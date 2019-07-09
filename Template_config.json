@@ -1,0 +1,87 @@
+"""
+This file is a template for a polymer constants file. 
+Once filled in, the information contained herein should contain all constants 
+needed to define MS and MSMS fragmentation properties of chosen polymer class
+to build MS and MSMS sequence libraries for screening mass spectrometry data 
+
+"""
+
+"""
+SECTION 1: MS1 
+This section should contain the basic information for constructing in silico
+MS1 data for polymer class. 
+
+MONOMERS = dictionary of monomer one letter codes, along with associated neutral
+            monoisotopic masses and reactivity classes. Format = 
+            {'X': [mass, rxn_class]} where X = monomer one letter code, 
+            mass = neutral monoisotopic mass, and 'rxn_class' = reactivity class
+            of monomer (see REACTIVITY_CLASSES, below) 
+
+MASS_DIFF = the mass difference when adding an additional monomer on to a polymer
+            chain (e.g. for condensation polymer = WATER) 
+
+ELONGATION_UNIT = the number of additional monomer units typically added when 
+                elongating a polymer. This will typically be 1 for most polymers 
+
+REACTIVITY_CLASSES = dictionary of reactivity classes with associated compatible
+                classes and monomers. Format = {'classA' : [['classX', 'classY'],
+                                                ['A', 'B']}
+                where classA = reaction class, classX and classY = classes 
+                that are cross-reactive with classA, and A and B are monomers
+                within reaction class classA 
+
+SYMMETRY = bool to define whether polymer is identical at both ends. Set to false
+            for polymers with different termini (e.g. N- and C- termini for peptides),
+            true for polymers with identical functional groups at both termini 
+            in linear chains
+
+CHAIN_TERMINATORS = list of monomers that terminate chain elongation 
+
+"""
+
+MONOMERS = {"X": [0, "rxn_class"]}
+"""
+INSERT DETAILS REGARDING MONOMERS HERE - FULL NAMES, CAS NUMBERS (IF APPLICABLE), 
+ADDITIONAL RELEVANT DETAILS
+
+"""
+
+MASS_DIFF: float = 0
+ELONGATION_UNIT = 1 
+REACTIVITY_CLASSES = {
+    "rxn_class": [["class1", "class2"], ["X", "Y"]]
+}
+"""
+INSERT ADDITIONAL DETAILS REGARDING REACTIVITY CLASSES HERE - FUNCTIONAL GROUPS
+AND ANY OTHER RELEVANT DETAILS 
+
+"""
+
+SYMMETRY = false 
+"""
+INSERT ADDITIONAL DETAILS REGARDING POLYMER TERMINI HERE - FUNCTIONAL GROUPS,
+ETC
+"""
+
+CHAIN_TERMINATORS = ["C", "D"]
+
+"""
+INSERT ADDITIONL DETAILS REGARDING CHAIN TERMINATORS HERE 
+
+"""
+
+"""
+Section 2: MS2 
+
+"""
+
+
+FRAG_SERIES = { 
+    'x': {
+        'terminus': 0,
+        'mass_diff': 0,
+        'fragmentation_unit': ELONGATION_UNIT
+}    
+}
+
+
