@@ -16,6 +16,13 @@ WATER = 18.010565
 OH = 17.00274 
 AMMONIA = 17.02655
 
+# Peptide Backbone Functional Groups
+
+CO = 27.99492
+COOH = 44.99767
+NH = 15.0109
+NH2 = 16.01872
+
 """
 Section 2: Adducts 
 
