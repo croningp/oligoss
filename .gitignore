@@ -1,4 +1,9 @@
 *.json
+!*params*.json
 __pycache__/
 *.pyc
 .vscode/
+*.egg-info/
+*.txt
+build/
+dist/
