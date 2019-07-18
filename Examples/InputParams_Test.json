@@ -1,0 +1,52 @@
+{
+"silico_params":
+    {   "mode": "pos",
+        "MS1": {
+            "monomers": [],
+            "max_length": 10,
+            "ms1_adducts": ["H", "Na"],
+            "min_z": 1,
+            "max_z": null,
+            "losses": true,
+            "max_neutral_losses": null,
+            "loss_products_adducts": ["H"],
+            "min_length": 1,
+            "chain_terminators": null,
+            "starting_monomers": null,
+            "ending_monomers": null,
+            "universal_rxn": false
+        },
+
+        "MS2": {
+            "fragments": ["b", "y"],
+            "ms2_adducts": ["H", "Na"],
+            "ms2_losses": true,
+            "ms2_max_neutral_losses": null,
+            "ms2_loss_products_adducts": ["H"],
+            "add_signatures": true,
+            "signatures": null
+        }
+    },
+
+"extractor_params":
+    {   "error": null,
+        "min_MS1_intenstity": 10000,
+        "min_MS2_intensity": 0.05,
+        "min_ms2_peak_abundance": 90,
+        "min_rt": null,
+        "max_rt": null,
+        "filter_signatures": null
+    },
+
+"postprocessing_params":
+    {   "exclude_frags": null,
+        "optional_core_frags": ["b1"],
+        "core_linear_series": ["b", "y"],
+        "dominant_signature_cap": 70,
+        "subsequence_coverage": true,
+        "subsequence_weight": 0.5,
+        "min_rt": null,
+        "max_rt": null
+    }
+
+}
