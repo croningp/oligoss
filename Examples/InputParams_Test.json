@@ -1,44 +1,75 @@
 {
-"silico_params":
+
+"silico_generator": true,
+
+"data_extraction": false,
+
+"postprocess": false,
+"add_modifications": false,
+"silico_parameters":
     {   "mode": "pos",
+        "silico_ms1": true,
+        "silico_ms2": true,
+        "add_modifications": false,
         "MS1": {
-            "monomers": [],
+            "monomers": ["H", "S", "F", "G"],
             "max_length": 10,
-            "ms1_adducts": ["H", "Na"],
+            "ms1_adducts": ["H"],
             "min_z": 1,
             "max_z": null,
             "losses": true,
             "max_neutral_losses": null,
-            "loss_products_adducts": ["H"],
-            "min_length": 1,
+            "loss_products_adducts": null,
+            "min_length": 3,
             "chain_terminators": null,
-            "starting_monomers": null,
-            "ending_monomers": null,
-            "universal_rxn": false
+            "universal_rxn": true,
+            "terminal_tags": {
+                "0": null,
+                "-1": ["F"]
+            }
         },
 
         "MS2": {
-            "fragments": ["b", "y"],
-            "ms2_adducts": ["H", "Na"],
+            "fragment_series": ["b", "y"],
+            "ms2_adducts": [],
             "ms2_losses": true,
             "ms2_max_neutral_losses": null,
-            "ms2_loss_products_adducts": ["H"],
+            "ms2_loss_products_adducts": null,
             "add_signatures": true,
-            "signatures": null
+            "signatures": null,
+            "min_z": 1,
+            "max_z": 1,
+            "uniques": true
         }
     },
 
-"extractor_params":
-    {   "error": null,
+"modifications": {
+    "sidechain_modifications": [],
+    "terminal_linkers": [],
+    "terminal_modifications": {
+        "0": ["Ole"],
+        "-1": null
+        }
+    },
+
+"extractor_parameters":
+    {   "error": 0.01,
         "min_MS1_intenstity": 10000,
         "min_MS2_intensity": 0.05,
         "min_ms2_peak_abundance": 90,
-        "min_rt": null,
-        "max_rt": null,
-        "filter_signatures": null
+
+        "pre_screen_filters": {
+            "min_rt": null,
+            "max_rt": null,
+            "essential_signatures": ["F"],
+            "signature_bins": true,
+            "massdiff_bins": true
+        },
+
+        "ms2_precursors": null
     },
 
-"postprocessing_params":
+"postprocessing_parameters":
     {   "exclude_frags": null,
         "optional_core_frags": ["b1"],
         "core_linear_series": ["b", "y"],

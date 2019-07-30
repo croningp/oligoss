@@ -8,12 +8,42 @@ Criteria are:
 
 .. moduleauthor:: Graham Keenan 2019
 """
+def find_target(
+    target,
+    candidates,
+    err,
+    err_abs=True
+):
+    """
+    Takes a target, associated error (absoulte mass units or ppm), list of
+    candidates and returns candidates that match target within specified error
 
-from typing import List, Callable
+    Args:
+        target (float): target m/z
+        candidates (list): list of candidates for matching to target
+        err (float): error threshold, in either absolute mass units or ppm
+        err_abs (bool, optional): specifies whether error threshold is absolute
+                        or in ppm; if True, error is in absolute mass units.
+                        Defaults to True.
+
+    Returns:
+        matches (list): list of candidates that match target within specified
+                        error
+    """
+    if not err_abs:
+        err = (target*err)*10**-6
+
+    min_hit, max_hit = target-err, target+err
+
+    matches = filter(
+        lambda x: x >= min_hit and x <= max_hit,
+        candidates
+    )
+    return matches
 
 def filter_retention_time(
         msdata: dict,
-        ret_time_range: List[float]
+        ret_time_range: list
     ) -> dict:
     """Filters a spectra collection based on retention time
 
@@ -41,28 +71,29 @@ def filter_retention_time(
 
 def filter_parent_ion(
         msdata: dict,
-        parent_ions: List[float],
-        target_func: Callable
+        parent_ions: list,
+        err,
+        err_abs=True
     ) -> dict:
     """Filters a spectra collection based on their parent ion
 
     Args:
         msdata (dict): Spectra collection
         parent_ions (List[float]): List of parent ions to filter for
-        target_func (Callable): Target find function
 
     Returns:
         dict: Spectra which pass the filter
     """
 
-    # List for filtered spectra
+    # dict for filtered spectra
     filtered = {}
 
     # Iterate through each spectrum
     for key, spectrum in msdata.items():
         # Get the parent and all target mass matches
         parent = float(spectrum["parent"])
-        found_parent = [ion for ion in target_func(parent, parent_ions)]
+        ions = [float(ion) for ion in spectrum["mass_list"]]
+        found_parent = find_target(parent, ions, err, err_abs)
 
         # If any matches are found, add the spectrum
         if found_parent:
@@ -74,8 +105,9 @@ def filter_parent_ion(
 
 def filter_signature_ions(
         msdata: dict,
-        sig_ions: List[float],
-        target_func: Callable
+        sig_ions: list,
+        err,
+        err_abs=True
     ) -> dict:
     """Filters a spectra collection based on the presence of signature ions
     Only one signature may be found to pass the filter
@@ -95,11 +127,15 @@ def filter_signature_ions(
     # Iterate through each spectrum
     for key, spectrum in msdata.items():
         # Get the mass list
-        mass_list = spectrum["mass_list"]
+        mass_list = [float(mass) for mass in spectrum["mass_list"]]
 
         # Check if signature ions are present
         found_ions = [
-            ion for ion in sig_ions if target_func(ion, mass_list)
+            ion for ion in sig_ions if find_target(
+                ion,
+                mass_list,
+                err,
+                err_abs)
         ]
 
         # If any matches are found, add to list
@@ -182,7 +218,8 @@ def filter_mass_difference(
         msdata: dict,
         monomer_massdiffs: dict,
         total_comparisons: int,
-        target_func: Callable
+        err,
+        err_abs=True
     ) -> dict:
     """Filters the spectra based on the mass difference between peaks
     Scans through a list of monomer mass differences and check for peaks that
@@ -222,7 +259,11 @@ def filter_mass_difference(
                     minus, plus = peak - mdiff, peak + mdiff
 
                     # Check if minus product found
-                    match1 = target_func(minus, mass_list)
+                    match1 = find_target(
+                        minus,
+                        mass_list,
+                        err,
+                        err_abs)
 
                     # Found, log monomer and move onto next peak
                     if match1:
@@ -230,7 +271,11 @@ def filter_mass_difference(
                         break
 
                     # No minus product, check plus product
-                    match2 = target_func(plus, mass_list)
+                    match2 = find_target(
+                        plus,
+                        mass_list,
+                        err,
+                        err_abs)
 
                     # Found, log monomer and move onto next peak
                     if match1 or match2:
@@ -240,7 +285,7 @@ def filter_mass_difference(
     return spectra
 
 
-def _sort_spectrum_peaks_by_intensity(spectrum: dict) -> List[float]:
+def _sort_spectrum_peaks_by_intensity(spectrum: dict) -> list:
     """Sorts a spectrum's peaks by the most intense peak
 
     Args:

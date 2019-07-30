@@ -4,7 +4,9 @@ in silico operations
 """
 from ..Constants.GlobalChemicalConstants import *
 from ..Config_files.Depsipeptide_config import *
+from ..Config_files.Peptide_Acylations_config import *
 import copy
+import time
 
 def find_sequence_mass(
     sequence,
@@ -38,20 +40,20 @@ def add_adducts_sequence_mass(
     [This functions adds charged adducts to a neutral sequence mass]
 
     Arguments:
-        neutral_mass {float} -- [neutral monoisotopic mass of sequence]
-        adducts {list} -- [list of adduct strings. All adducts must be found
+        neutral_mass {float} -- neutral monoisotopic mass of sequence
+        adducts {list} -- list of adduct strings. All adducts must be found
                         in either ANIONS or CATIONS dicts in
-                        GlobalChemicalConstants.py]
+                        GlobalChemicalConstants.py
     Keyword Arguments:
-        min_z {int} -- [minimum ABSOLUTE charge of adduct] (default: {1})
-        max_z {int} -- [maximum ABSOLUTE charge of adduct. If this is set to
+        min_z {int} -- minimum ABSOLUTE charge of adduct (default: {1})
+        max_z {int} -- maximum ABSOLUTE charge of adduct. If this is set to
                         None, maximum charge is assumed to be maximum oxidation
-                        state of adduct ions] (default: {None})
-        mode {str} -- [either 'pos' or 'neg' for positive and negative mode
-                        mass spectrometry, respectively] (default: {'pos'})
+                        state of adduct ions (default: {None})
+        mode {str} -- either 'pos' or 'neg' for positive and negative mode
+                        mass spectrometry, respectively (default: {'pos'})
     Returns:
-        [charged_sequence_masses] -- [list of m/z values for charged sequences
-                        with adducts]
+        [charged_sequence_masses] -- list of m/z values for charged sequences
+                        with adducts
     """
     #list anions and cations within adducts
     anions = [adduct for adduct in adducts if adduct in ANIONS]
@@ -94,6 +96,7 @@ def add_adducts_sequence_mass(
         # GlobalChemicalConstants
         if not max_z:
             max_z = max_charge
+        # add more comments
         min_z, max_z = max([min_z, min_charge]), min([max_z, max_charge])
 
         for i in range(min_z, max_z+1):
@@ -139,8 +142,8 @@ def generate_all_sequences(
     min_length=1,
     sequencing=True,
     chain_terminators=None,
-    starting_monomers=None,
-    ending_monomers=None):
+    start_tags=None,
+    end_tags=None):
     """
     [This function takes a list of input monomers and outputs all possible
     sequences or compositions that could arise within the constraints set,
@@ -158,12 +161,14 @@ def generate_all_sequences(
                             (default: {True})
         chain_terminators {list} -- [list of monomers which prevent further
                             elongation] (default: {None})
-        starting_monomers {list} -- [list of monomers. If this list is input,
-                            only sequences beginning with a monomer in this
-                            list will be returned] (default: {None})
-        ending_monomers {list} -- [list of monomers. If this is input,
-                            only sequences ending with a monomer in this list
-                            will be returned] (default: {None})
+        start_tags {list} -- list of monomers. If this list is input, sequences
+                            are tagged at terminus 0 by each of the monomers
+                            in start_tags - one tag per sequence, and only
+                            tagged sequences are returned (default: {None})
+        end_tags {list} -- list of monomers. If this list is input, sequences
+                            are tagged at terminus -1 by each of the monomers
+                            in end_tags - one tag per sequence, and only
+                            tagged sequences are returned (default: {None})
     Returns:
         sequences {list} -- [list of possible sequences that could arise from
                             input monomers within the constraints set]
@@ -184,17 +189,24 @@ def generate_all_sequences(
             if (seq[0] in chain_terminators
             or seq[-1] in chain_terminators)
         ]
-    if starting_monomers:
-        sequences = [
-            seq for seq in sequences
-            if seq[0] in starting_monomers
-        ]
-    if ending_monomers:
-        sequences = [
-            seq for seq in sequences
-            if seq[-1] in ending_monomers
-        ]
+    if start_tags:
+        tagged_seqs = []
+        for start_tag in start_tags:
+            if start_tag in MONOMERS:
+                tagged_seqs.extend(
+                    [start_tag + sequence for sequence in sequences]
+                )
+        sequences = tagged_seqs
 
+    if end_tags:
+        tagged_seqs = []
+        for end_tag in end_tags:
+            if end_tag in MONOMERS:
+                tagged_seqs.extend(
+                    [sequence + end_tag for sequence in sequences]
+                )
+
+        sequences = tagged_seqs
     if not sequencing:
         sequences = list(set(["".join(sorted(seq)) for seq in sequences]))
 
@@ -295,12 +307,16 @@ def add_sidechain_neutral_loss_products_sequence(
 
                     # make masses 4 point floats
                     final_masses = [
-                        float(f"{mass:.4f}")
-                        for mass in final_masses
-                    ]
+                        mass for mass in final_masses]
 
                     # return sorted list of loss products, removing duplicates
-                    return sorted(list(set(final_masses)))
+                    return sorted(
+                        list(
+                            set(
+                                [float(f'{mass:.4f}') for mass in final_masses]
+                                )
+                            )
+                        )
 
         # add monomer-specific loss products to final sequence masses,
         # remove duplicate final masses
@@ -360,15 +376,158 @@ def generate_dict_isobaric_sequences(sequences):
         sequences (list): list of sequence strings
     """
     # get list of sequence compositions
-    sorted_sequences = ["".join(sorted(sequence)) for sequence in sequences]
-
+    sorted_sequences = list(
+        set(
+            ["".join(sorted(sequence)) for sequence in sequences]
+        )
+    )
+    print(f'organising {len(sequences)} sequences into {len(sorted_sequences)} isobaric groups')
     # generate dictionary of sequence compositions (key = sorted sequences)
     # and lists of sequences matching those compositions (value = sequence list)
     isobaric_dict = {
         sorted_seq: [
             seq for seq in sequences
-            if "".join(sorted(seq)) == sorted_seq
-        ]
+            if "".join(sorted(seq)) == sorted_seq]
             for sorted_seq in sorted_sequences
         }
+
     return isobaric_dict
+
+def add_peak_lists_massdict(massdict):
+    """
+    This function takes an MS1, MS2 or full MSn mass dictionary and generates
+    a list of all MS1 and MS2 ions for each sequence in the massdict, adding
+    ion masses to a list ("peak_list") which is then used for screening
+    spectra.
+
+    Args:
+        massdict (dict): dictionary of sequences and corresponding
+                subdictionaries of MS1 and /or MS2 ions
+
+    Returns:
+        output_dict: same as input massdict, but with extra key-value pair
+                added to sequence subdictionaries ({"peak_list": [masses]}
+                where masses = list of all MS1 and MS2 ions - including
+                monomer-specific signature ions - associated with sequence)
+    """
+    # initiate output dict to store dictionary to be returned
+    output_dict = {}
+
+    # iterat through sequences  and subdicts in input massdict
+    for sequence, subdict in massdict.items():
+
+        # initiate list to store all MS1 and MS2 ions associated with sequence
+        peak_list = []
+
+        # check sequence subdict for MS1 ions; if present, add to peak_list
+        if "MS1" in subdict:
+            peak_list.extend(subdict["MS1"])
+
+        # check sequence subdict for MS2 ions; if present, add to peak_list
+        if "MS2" in subdict:
+            frag_dict = {
+                frag: masses
+                for frag, masses in subdict["MS2"].items()
+                if frag != "signatures" and frag != "unique_fragments"
+            }
+            for masses in frag_dict.values():
+                peak_list.extend(masses)
+
+            # check MS2 subdict for monomer-specific signature ions; if present,
+            # add to peak_list
+            if "signatures" in subdict["MS2"]:
+                signature_fragdict = {
+                    frag : masses
+                    for frag, masses in subdict["MS2"]["signatures"].items()
+                    if frag != "unique_fragments"
+                }
+                for masses in signature_fragdict.values():
+                    peak_list.extend(masses)
+
+        # remove any duplicate m/z values from peak_list
+        peak_list = sorted(list(set(peak_list)))
+
+        # add sequence to output dict, with same info as input massdict
+        output_dict[sequence] = massdict[sequence]
+
+        # add peak_list subdict to output sequence subdict
+        output_dict[sequence].update({"peak_list": peak_list})
+
+    # return massdict with peak lists added for each sequence
+    return output_dict
+
+def add_modification_sequence_mass_list(
+    mass_list,
+    modification_mass,
+    mod_mass_diff,
+    universal_shift
+):
+    """
+    Takes a mass (or list of masses) corresponding to a sequence and / or
+    sequence fragment and adds the mass of a modification on to the sequence
+    mass(es), returning a list of modified masses
+
+    Args:
+        mass_list (float or list of floats): mass(es) of unmodified sequences
+                    and / or sequence fragments
+        modification_mass (float): mass of modification to add to unmodified
+                    mass(es)
+        mod_mass_diff (float): mass lost upon addition of modification to
+                    sequence and / or fragments (e.g. water is lost when fatty
+                    acids acylate peptides)
+        universal_shift (bool): specifies whether modification shifts ALL
+                    unmodified masses; if True, only list of modified masses
+                    is returned; if False, returned list includes both
+                    modified and unmodified masses
+
+    Returns:
+        modified_masses (list): list of masses and / or unmodified masses
+    """
+
+    # check if mass_list is a list or single mass; if single mass, make list
+    if type(mass_list) != list:
+        mass_list = [mass_list]
+
+    # make list of modified masses
+    modified_masses = [
+        round(mass + modification_mass - mod_mass_diff, 4)
+        for mass in mass_list
+    ]
+
+    # if every mass is to be shifted by the modification, return list of only
+    # modified masses, removing duplicates
+    if universal_shift:
+        return list(set(modified_masses))
+
+    # if universal_shift=False, return list of unmodified masses + modified
+    # masses
+    modified_masses.extend(mass_list)
+
+    return list(
+        set(
+            [round(mass, 4) for mass in modified_masses]
+        )
+    )
+
+def add_terminal_modification_sequence_string(
+    sequence,
+    modification,
+    terminus
+):
+    """
+    Adds three letter code for a terminal modification to a standard sequence
+    string
+
+    Args:
+        sequence (str): sequence string comprised of monomer one letter codes
+        modification (str): three letter code for terminal modification
+        terminus (int): specifies terminus to add the sequence; either 0 or -1
+        for start terminus and end terminus, respectively
+
+    Returns:
+        str : modified sequence string
+    """
+    if terminus == 0:
+        return f"{modification}={sequence}"
+    elif terminus == -1:
+        return f"{sequence}={modification}"

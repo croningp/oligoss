@@ -4,7 +4,7 @@ Polymer Data
 """
 from .Constants.GlobalChemicalConstants import *
 from .Config_files.Depsipeptide_config import *
-from .helpers.helpers import *
+from .helpers.insilico_helpers import *
 
 def __init__():
     """
@@ -22,8 +22,8 @@ def generate_mass_dictionary(
     sequencing=True,
     universal_rxn=True,
     chain_terminators=None,
-    starting_monomers=None,
-    ending_monomers=None):
+    start_tags=None,
+    end_tags=None):
     """
     [This function takes a list of monomers and outputs a dictionary of all
     possible sequences or compositions that could arise from input monomers
@@ -71,8 +71,8 @@ def generate_mass_dictionary(
             min_length,
             sequencing,
             chain_terminators,
-            starting_monomers,
-            ending_monomers
+            start_tags,
+            end_tags
             )
 
     # if input monomers are not universally cross-reactive, more complicated
@@ -180,6 +180,95 @@ def add_loss_products_ms1_massdict(
     # with neutral loss products
     return loss_product_dict
 
+def add_terminal_modification_MS1_sequence(
+    sequence,
+    sequence_masses,
+    modification,
+    modification_mass,
+    modification_massdiff,
+    modification_terminus
+):
+    """
+    Takes a sequence, associated masses, modification three letter code and
+    associated mass, massdiff, and returns a dict of modified sequence +
+    modified sequence masses
+
+    Args:
+        sequence (str): sequence string comprised of monomer one letter codes
+        sequence_masses (list): list of m/z values for unmodified sequence
+                        (floats). SHOULD BE IN +1 CHARGE STATE
+        modification (str): modification three letter code from
+                        MODIFICATIONS_DICT in modifications config file
+        modification_mass (float): neutral monoisotopic mass of modifier
+        modification_massdiff (float): mass lost upon addition of modification
+                        to sequence (e.g. H2O for fatty acid acylations of
+                        peptide N-termini)
+        modification_terminus (int): either 0 or -1 for start and end terminus,
+                        respectively
+
+    Returns:
+        {mod_seq: [mod_seq_masses]}: dictionary of modified sequence string
+                        and corresponding modified sequence masses
+    """
+    if type(sequence_masses) != list:
+        sequence_masses = [sequence_masses]
+
+    if modification_terminus == 0:
+        mod_seq = f"{modification}={sequence}"
+
+    elif modification_terminus == -1:
+        mod_seq = f"{sequence}={modification}"
+
+    modified_sequence_masses = add_modification_sequence_mass_list(
+        sequence_masses,
+        modification_mass,
+        modification_massdiff,
+        universal_shift=True
+    )
+
+def add_terminal_modification_MS1_massdict(
+    massdict,
+    modification,
+    modification_mass,
+    modification_massdiff,
+    modification_terminus
+):
+    """
+    Takes an MS1 sequence mass dictionary and adds a terminal modification to
+    every sequence, returning a dictionary of modified sequence string
+    and corresponding modified masses
+
+    Args:
+        massdict (dict): dictionary of sequences and corresponding MS1 masses
+        modification (str): modification three letter code from
+                MODIFICATIONS_DICT in modificatiosn config file
+        modification_mass (float): neutral monoisotopic mass of modifier
+        modification_massdiff ([type]): mass lost upon addition of modification
+                to sequence (e.g. H2O for fatty acid acylation of peptides
+                as this is a condensation reaction)
+        modification_terminus (int): either 0 or -1 to specify start and
+                end terminus, respectively
+
+    Returns:
+        modified_massdict (dict): dictionary of modified sequence strings and
+                masses
+    """
+    modified_massdict = {}
+
+    for sequence, masses in massdict.items():
+        modified_massdict.update(
+            add_terminal_modification_MS1_sequence(
+                sequence,
+                masses,
+                modification,
+                modification_mass,
+                modification_massdiff,
+                modification_terminus
+            )
+        )
+
+    return modified_massdict
+
 def generate_ms1_mass_dictionary_adducts_losses(
     monomers,
     max_length,
@@ -192,9 +281,9 @@ def generate_ms1_mass_dictionary_adducts_losses(
     loss_product_adducts=None,
     min_length=1,
     chain_terminators=None,
-    starting_monomers=None,
-    ending_monomers=None,
-    universal_rxn=True
+    universal_rxn=True,
+    start_tags=None,
+    end_tags=None
 ):
 
     # generate neutral mass dictionary of all possible sequences arising from
@@ -206,8 +295,8 @@ def generate_ms1_mass_dictionary_adducts_losses(
         True,
         universal_rxn,
         chain_terminators,
-        starting_monomers,
-        ending_monomers
+        start_tags,
+        end_tags
     )
 
     # generate a separate mass dictionary, including side chain-specific
@@ -217,11 +306,10 @@ def generate_ms1_mass_dictionary_adducts_losses(
         MS1_neutral,
         max_total_losses
     )
-    print(f'max total losses for {monomers} = {max_total_losses}')
 
     # before adding charged adducts to masses, check whether any specific
     # charged adducts have been specified to add to side chain loss product
-    # masses. This is only to be used in cass where the adducts added to loss
+    # masses. This is only to be used in cases where the adducts added to loss
     # product masses are to be different to adducts added to full sequence masses
     # Most common usage of this is to add less adducts to loss products in order
     # to minimise false positives in later screening

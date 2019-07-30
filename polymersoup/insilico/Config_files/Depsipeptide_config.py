@@ -52,9 +52,21 @@ SYMMETRY = bool to define whether polymer is identical at both ends. Set to fals
 
 CHAIN_TERMINATORS = list of monomers that terminate chain elongation
 
-LOSS_PRODUCTS = dictinary of monomer one letter codes and associated side chain
+LOSS_PRODUCTS = dictionary of monomer one letter codes and associated side chain
             neutral loss products, i.e. masses that can be lost from the monomer
             side chain.
+
+IONIZABLE_SIDECHAINS = dictionary of monomers that can be ionised with extra
+            adducts at the SIDE CHAIN, with associated adducts, minimum and
+            maximum absolute charge states in both positive and negative mode.
+            Format: {"X": {"pos": (adduct, a, b), "neg": (adduct, a, b)}} where
+            "X" = monomer one letter code, adduct = adduct string (must be found
+            in either CATIONS OR ANIONS in GlobalChemicalConstantss), a = min
+            side chain charge, b = max side chain charge for ionized form
+
+INTRINSICALLY_CHARGED_MONOMERS = dictionary of monomers that have an intrinsic
+            charge (i.e. charged without addition of adducts), with associated
+            lists of permissible adducts
 """
 
 MONOMERS = {
@@ -139,12 +151,38 @@ LOSS_PRODUCTS = {
     "K": [NH3],
     "Q" : [NH3]
 }
+"""
+lOSS_PRODUCTS: Side chains with hydroxyl and carboxylic acid groups can lose
+H2O; amines can lose NH3; carboxamides can lose H2O and NH3
 
 """
-Side chains with hydroxyl and carboxylic acid groups can lose H2O;
-amines can lose NH3; carboxamides can lose H2O and NH3
+
+IONIZABLE_SIDECHAINS = {
+    "K": {
+        "pos": (H, 1, 1),
+        "neg": None},
+    "R": {
+        "pos": (H, 1, 1),
+        "neg": None},
+    "E": {
+        "pos": None,
+        "neg": (-H, 1, 1)},
+    "D": {
+        "pos": None,
+        "neg": (-H, 1, 1)},
+    "H": {
+        "pos": (H, 1, 1),
+        "neg": None}
+}
 
 """
+IONIZABLE_SIDECHAINS: Side chains with free amines (K, R, H) can gain a proton
+and become cationic; side chains with free carboxylates (E, D) can lose a proton
+and become anionic
+"""
+
+
+INTRINSICALLY_CHARGED_MONOMERS = {}
 
 """
 Section 2: MS2 FRAGMENTATION
@@ -202,6 +240,17 @@ Fragment properties:
             adding non-standard adducts (e.g. Na+, K+, Cl- etc..) to MS2
             fragments, as intrinsic adduct masses must be removed when adding
             other adduct masses
+
+'permissible_adducts' - OPTIONAL. this subdictionary contains lists of adducts
+            that may be found associated with a particular MS2 fragment series.
+            This is to be used only in cases where there are restrictions on
+            associated fragments, as otherwise it is assumed that any MS2
+            adducts included in the in silico run are compatible with all
+            fragment series. Example: peptide b fragments are inherently
+            charged as acylium ions, and as they are extremely unlikely to be
+            multiply charged in the absence of ionizable or intrinsically
+            charged side chains, there are no permissible adducts for this
+            series.
 """
 
 FRAG_SERIES = {
@@ -249,13 +298,22 @@ FRAG_SERIES = {
             "neg": ELONGATION_UNIT
         },
         "start": 0,
-        "end": 0
+        "end": 0,
+        "permissible_adducts": {
+            "pos": [],
+            "neg": []
+        }
     },
     "y": {
         "terminus": -1,
         "mass_diff": {
             "pos": +H,
-            "neg": -H
+            "neg": -H,
+            "exceptions": {
+                "pos": {
+                    "hydroxyA": -OH
+                }
+            }
         },
         "fragmentation_unit": {
             "pos": ELONGATION_UNIT,
@@ -312,7 +370,7 @@ IMMONIUM_IONS = MS2_SIGNATURE_IONS = {
         #'dominant' is a list of monomers for which the signature ion is
         #expected to be present in all MS2 spectra of a sequence containing
         #the monomer
-        "dominant": ["F", "P", "I", "L", "H", "Y"]
+        "dominant": ["F", "I",  "L", "P", "H", "Y"]
         }
 }
 """

@@ -4,7 +4,7 @@ Polymer Data
 """
 from .Constants.GlobalChemicalConstants import *
 from .Config_files.Depsipeptide_config import *
-from .helpers.helpers import *
+from .helpers.insilico_helpers import *
 
 def __init__():
     """
@@ -107,11 +107,39 @@ def build_fragment_series_single_sequence(
     # combine fragment dict with loss product fragment dict
     for fragment, masses in loss_fragment_dict.items():
         masses.extend(fragment_dict[fragment])
-        masses = sorted(list(set(masses)))
-        fragment_dict[fragment] = masses
+        masses = [float(f'{mass:.4f}') for mass in masses]
+        fragment_dict[fragment] = sorted(list(set(masses)))
 
     # finally, return MS2 fragment dictionary
     return fragment_dict
+
+def load_fragment_exceptions(
+    sequences,
+    fragment_series,
+    mode
+):
+    """
+    This functions checks for any monomer and fragment series combinations that
+    require exceptions to adduct rules and / or sub_sequence mass_diffs. If
+    none are found, regular fragment builder function is used; otherwise,
+    more complicated fragment builder taking exceptions into account is
+    required
+
+    Args:
+        sequences (list): list of sequence strings
+        fragment_series (list): list of fragment types that will have
+                                exceptions to their mass_diff depending on
+                                certain monomer types being present at the
+                                final and / or first residue in the subsequence.
+                                Example: peptide y-fragment mass_diff = +H in
+                                positive mode; but if the final monomer in
+                                the sub_sequence is a hydroxy acid, this becomes
+                                -OH in positive mode. NOTE: do NOT allow
+                                addition of adducts to fragments with exceptions
+        mode (str): either 'pos' or 'neg' for positive or negative mode mass
+                                spec, respectively
+    """
+
 
 def build_multiple_fragment_series_single_sequence(
     sequence,
@@ -254,6 +282,13 @@ def add_adducts_ms2_fragments(
         if 'intrinsic_adducts' in frag_info:
             intrinsic_adduct = frag_info['intrinsic_adducts'][mode]
 
+        # some fragment series have intrinsic charges (not adducts) and are
+        # not found with extra adducts in a singly charged state - e.g.
+        # peptide b fragments
+        if 'permissible_adducts' in frag_info:
+            adducts = [adduct for adduct in adducts
+            if adduct in frag_info['permissible_adducts'][mode]]
+
         # organise adducts by type - cationic or anionic
         cations = [adduct for adduct in adducts if adduct in CATIONS]
         anions = [adduct for adduct in adducts if adduct in ANIONS]
@@ -271,7 +306,6 @@ def add_adducts_ms2_fragments(
         for fragment, masses in current_fragments.items():
             adduct_masses = []
             for mass in masses:
-                print(f'type mass, i_adduct = {type(mass)}, {type(intrinsic_adduct)}')
                 mass -= intrinsic_adduct
                 adduct_masses.extend(add_adducts_sequence_mass(
                     mass,
@@ -284,6 +318,8 @@ def add_adducts_ms2_fragments(
             # be returned, include these in output adduct_masses list
             if return_base_fragments:
                 adduct_masses.extend(masses)
+
+            adduct_masses = [float(f'{mass:.4f}') for mass in adduct_masses]
 
             # add fragment and associated adducts to output adduct_fragdict,
             # removing any duplicate masses - which should not be there anyway
@@ -348,7 +384,8 @@ def generate_ms2_mass_dictionary(
     signatures=None,
     losses=True,
     max_total_losses=None,
-    loss_product_adducts=None
+    loss_product_adducts=None,
+    uniques=True
 ):
     """
     Takes a list of sequences and generates full ms2 fragment dictionary
@@ -388,6 +425,7 @@ def generate_ms2_mass_dictionary(
         where seq = sequence, "frag" = fragment id, masses = MS2 fragment m/z
         values, "signature_frag" = signature fragment id
     """
+    print(f'building MS2 fragment series for {len(sequences)} sequences')
     ms2_fragment_dict = {
         sequence: build_multiple_fragment_series_single_sequence(
             sequence,
@@ -400,4 +438,242 @@ def generate_ms2_mass_dictionary(
             max_total_losses)
         for sequence in sequences}
 
+    if uniques:
+        print(f'identifying unique fragments for {len(ms2_fragment_dict)} sequences')
+        ms2_fragment_dict = generate_unique_fragment_ms2_massdict(
+            ms2_fragment_dict)
+
     return ms2_fragment_dict
+
+def find_unique_fragments_isobaric_set(isobaric_sequencedict):
+    """
+    finds unique MS2 fragments from an MS2 fragment mass dictionary in which
+    all sequences within the dictionary are isobaric (i.e. have the same
+    composition)
+
+    Args:
+        isobaric_sequencedict (dict): dictionary of isobaric sequences and
+                                    MS2 fragments
+
+    Returns:
+        isobaric_sequencedict: input dict, with list of unique fragments added
+                                    to MS2 fragments
+    """
+    all_fragment_masses = []
+
+    for sequence in isobaric_sequencedict:
+        frag_dict = isobaric_sequencedict[sequence]
+        for fragment, masses in frag_dict.items():
+            if fragment.find('signature') == -1:
+                all_fragment_masses.extend(masses)
+
+    for sequence in isobaric_sequencedict:
+        uniques = []
+        frag_dict = isobaric_sequencedict[sequence]
+        for fragment, masses in frag_dict.items():
+            if fragment.find('signature') == -1:
+                mass_count = sum(
+                    [all_fragment_masses.count(mass)
+                    for mass in masses]
+                )
+                if mass_count == len(masses):
+                    uniques.append(fragment)
+        isobaric_sequencedict[sequence].update({'unique_fragments': uniques})
+    return isobaric_sequencedict
+
+def generate_unique_fragment_ms2_massdict(massdict):
+    """
+    Takes an MS2 fragment mass dict and identifies unique fragments for each
+    sequence in the dict, adds them as a key-value pair to output dict
+
+    Args:
+        massdict (dict): MS2 mass dict in the format: {
+            sequence: {
+                'frag': [masses]
+                }
+            }
+        where frag = fragment id, masses = m/z values of fragments
+
+    Returns:
+        unique_fragment_dict: same as input massdict, but with extra key-value
+                pair added to each sequence subdictionary in format:
+                {
+                    sequence: {
+                        'frag': [masses],
+                        'unique_fragments': ['frag_1', 'frag_2'...]
+                    }
+                }
+                where 'frag_1', 'frag_2' = fragment string ids for fragments
+                that are unique to sequence
+    """
+    # generate dictionary of isobaric sets in format:
+    #       {
+    #           sorted(seq): [seqs]
+    #   }
+    # where sorted(seq) = alphabetically sorted sequence; seqs = list of
+    # sequences that have same composition (i.e. sorted(seq))
+    isobaric_dict = generate_dict_isobaric_sequences(massdict.keys())
+
+    # initiate dict to store ms2_mass_fragment dicts with unique fragments
+    # added
+    unique_fragment_dict = {}
+
+    # iterate through isobaric sets, updating sequence identifying fragments
+    # unique to sequences within each set
+    for sequences in isobaric_dict.values():
+        sequence_dict = {
+            sequence: massdict[sequence] for sequence in sequences}
+
+        # update unique_fragment_dict with full MS2 sequence dict for sequence
+        # in isobaric_group, with unique fragments added for each sequence
+        # within the group
+        unique_fragment_dict.update(find_unique_fragments_isobaric_set(sequence_dict))
+
+    # return full MS2 sequence fragment dict, with unique fragments included
+    return unique_fragment_dict
+
+def find_fragments_by_index(
+    fragments,
+    target_index
+):
+    """
+    Takes a list of fragment ids and returns fragments within list whose
+    position in the fragment series matches the target_index specified.
+    Fragments must be denoted by ONE LETTER codes and index
+
+    Args:
+        fragments (list): list of fragment ids (strings)
+        target_index (int): target fragment index
+
+    Returns:
+        fragments (list): list of fragments that match target index (e.g.
+                    ['y14', 'b14'] if target_index = 14)
+    """
+
+    fragments = [fragment[1::] for fragment in fragment]
+
+    fragments = [
+        fragment for fragment in fragments
+        if int(fragment) == target_index
+    ]
+    return fragments
+
+def add_terminal_modification_sequence_all_fragments(
+    sequence,
+    fragment_dict,
+    modification_mass,
+    modification_terminus,
+    universal_shift=False
+):
+
+    fragment_series = list(
+        set(
+            [frag[0] for frag in fragment_dict if frag != 'signature']
+        )
+    )
+
+    modified_fragdict, modified_fragments = {}
+
+    for series in fragment_series:
+        frag_info = FRAG_SERIES[series]
+        terminus = frag_info['terminus']
+        start = frag_info['start']
+        end = frag_info['end']
+        if modification_terminus == terminus and start != 0:
+            pass
+        elif modification_terminus != terminus and end != 0:
+            pass
+        else:
+            pass
+
+def add_terminal_ms2_modification_sequence_fragment_subsets(
+    sequence,
+    fragment_dict,
+    frag_terminus,
+    modification_mass,
+    modification_massdiff,
+    modification_terminus,
+    universal_shift=False
+):
+    """
+    Takes a sequence, associated subset of MS2 fragments, and adds terminal
+    modification on to MS2 fragment masses. IMPORTANT: ALL FRAGMENT TYPES IN
+    fragment_dict MUST HAVE THE SAME TERMINUS, START AND END POSITION.
+
+    Args:
+        sequence (str): full length sequence string comprised of monomer one
+                        letter codes
+        fragment_dict (dict): dictionary of MS2 fragments (different fragment
+                        types are allowed as long as they have the same
+                        terminus and start, end positions) and associated
+                        unmodified masses
+        frag_terminus (int): 0 or -1 for start and end terminus, respectively;
+                        retrieved from FRAG_SERIES['terminus'] in polymer
+                        config file
+        modification_mass (float): full neutral monoisotopic mass of modification
+        modification_massdiff (float): mass lost upon addition of modification
+                        to fragment mass(es)
+        modification_terminus (int): either 0 or -1 for start and end terminus,
+                        respectively; specifies whether terminal modification
+                        is to be added to start or end terminus
+        universal_shift (bool, optional): specifies whether every fragment mass
+                        must be shifted by modification mass; if True, only
+                        modified masses are returned; if False, masses of
+                        modified + unmodified fragments are returned.
+                        Defaults to False.
+
+    Returns:
+        modified_fragdict: dictionary of fragment_ids and associated masses,
+                        with modification masses added to fragments containing
+                        target terminus
+    """
+    # initiate dictionary to store fragments with modified masses
+    modified_fragdict = {}
+
+    # if fragment series begins at the same terminus as the
+    # modification_terminus, the terminal modification will be added to all
+    # fragments
+    if frag_terminus == modification_terminus:
+
+        # iterate through fragment and add terminal modification to
+        # fragment masses
+        for fragment, masses in fragment_dict.items():
+            modified_fragdict[fragment] = add_modification_sequence_mass_list(
+                masses,
+                modification_mass,
+                modification_massdiff,
+                universal_shift
+            )
+
+    # if fragment series begins at opposite terminus to modification_terminus,
+    # only fragments that contain modification_terminus (i.e. full-length
+    # fragments that span the whole sequence) will be modified
+    elif frag_terminus != modification_terminus:
+
+        # find fragments that contain target_terminus (i.e. final fragment
+        # in series)
+        modified_fragments = find_fragments_by_index(
+            fragment_dict.keys(),
+            len(sequence)
+        )
+        # add modification only to fragments that contain the target terminus
+        # for modification
+        for fragment in modified_fragments:
+            modified_fragdict[fragment] = add_modification_sequence_mass_list(
+                fragment_dict[fragment],
+                modification_mass,
+                modification_massdiff,
+                universal_shift
+            )
+
+            # update modified_fragdict with unmodified fragments so that all
+            # fragments and associated masses are returned
+            modified_fragdict.update(
+                {
+                    fragment : masses
+                    for fragment, masses in fragment_dict.items()
+                    if fragment not in modified_fragments
+            }
+        )
+
+    return modified_fragdict
