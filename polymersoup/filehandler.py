@@ -133,3 +133,6 @@ def generate_insilico_writefile_string(
         write_string = write_string + f"-1terminaltags={end_tags}"
     write_string = f"{write_string}.json"
     return os.path.join(folder, write_string)
+
+
+    
