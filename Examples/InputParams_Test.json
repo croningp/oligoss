@@ -13,7 +13,7 @@
         "add_modifications": false,
         "MS1": {
             "monomers": ["H", "S", "F", "G"],
-            "max_length": 10,
+            "max_length": 5,
             "ms1_adducts": ["H"],
             "min_z": 1,
             "max_z": null,

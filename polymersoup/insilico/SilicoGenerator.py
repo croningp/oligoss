@@ -24,13 +24,13 @@ def generate_MSMS_sequence_dict(
 
     if ms1:
         start = time.time()
-        ms1 = params_dict["MS1"]
+        ms1 = silico_params["MS1"]
 
         MS1 = generate_ms1_mass_dictionary_adducts_losses(
             ms1["monomers"],
             ms1["max_length"],
             ms1["ms1_adducts"],
-            ms1["mode"],
+            silico_params["mode"],
             ms1["min_z"],
             ms1["max_z"],
             ms1["losses"],
@@ -48,31 +48,6 @@ def generate_MSMS_sequence_dict(
         print(f'time taken per sequence for MS1 = {time_elapsed/len(MS1)} seconds')
 
     start = time.time()
-    ms1 = silico_params["MS1"]
-    MS1 = generate_ms1_mass_dictionary_adducts_losses(
-        ms1["monomers"],
-        ms1["max_length"],
-        ms1["ms1_adducts"],
-        silico_params["mode"],
-        ms1["min_z"],
-        ms1["max_z"],
-        ms1["losses"],
-        ms1["max_neutral_losses"],
-        ms1["loss_products_adducts"],
-        ms1["min_length"],
-        ms1["chain_terminators"],
-        ms1["universal_rxn"],
-        ms1["terminal_tags"]["0"],
-        ms1["terminal_tags"]["-1"]
-    )
-    end = time.time()
-    time_elapsed = end-start
-    print(f'for {len(MS1)} sequences, time taken for MS1 = {time_elapsed} seconds')
-    print(f'time taken per sequence for MS1 = {time_elapsed/len(MS1)} seconds')
-
-
-    start = time.time()
-    print(f'doing in silico fragmentation for {len(MS1)} sequences')
     ms2 = silico_params["MS2"]
     MS2 = generate_ms2_mass_dictionary(
             MS1.keys(),
