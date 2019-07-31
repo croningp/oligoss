@@ -5,12 +5,16 @@
 "data_extraction": false,
 
 "postprocess": false,
+
 "add_modifications": false,
+
 "silico_parameters":
-    {   "mode": "pos",
+    {
+        "mode": "pos",
         "silico_ms1": true,
         "silico_ms2": true,
         "add_modifications": false,
+
         "MS1": {
             "monomers": ["H", "S", "F", "G"],
             "max_length": 5,
@@ -54,19 +58,22 @@
 
 "extractor_parameters":
     {   "error": 0.01,
-        "min_MS1_intenstity": 10000,
-        "min_MS2_intensity": 0.05,
         "min_ms2_peak_abundance": 90,
-
+        "pre_run_filter": true,
         "pre_screen_filters": {
             "min_rt": null,
             "max_rt": null,
+            "rt_filter_ms_level": null,
             "essential_signatures": ["F"],
-            "signature_bins": true,
-            "massdiff_bins": true
-        },
+            "signature_ms_level": 2,
+            "massdiff_bins": true,
+            "ms2_precursors": null,
+            "min_MS1_total_intenstity": 10000,
+            "min_MS2_total_intensity": 0.05,
+            "min_MS1_max_intensity": null,
+            "min_MS2_max_intensity": null
+        }
 
-        "ms2_precursors": null
     },
 
 "postprocessing_parameters":
