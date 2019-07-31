@@ -78,6 +78,11 @@
         "subsequence_weight": 0.5,
         "min_rt": null,
         "max_rt": null
+    },
+
+"directories": 
+    {   "ripper_folder": "",
+        "postprocessing_outputdir": null
     }
 
 }
