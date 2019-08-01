@@ -34,7 +34,7 @@
         },
 
         "MS2": {
-            "fragment_series": ["b", "y"],
+            "fragment_series": ["b", "y", "c"],
             "ms2_adducts": ["Na"],
             "ms2_losses": true,
             "ms2_max_neutral_losses": null,
