@@ -45,8 +45,7 @@ def find_target(
 
 def filter_retention_time(
         msdata: dict,
-        ret_time_range: list,
-        ms_level=None
+        ret_time_range: list
     ) -> dict:
     """Filters a spectra collection based on retention time
 
@@ -58,23 +57,27 @@ def filter_retention_time(
         dict: Spectra that pass the filter
     """
 
-    # List for filtered spectra
-    filtered = {}
 
-    if ms_level: 
-        msdict = {f'ms{ms_level}': msdata[f'ms{ms_level}']}
+    # iterate through each ms level and corresponding mass spec data in
+    # ripper_dict
+    for ms, ms_subdict in msdata.items():
 
-    for ms, ms_subdict in msdict.items():
+        # dict for filtered spectra
+        filtered = {}
+
         # Iterate through each spectrum
         for key, spectrum in ms_subdict.items():
+
             # Check if the retention time is within the range
-            ret_time = float(spectrum["ret_time"])
+            ret_time = float(spectrum["retention_time"])
             if ret_time >= ret_time_range[0] and ret_time <= ret_time_range[-1]:
                 filtered[key] = spectrum
-        
-        msdict[ms] = filtered
+                print(f'{key} passed retention filter')
+
+        msdata[ms] = filtered
+
     # Return spectra sorted by retention time
-    return msdict
+    return msdata
 
 
 def filter_parent_ion(
@@ -89,7 +92,7 @@ def filter_parent_ion(
     Args:
         msdata (dict): Spectra collection
         parent_ions (List[float]): List of parent ions to filter for
-    
+
     Keyword Args:
         ms_level (int): specifies ms_level for spectra being screened (default:
                     2)
@@ -99,12 +102,12 @@ def filter_parent_ion(
 
     # dict for filtered spectra
     filtered = {}
-    
+
     if ms_level < 2:
         raise Exception(f'ms_level for parent ion filter must be 2 or greater, current ms_level set to {ms_level}')
-    
+
     msdict = msdata[f'ms{ms_level}']
-    
+
     # Iterate through each spectrum
     for key, spectrum in msdict.items():
         # Get the parent and all target mass matches
@@ -115,9 +118,9 @@ def filter_parent_ion(
         # If any matches are found, add the spectrum
         if found_parent:
             filtered[key] = spectrum
-    
+
     msdict[f'ms{ms_level}'] = filtered
-    
+
     # Return spectra sorted by parent
     return msdict
 
@@ -168,10 +171,9 @@ def filter_signature_ions(
 
     msdata[f'ms{ms_level}'] = filtered
 
-    # Return msdata with spectra not containing signature ions at specified 
+    # Return msdata with spectra not containing signature ions at specified
     # ms level removed
     return msdata
-
 
 def filter_total_intensity(
         msdata: dict,
@@ -188,29 +190,34 @@ def filter_total_intensity(
     Returns:
         dict: Spectra which pass the filter
     """
+    print(f'total intensity threshold for ms{ms_level} = {intensity_threshold}')
+    for ms, msdict in msdata.items():
 
-    # List for filtered spectra
-    filtered = {}
+        # List for filtered spectra
+        filtered = {}
 
-    msdict = msdata[f'ms{ms_level}']
+        if int(ms[-1]) != ms_level:
+            filtered = msdict
 
-    # Iterate through each spectrum
-    for key, spectrum in msdict.items():
-        # Convert mass list to 4pt. float strings
-        mass_list = [f"{m:.4f}" for m in spectrum["mass_list"]]
+        elif int(ms[-1]) == ms_level:
+            # Iterate through each spectrum
+            for key, spectrum in msdict.items():
+                # Convert mass list to 4pt. float strings
+                mass_list = [f"{m:.4f}" for m in spectrum["mass_list"]]
 
-        # Get the total intensity of the enbtire spectrum
-        total = sum([spectrum[m] for m in mass_list])
+                # Get the total intensity of the enbtire spectrum
+                total = sum([spectrum[m] for m in mass_list])
 
-        # Exceeds the threshold, add to list
-        if total >= intensity_threshold:
-            filtered[key] = spectrum
-    
-    msdict[f'ms{ms_level}'] = filtered
-    
+                # Exceeds the threshold, add to list
+                if total >= intensity_threshold:
+                    filtered[key] = spectrum
+                    if ms_level == 1:
+                        print(f'{key} total intensity = {total}, threshold = {intensity_threshold}')
+
+        msdata[f'ms{ms_level}'] = filtered
+
     # Return spectra
-    return msdict
-
+    return msdata
 
 def filter_max_intensity(
         msdata: dict,
@@ -227,26 +234,30 @@ def filter_max_intensity(
     Returns:
         dict: Spectra which pass the filter
     """
+    print(f'max intensity filter for ms{ms_level} = {intensity_threshold}')
+    for ms, msdict in msdata.items():
 
-    # List for filtered spectra
-    filtered = {}
+        # dict for filtered spectra
+        filtered = {}
 
-    msdict = msdata[f'ms{ms_level}']
+        # check ms level of spectra
+        if int(ms[-1]) != ms_level:
+            filtered = msdict
+        elif int(ms[-1]) == ms_level:
+            # Iterate through each spectrum
+            for key, spectrum in msdict.items():
+                # Convert mass list to 4pt float strings
+                mass_list = [f"{m:.4f}" for m in spectrum["mass_list"]]
 
-    # Iterate through each spectrum
-    for key, spectrum in msdict.items():
-        # Convert mass list to 4pt float strings
-        mass_list = [f"{m:.4f}" for m in spectrum["mass_list"]]
+                # Get the maximum intensity of the spectrum
+                max_intensity = max([spectrum[m] for m in mass_list])
 
-        # Get the maximum intensity of the spectrum
-        max_intensity = max([spectrum[m] for m in mass_list])
+                # Exceeds the threshold, add to list
+                if max_intensity >= intensity_threshold:
+                    filtered[key] = spectrum
 
-        # Exceeds the threshold, add to list
-        if max_intensity >= intensity_threshold:
-            filtered[key] = spectrum
-    
-    msdata[f'ms{ms_level}'] = filtered
-    
+        msdata[ms] = filtered
+
     # Return spectra
     return msdata
 
@@ -349,7 +360,6 @@ def apply_pre_screening_filters(
     ripper_dict,
     min_rt,
     max_rt,
-    rt_filter_ms_level,
     essential_signatures,
     signature_ms_level,
     precursor_ions,
@@ -362,43 +372,40 @@ def apply_pre_screening_filters(
     err_abs
 ):
     """
-    This function takes an ms dictionary read from an mzml ripper json and 
+    This function takes an ms dictionary read from an mzml ripper json and
     returns a filtered dictionary of spectra within the input ripper_dict that
     meet the filter criteria specified (described below)
-    
+
     Args:
         ripper_dict (dict): mass spec data dict in mzml ripper format
         min_rt (float): minimum retention time for spectra (in minutes)
         max_rt (float): maximum retention time for spectra (in minutes)
-        rt_filter_ms_level (int): specified which ms levels to apply retention 
-            time filters to; if None, retention time filter is applied to all
-            ms levels in the ripper_dict
         essential_signatures (list): list of monomers that MUST have signature
-            ions present in all spectra screened. Only spectra containing 
-            these monomer signature ions at the specified ms level will be 
+            ions present in all spectra screened. Only spectra containing
+            these monomer signature ions at the specified ms level will be
             returned
-        signature_ms_level (int): ms level for monomer signature screening 
+        signature_ms_level (int): ms level for monomer signature screening
         precursor_ions (list): list of precursor ions. At least one of these
-            must be the precursr for any MSn spectra 
+            must be the precursr for any MSn spectra
         precursor_ion_ms_level (int): MS level for screening precursors. This
-            MUST be greater than 1, as MS1 spectra have no precursors 
+            MUST be greater than 1, as MS1 spectra have no precursors
         min_MS1_total_intensity (float): minimum total intensity of MS1 spectra
-            spectra with a total intensity below this value will be filtered 
+            spectra with a total intensity below this value will be filtered
             out
         min_MS2_total_intensity (float): minimum total intensity of MS2 spectra
-            spectra with a total intensity below this value will be filtered 
+            spectra with a total intensity below this value will be filtered
             out. NOTE: This is either given as an absolute value or a decimal
             fraction of min_MS1_total_intensity; either is acceptable
         min_MS1_max_intensity (float): minimum maximum intensity of MS1 spectra
-            spectra with a maximum intensity below this value will be filtered 
+            spectra with a maximum intensity below this value will be filtered
             out
         min_MS2_max_intensity (float): minimum maximum intensity of MS2 spectra
-            spectra with a maximum intensity below this value will be filtered 
+            spectra with a maximum intensity below this value will be filtered
             out. NOTE: This is either given as an absolute value or a decimal
             fraction of min_MS1_max_intensity; either is acceptable
         err (float): error threshold for screening - either in absolute mass
             units or ppm
-        err_abs (bool): specifies whether err units are absolute mass units 
+        err_abs (bool): specifies whether err units are absolute mass units
             or ppm
     """
     # check for min, max rt and apply filter
@@ -419,8 +426,8 @@ def apply_pre_screening_filters(
                 err_abs,
                 signature_ms_level)
 
-    # check for precursor ions; if any are specified, filter out any MSn 
-    # spectra that do not match any of these precursors 
+    # check for precursor ions; if any are specified, filter out any MSn
+    # spectra that do not match any of these precursors
     if precursor_ions:
         ripper_dict = filter_parent_ion(
             ripper_dict,
@@ -433,6 +440,7 @@ def apply_pre_screening_filters(
     # check for minimum MS1 total intensity; if specified, filter out any MS1
     # spectra that have a total intensity below this value
     if min_MS1_total_intensity:
+        print(f'filtering out MS1 spectra with total I below {min_MS1_total_intensity}')
         ripper_dict = filter_total_intensity(
             ripper_dict,
             min_MS1_total_intensity,
@@ -441,8 +449,8 @@ def apply_pre_screening_filters(
 
     # check for minimum MS2 total intensity; if specified, filter out any MS2
     # spectra that have a total intensity below this value
-    # also check to see if min_MS2_total_intensity is an absolute value or a 
-    # decimal fraction of min_MS1_total_intensity 
+    # also check to see if min_MS2_total_intensity is an absolute value or a
+    # decimal fraction of min_MS1_total_intensity
     if min_MS2_total_intensity:
         if min_MS2_total_intensity < 1:
             min_MS2_total_intensity = min_MS2_total_intensity * min_MS2_total_intensity
@@ -452,6 +460,7 @@ def apply_pre_screening_filters(
             ms_level=2
         )
 
+
     # check for minimum MS1 max intensity; if specified, filter out any MS1
     # spectra that have a total intensity below this value
     if min_MS1_max_intensity:
@@ -460,16 +469,18 @@ def apply_pre_screening_filters(
             min_MS1_max_intensity,
             ms_level=1
         )
-    
+
     # check for minimum MS2 max intensity; if specified, filter out any MS2
     # spectra that have a maximum intensity below this value
-    # also check to see if min_MS2_max_intensity is an absolute value or a 
-    # decimal fraction of min_MS1_max_intensity 
+    # also check to see if min_MS2_max_intensity is an absolute value or a
+    # decimal fraction of min_MS1_max_intensity
     if min_MS2_max_intensity:
         if min_MS2_max_intensity < 1:
             min_MS2_max_intensity = min_MS2_max_intensity*min_MS1_max_intensity
+            print(f'min MS2 max intensity = {min_MS2_max_intensity}')
         ripper_dict = filter_max_intensity(
             ripper_dict,
             min_MS2_max_intensity,
             ms_level=2
         )
+    return ripper_dict
