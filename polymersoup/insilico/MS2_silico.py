@@ -459,26 +459,49 @@ def find_unique_fragments_isobaric_set(isobaric_sequencedict):
         isobaric_sequencedict: input dict, with list of unique fragments added
                                     to MS2 fragments
     """
+    # initiate list to store fragment masses, for later use in counting
+    # occurence of each fragment mass
     all_fragment_masses = []
 
+    # iterate through each isobaric sequence in the input isobaric_sequencedict
     for sequence in isobaric_sequencedict:
+
+        # retrieve fragment dict for sequence
         frag_dict = isobaric_sequencedict[sequence]
+
+        # for each fragment, add associated m/z values to all_fragment_masses
         for fragment, masses in frag_dict.items():
+
+            # do not include signature fragments, as these are a very different
+            # beast
             if fragment.find('signature') == -1:
                 all_fragment_masses.extend(masses)
 
+    # iterate through isobaric sequences again
     for sequence in isobaric_sequencedict:
+
+        # initiate list to store unique fragments, then retrieve fragment dict
         uniques = []
         frag_dict = isobaric_sequencedict[sequence]
+
+        # for each fragment and associated m/z values, count the total occurence
+        # of m/z values in the full fragment mass list (all_fragment_masses)
         for fragment, masses in frag_dict.items():
             if fragment.find('signature') == -1:
                 mass_count = sum(
                     [all_fragment_masses.count(mass)
                     for mass in masses]
                 )
+
+                # check if each fragment m/z value is found only once in the
+                # full list of all_fragment_masses; if this is the case, the
+                # fragment is unique => add fragment to list of uniques
                 if mass_count == len(masses):
                     uniques.append(fragment)
+
+        # update sequence dict with unique fragments associated with sequence
         isobaric_sequencedict[sequence].update({'unique_fragments': uniques})
+
     return isobaric_sequencedict
 
 def generate_unique_fragment_ms2_massdict(massdict):
@@ -550,8 +573,11 @@ def find_fragments_by_index(
                     ['y14', 'b14'] if target_index = 14)
     """
 
+    # remove one letter code from fragments, leaving only string of fragment
+    # index - e.g. 'b14' => '14', 'y2' => '2'
     fragments = [fragment[1::] for fragment in fragment]
 
+    # return list of fragments with index matching target
     fragments = [
         fragment for fragment in fragments
         if int(fragment) == target_index
