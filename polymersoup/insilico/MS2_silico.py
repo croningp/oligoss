@@ -6,10 +6,6 @@ from .Constants.GlobalChemicalConstants import *
 from .Config_files.Depsipeptide_config import *
 from .silico_helpers.insilico_helpers import *
 
-def __init__():
-    """
-    [init]
-    """
 def build_fragment_series_single_sequence(
     sequence,
     fragment_series,

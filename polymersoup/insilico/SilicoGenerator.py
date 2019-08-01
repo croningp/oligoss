@@ -5,11 +5,7 @@ ALife polymer chemistry.
 from .MS1_silico import *
 from .MS2_silico import *
 from .. parameter_handlers import *
-def __init__():
-    """
-    Initialises SilicoGenerator and imports constants from polymer config file
 
-    """
 
 def generate_MSMS_sequence_dict(
     parameters_file="C:/Users/group/PolymerMassSpec/Examples/InputParams_Test.json",
@@ -87,3 +83,5 @@ def generate_MSMS_sequence_dict(
         write_to_json(full_MSMS_dict, write_file)
 
     return full_MSMS_dict
+
+generate_MSMS_sequence_dict()

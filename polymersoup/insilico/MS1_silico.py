@@ -6,14 +6,6 @@ from .Constants.GlobalChemicalConstants import *
 from .Config_files.Depsipeptide_config import *
 from .silico_helpers.insilico_helpers import *
 
-def __init__():
-    """
-    Initialises SilicoGenerator and imports constants from polymer config file
-
-    """
-    #ADD SOMETHING TO IMPORT CONFIG FILE HERE - IMPORTING DEPSIPEPTIDE
-    #CONFIG FILE DIRECTLY IS A TEMPORARY SOLUTION FOR INITIAL TESTING OF
-    #FUNCTIONS
 
 def generate_mass_dictionary(
     monomers,
