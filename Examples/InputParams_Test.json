@@ -35,7 +35,7 @@
 
         "MS2": {
             "fragment_series": ["b", "y"],
-            "ms2_adducts": [],
+            "ms2_adducts": ["Na"],
             "ms2_losses": true,
             "ms2_max_neutral_losses": null,
             "ms2_loss_products_adducts": null,
@@ -58,18 +58,18 @@
 
 "extractor_parameters":
     {   "error": 0.01,
+        "err_abs": true,
         "min_ms2_peak_abundance": 90,
         "pre_run_filter": true,
         "pre_screen_filters": {
-            "min_rt": null,
-            "max_rt": null,
-            "rt_filter_ms_level": null,
-            "essential_signatures": ["F"],
+            "min_rt": 5,
+            "max_rt": 5.1,
+            "essential_signatures": null,
             "signature_ms_level": 2,
             "massdiff_bins": true,
             "ms2_precursors": null,
-            "min_MS1_total_intenstity": 10000,
-            "min_MS2_total_intensity": 0.05,
+            "min_MS1_total_intensity": null,
+            "min_MS2_total_intensity": null,
             "min_MS1_max_intensity": null,
             "min_MS2_max_intensity": null
         }
@@ -88,7 +88,7 @@
     },
 
 "directories":
-    {   "ripper_folder": "",
+    {   "ripper_folder": "C:/Users/group/polymermassspec/Examples/ripper_jsons",
         "postprocessing_outputdir": null
     }
 

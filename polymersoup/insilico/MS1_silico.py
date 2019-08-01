@@ -4,7 +4,7 @@ Polymer Data
 """
 from .Constants.GlobalChemicalConstants import *
 from .Config_files.Depsipeptide_config import *
-from .helpers.insilico_helpers import *
+from .silico_helpers.insilico_helpers import *
 
 def __init__():
     """
