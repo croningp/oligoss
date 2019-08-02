@@ -44,10 +44,10 @@ def pre_filter_rippers(
 
         # filter ripper_dict according to pre_screening_filters specified
         # in input parameters .json file
-        # ripper_dict = apply_filter_dict_ripper_json(
-        #     ripper_dict,
-        #     filter_parameters
-        # )
+        ripper_dict = apply_filter_dict_ripper_json(
+            ripper_dict,
+            filter_parameters
+        )
         first_spectrum = ripper_dict['ms1']['spectrum_1']
         ripper_dict = {'ms1': first_spectrum}
         # name output file for filtered mass spec data in ripper_dict

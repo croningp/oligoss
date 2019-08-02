@@ -16,7 +16,7 @@
         "add_modifications": false,
 
         "MS1": {
-            "monomers": ["H", "S", "F", "G"],
+            "monomers": ["H", "S", "L", "G"],
             "max_length": 5,
             "ms1_adducts": ["H"],
             "min_z": 1,
@@ -24,7 +24,7 @@
             "losses": true,
             "max_neutral_losses": null,
             "loss_products_adducts": null,
-            "min_length": 3,
+            "min_length": 1,
             "chain_terminators": null,
             "universal_rxn": true,
             "terminal_tags": {
@@ -34,7 +34,7 @@
         },
 
         "MS2": {
-            "fragment_series": ["b", "y", "c"],
+            "fragment_series": ["b", "y", "a"],
             "ms2_adducts": ["Na"],
             "ms2_losses": true,
             "ms2_max_neutral_losses": null,
@@ -61,6 +61,7 @@
         "err_abs": true,
         "min_ms2_peak_abundance": 90,
         "pre_run_filter": true,
+        
         "pre_screen_filters": {
             "min_rt": 5,
             "max_rt": 5.1,

@@ -14,7 +14,6 @@ def generate_MSMS_sequence_dict(
     ms1=True,
     ms2=True
 ):
-
     # reads in silico parameters from input parameters json
     silico_params = return_silico_parameters(parameters_file)
 
