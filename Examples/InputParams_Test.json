@@ -16,8 +16,8 @@
         "add_modifications": false,
 
         "MS1": {
-            "monomers": ["H", "S", "L", "G"],
-            "max_length": 5,
+            "monomers": ["H", "S", "F", "L"],
+            "max_length": 9,
             "ms1_adducts": ["H"],
             "min_z": 1,
             "max_z": null,
@@ -34,7 +34,7 @@
         },
 
         "MS2": {
-            "fragment_series": ["b", "y", "a"],
+            "fragment_series": ["b", "y"],
             "ms2_adducts": ["Na"],
             "ms2_losses": true,
             "ms2_max_neutral_losses": null,
@@ -63,8 +63,8 @@
         "pre_run_filter": true,
         
         "pre_screen_filters": {
-            "min_rt": 5,
-            "max_rt": 5.1,
+            "min_rt": 0,
+            "max_rt": 50,
             "essential_signatures": null,
             "signature_ms_level": 2,
             "massdiff_bins": true,

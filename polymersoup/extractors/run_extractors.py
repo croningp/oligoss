@@ -22,16 +22,19 @@ def pre_filter_rippers(
     if not os.path.exists(filter_outputdir):
         os.mkdir(filter_outputdir)
 
-    # retrieve data extrator parameters from parameters file
+    # retrieve data extractor parameters from parameters file
     extractor_parameters = return_extractor_parameters(parameters_file)
-    print(f'extractor_parameters = {extractor_parameters}')
 
+    # retrieve error tolerance, and check whether units of err are in absolute
+    # mass units or ppm
     err = extractor_parameters["error"]
     err_abs = extractor_parameters["err_abs"]
 
     # get pre_screen filter parameters dict from within extractor parameters
     filter_parameters = extractor_parameters['pre_screen_filters']
+    print(f'filtering for: {filter_parameters}')
 
+    # pass on error tolerance info to filter parameters
     filter_parameters["err"] = err
     filter_parameters["err_abs"] = err_abs
 
@@ -55,8 +58,13 @@ def pre_filter_rippers(
         filtered_json = ripper_filename.replace('.json', '_PRE_FILTERED.json')
         filtered_json = os.path.join(filter_outputdir, filtered_json)
 
+        first_spectrum_dict = {}
+
+        first_spectrum_json = filtered_json.replace('_PRE_FILTERED', '1spectr')
+        write_to_json(first_spectrum_dict, first_spectrum_json)
+        
         # finally, write the filtered dict to file
-        print('about to write')
+        print(f'writing ripper_dict to {filtered_json}')
         write_to_json(ripper_dict, filtered_json)
 
 def apply_filter_dict_ripper_json(
@@ -89,6 +97,8 @@ def apply_filter_dict_ripper_json(
     min_rt = filter_dict['min_rt']
     max_rt = filter_dict['max_rt']
 
+    # check for essential signatures - spectra at signature_ms_level that do
+    # not contain these signature peaks will be removed from ripper_dict
     essential_sigs = filter_dict['essential_signatures']
     signature_ms_level = filter_dict['signature_ms_level']
 

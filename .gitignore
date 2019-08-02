@@ -1,4 +1,5 @@
 *.json
+!*Arg*.json
 !*params*.json
 __pycache__/
 *.pyc

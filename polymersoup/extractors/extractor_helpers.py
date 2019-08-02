@@ -72,7 +72,6 @@ def filter_retention_time(
             ret_time = float(spectrum["retention_time"])
             if ret_time >= ret_time_range[0] and ret_time <= ret_time_range[-1]:
                 filtered[key] = spectrum
-                print(f'{key} passed retention filter')
 
         msdata[ms] = filtered
 
@@ -409,11 +408,16 @@ def apply_pre_screening_filters(
             or ppm
     """
     # check for min, max rt and apply filter
-    if not min_rt:
-        min_rt = 0
-    if not max_rt:
-        max_rt = math.inf
-    ripper_dict = filter_retention_time(ripper_dict, [min_rt, max_rt])
+    print(f'min, max rt = {min_rt}, {max_rt}')
+    if not min_rt and not max_rt:
+        ripper_dict = ripper_dict
+        print('ripper dict not filtered by retention time')
+    else:
+        if not min_rt:
+            min_rt = 0
+        if not max_rt:
+            max_rt = math.inf
+        ripper_dict = filter_retention_time(ripper_dict, [min_rt, max_rt])
 
     # check for essential signatures; if any are specified, filter out
     # spectra that do not contain these signatures at specified ms level
