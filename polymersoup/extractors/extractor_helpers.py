@@ -8,7 +8,6 @@ Criteria are:
 
 .. moduleauthor:: Graham Keenan 2019
 """
-import math
 
 def find_target(
     target,
@@ -57,7 +56,6 @@ def filter_retention_time(
         dict: Spectra that pass the filter
     """
 
-
     # iterate through each ms level and corresponding mass spec data in
     # ripper_dict
     for ms, ms_subdict in msdata.items():
@@ -77,7 +75,6 @@ def filter_retention_time(
 
     # Return spectra sorted by retention time
     return msdata
-
 
 def filter_parent_ion(
         msdata: dict,
@@ -122,7 +119,6 @@ def filter_parent_ion(
 
     # Return spectra sorted by parent
     return msdict
-
 
 def filter_signature_ions(
         msdata: dict,
