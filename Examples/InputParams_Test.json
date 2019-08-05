@@ -59,7 +59,7 @@
 "extractor_parameters":
     {   "error": 0.01,
         "err_abs": true,
-        "min_ms2_peak_abundance": 90,
+        "min_ms2_peak_abundance": 100,
         "pre_run_filter": true,
         
         "pre_screen_filters": {
@@ -69,6 +69,11 @@
             "signature_ms_level": 2,
             "massdiff_bins": true,
             "ms2_precursors": null,
+            "precursors": {
+                "1": null, 
+                "2": null,
+                "3": null
+            },
             "min_MS1_total_intensity": null,
             "min_MS2_total_intensity": null,
             "min_MS1_max_intensity": null,
@@ -76,7 +81,7 @@
         }
 
     },
-
+    
 "postprocessing_parameters":
     {   "exclude_frags": null,
         "optional_core_frags": ["b1"],

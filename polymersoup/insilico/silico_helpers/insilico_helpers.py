@@ -7,7 +7,6 @@ from ..Config_files.Depsipeptide_config import *
 from ..Config_files.Peptide_Acylations_config import *
 import copy
 import time
-import math
 
 def find_sequence_mass(
     sequence,
@@ -123,26 +122,26 @@ def add_adduct_complexes_sequence_mass(
     max_opposite_charged_ions=None,
     min_opposite_charged_ions=None,
     max_mz_overall_adduct=0,
-    min_mz_overall_adduct=math.inf
+    min_mz_overall_adduct=None
     ):
     """
     This function will add complex adducts to sequence masses - i.e. multiple
     metal centres, ions with counterions and associated solvent species etc
-    
+
     Args:
         sequence (str): sequence string comprised of monomer one letter codes
-        neutral_mass (float): neutral monoisotopic mass of sequence 
-        adducts (list): list of adduct strings  
-        min_z (int, optional): minimum absolute charge of OVERALL ION COMPLEX. 
+        neutral_mass (float): neutral monoisotopic mass of sequence
+        adducts (list): list of adduct strings
+        min_z (int, optional): minimum absolute charge of OVERALL ION COMPLEX.
                     Defaults to 1.
-        max_z ([type], optional): maximum absolute charge of OVERALL ION COMPLEX. 
+        max_z ([type], optional): maximum absolute charge of OVERALL ION COMPLEX.
                     Defaults to None.
         mode (str, optional): specifies whether OVERALL ION COMPLEX is positive
-                    or negative; either 'pos' or 'neg' for positive and 
+                    or negative; either 'pos' or 'neg' for positive and
                     negative mode, respectively. Defaults to 'pos'.
-        max_total_ions (int, optional): maximum number of total ions of 
+        max_total_ions (int, optional): maximum number of total ions of
                     ANY CHARGE STATE IN OVERALL ION COMPLEX. Defaults to None.
-        min_total_ions (int, optional): minimum number of total ions of 
+        min_total_ions (int, optional): minimum number of total ions of
                     ANY CHARGE STATE IN OVERALL ION COMPLEX. Defaults to None.
         max_mode_matching_ions (int, optional): maximum number of ions whose
                     CHARGE STATE MATCHES THE OVERALL CHARGE STATE OF THE
@@ -156,23 +155,25 @@ def add_adduct_complexes_sequence_mass(
         min_opposite_charged_ions ([type], optional): minimum number of ions
                     whose CHARGE STATE IS OPPOSITE TO THE OVERALL CHARGE STATE
                     OF THE ADDUCT. Defaults to None.
-    
+
     Raises:
         Exception: [description]
-    
+
     Returns:
         [type]: [description]
     """
-    raise Exception('this function is not complete - do NOT USE')
-    
+
     # initialise list of final m/z values of adduct complexes
     masses = []
 
+    if not max_mz_overall_adduct:
+        max_mz_overall_adduct = sorted(masses)[-1]
+
     # filters out m/z values that do not fall within the specific minimum and
-    # maximum m/z range 
-    masses = filter(lambda mass: mass >= min_mz_overall_adduct and mass <= 
-                max_mz_overall_adduct, masses) 
-    
+    # maximum m/z range
+    masses = filter(lambda mass: mass >= min_mz_overall_adduct and mass <=
+                max_mz_overall_adduct, masses)
+
     return masses
 
 def generate_all_sequences(
