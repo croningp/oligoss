@@ -139,9 +139,18 @@ def confirm_fragments_sequence(
     # iterate through spectra and find most intense peak
     for spectrum in ripper_dict:
 
-        most_intense_peak = find_most_intense_peak_spectrum
-
-
+        most_intense_peak = find_most_intense_peak_spectrum(spectrum)
+        if not find_target(
+            most_intense_peak[0],
+            peak_list,
+            err,
+            err_abs
+        ):
+            top_hit = find_most_intense_matching_peak(
+                spectrum, 
+                peak_list,
+                err,
+                err_abs)
 
 def find_most_intense_peak_spectrum(
     spectrum
@@ -172,3 +181,55 @@ def find_most_intense_peak_spectrum(
     most_intense = masses[-1]
 
     return most_intense
+
+def find_most_intense_matching_peak(
+    spectrum, 
+    peak_list,
+    err,
+    err_abs):
+    """
+    takes a list of theoretical peaks associated with a sequence, a spectrum 
+    containing observed peaks and associated intensities, and returns the 
+    intensity of the most intense matching peak
+    
+    Args:
+        spectrum (dict): spectrum dict in mzml ripper dict format
+        peak_list (list): list of theoretical m/z values associated with a
+                        sequence 
+        err (float): 
+        err_abs ([type]): [description]
+    
+    Returns:
+        top_intensity (float): intensity of most intense matching peak
+    """
+
+    # set top matching intensity to 0; this will be reset if matching peaks
+    # are found with intensity > 0 
+    top_intensity = 0 
+
+    # iterate through theoretical peaks associated with sequence 
+    for peak_mass in peak_list:
+
+        # find real peaks in spectrum that match theoretical sequence peak 
+        # mass
+        matches = find_target(
+            peak_mass,
+            [float(mass) for mass in spectrum['mass_list']],
+            err,
+            err_abs
+        )
+
+        # get intensities of all matching peaks, sorted in ascending order 
+        intensities = sorted(
+            [
+                float(spectrum[f'{match}']) 
+                for match in matches
+            ]
+        )
+
+        # check whether most intense match is more intense than previous most
+        # intense match; if so, reset top_intensity
+        if intensities[-1] > top_intensity:
+            top_intensity = intensities[-1]
+    
+    return top_intensity
