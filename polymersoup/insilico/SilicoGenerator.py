@@ -3,9 +3,10 @@ This file contains functions for passing on silico parameters to insilico
 functions for generating theoretical MS and MSMS sequence data
 
 """
-from .MS1_silico import *
-from .MS2_silico import *
-from .. parameter_handlers import *
+from .MS1_silico import as MS1silico
+from .MS2_silico import as MS2silico
+from .. parameter_handlers import as phandlers
+from .silico_helpers.insilico_helpers import as helpers
 
 run = True
 
@@ -53,13 +54,13 @@ def generate_MSMS_sequence_dict(
             is described in detail above
     """
     # reads in silico parameters from input parameters json
-    silico_params = return_silico_parameters(parameters_file)
+    silico_params = phandlers.return_silico_parameters(parameters_file)
 
     if ms1:
         start = time.time()
         ms1 = silico_params["MS1"]
 
-        MS1 = generate_ms1_mass_dictionary_adducts_losses(
+        MS1 = MS1silico.generate_ms1_mass_dictionary_adducts_losses(
             ms1["monomers"],
             ms1["max_length"],
             ms1["ms1_adducts"],
@@ -82,7 +83,7 @@ def generate_MSMS_sequence_dict(
 
     start = time.time()
     ms2 = silico_params["MS2"]
-    MS2 = generate_ms2_mass_dictionary(
+    MS2 = MS2silico.generate_ms2_mass_dictionary(
             MS1.keys(),
             ms2["fragment_series"],
             ms2["ms2_adducts"],
@@ -106,18 +107,18 @@ def generate_MSMS_sequence_dict(
             'MS2': MS2[sequence]
             }
 
-    full_MSMS_dict = add_peak_lists_massdict(full_MSMS_dict)
+    full_MSMS_dict = helpers.add_peak_lists_massdict(full_MSMS_dict)
 
     if write:
         if not output_folder:
-            output_folder = os.path.dirname(parameters_file)
+            output_folder = phandler.os.path.dirname(parameters_file)
 
-        write_file = generate_insilico_writefile_string(
+        write_file = phandler.generate_insilico_writefile_string(
             output_folder,
             silico_params
         )
 
-        write_to_json(full_MSMS_dict, write_file)
+        phandler.write_to_json(full_MSMS_dict, write_file)
 
     return full_MSMS_dict
 
@@ -131,7 +132,7 @@ def generate_MS1_compositional_dict(
     # check if silico_parameters is provided as a file path to input parameters
     # .json file or already opened as a dict; if file path, open as dict
     if type(silico_parameters) == str:
-        silico_parameters = open_json(silico_parameters)['silico_parameters']
+        silico_parameters = phandler.open_json(silico_parameters)['silico_parameters']
 
     # load starting monomers
     monomers = silico_parameters['MS1']['monomers']
@@ -168,7 +169,7 @@ def generate_MS1_compositional_dict(
     start_tags = terminal_tags['0']
     end_tags = terminal_tags['-1']
 
-    MS1_dict = generate_ms1_mass_dictionary_adducts_losses(
+    MS1_dict = MS1silico.generate_ms1_mass_dictionary_adducts_losses(
         monomers,
         max_length,
         adducts,

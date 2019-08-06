@@ -4,7 +4,7 @@ Polymer Data
 """
 from .Constants.GlobalChemicalConstants import *
 from .Config_files.Depsipeptide_config import *
-from .silico_helpers.insilico_helpers import *
+from .silico_helpers.insilico_helpers import as helpers
 
 def build_fragment_series_single_sequence(
     sequence,
@@ -76,10 +76,10 @@ def build_fragment_series_single_sequence(
     # time
     for i in range(start, len(sequence)-end):
         fragment, sub_sequence = f'{fragment_series}{i+1}', sequence[0:i+1]
-        fragment_mass = find_sequence_mass(sub_sequence) + mass_diff
+        fragment_mass = helpers.find_sequence_mass(sub_sequence) + mass_diff
         fragment_dict[fragment] = [float(f'{fragment_mass:.4f}')]
         if losses:
-            loss_fragment_dict[fragment] = add_sidechain_neutral_loss_products_sequence(
+            loss_fragment_dict[fragment] = helpers.add_sidechain_neutral_loss_products_sequence(
                 sub_sequence,
                 fragment_mass,
                 max_total_losses
@@ -303,7 +303,7 @@ def add_adducts_ms2_fragments(
             adduct_masses = []
             for mass in masses:
                 mass -= intrinsic_adduct
-                adduct_masses.extend(add_adducts_sequence_mass(
+                adduct_masses.extend(helpers.add_adducts_sequence_mass(
                     mass,
                     adducts,
                     1,
@@ -531,7 +531,7 @@ def generate_unique_fragment_ms2_massdict(massdict):
     #   }
     # where sorted(seq) = alphabetically sorted sequence; seqs = list of
     # sequences that have same composition (i.e. sorted(seq))
-    isobaric_dict = generate_dict_isobaric_sequences(massdict.keys())
+    isobaric_dict = helpers.generate_dict_isobaric_sequences(massdict.keys())
 
     # initiate dict to store ms2_mass_fragment dicts with unique fragments
     # added
@@ -660,7 +660,7 @@ def add_terminal_ms2_modification_sequence_fragment_subsets(
         # iterate through fragment and add terminal modification to
         # fragment masses
         for fragment, masses in fragment_dict.items():
-            modified_fragdict[fragment] = add_modification_sequence_mass_list(
+            modified_fragdict[fragment] = helpers.add_modification_sequence_mass_list(
                 masses,
                 modification_mass,
                 modification_massdiff,
@@ -681,7 +681,7 @@ def add_terminal_ms2_modification_sequence_fragment_subsets(
         # add modification only to fragments that contain the target terminus
         # for modification
         for fragment in modified_fragments:
-            modified_fragdict[fragment] = add_modification_sequence_mass_list(
+            modified_fragdict[fragment] = helpers.add_modification_sequence_mass_list(
                 fragment_dict[fragment],
                 modification_mass,
                 modification_massdiff,
