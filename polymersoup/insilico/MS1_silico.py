@@ -4,7 +4,7 @@ Polymer Data
 """
 from .Constants.GlobalChemicalConstants import *
 from .Config_files.Depsipeptide_config import *
-from .silico_helpers.insilico_helpers import *
+from .silico_helpers.insilico_helpers import as helpers
 
 
 def generate_mass_dictionary(
@@ -57,7 +57,7 @@ def generate_mass_dictionary(
     # check to see if input monomers are set as universally cross-reactive
     # if so, sequence generator used is simpler and (probably) faster
     if universal_rxn:
-        sequences = generate_all_sequences(
+        sequences = helpers.generate_all_sequences(
             monomers,
             max_length,
             min_length,
@@ -72,7 +72,7 @@ def generate_mass_dictionary(
     # those sequences that can be produced from appropriately cross-reactive
     # monomers
     elif not universal_rxn:
-        sequences = generate_all_sequences_rxn_classes(monomers)
+        sequences = helpers.generate_all_sequences_rxn_classes(monomers)
 
     # work out neutral mass of each sequence and add to mass dictionary in
     # format {seq : mass} where seq = sequence, mass = neutral monoisotopic
@@ -121,7 +121,7 @@ def add_adducts_ms1_massdict(
     # iterate through sequences, neutral masses and add adducts to
     # adduct_massdict
     for sequence, neutral_mass in massdict.items():
-        adduct_massdict[sequence] = add_adducts_sequence_mass(
+        adduct_massdict[sequence] = helpers.add_adducts_sequence_mass(
             neutral_mass,
             adducts,
             min_z,
@@ -162,7 +162,7 @@ def add_loss_products_ms1_massdict(
     # iterate through sequences and corresponding neutral masses, adding
     # side chain-specific neutral losses to sequence mass lists
     for sequence, neutral_mass in massdict.items():
-        loss_product_dict[sequence] = add_sidechain_neutral_loss_products_sequence(
+        loss_product_dict[sequence] = helpers.add_sidechain_neutral_loss_products_sequence(
             sequence,
             neutral_mass,
             max_total_losses
@@ -211,7 +211,7 @@ def add_terminal_modification_MS1_sequence(
     elif modification_terminus == -1:
         mod_seq = f"{sequence}={modification}"
 
-    modified_sequence_masses = add_modification_sequence_mass_list(
+    modified_sequence_masses = helpers.add_modification_sequence_mass_list(
         sequence_masses,
         modification_mass,
         modification_massdiff,
@@ -275,8 +275,7 @@ def generate_ms1_mass_dictionary_adducts_losses(
     chain_terminators=None,
     universal_rxn=True,
     start_tags=None,
-    end_tags=None,
-    sequencing=True
+    end_tags=None
 ):
 
     # generate neutral mass dictionary of all possible sequences arising from
@@ -285,7 +284,7 @@ def generate_ms1_mass_dictionary_adducts_losses(
         monomers,
         max_length,
         min_length,
-        sequencing,
+        True,
         universal_rxn,
         chain_terminators,
         start_tags,
