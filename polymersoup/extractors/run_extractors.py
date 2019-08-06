@@ -1,3 +1,9 @@
+"""
+This file contains functions for reading extractor parameters and passing
+these on to core extractor functions
+
+"""
+
 from .extractor_helpers import *
 from ..parameter_handlers import *
 
@@ -23,7 +29,10 @@ def pre_filter_rippers(
         os.mkdir(filter_outputdir)
 
     # retrieve data extractor parameters from parameters file
-    extractor_parameters = return_extractor_parameters(parameters_file)
+    if type(parameters_file) == str:
+        extractor_parameters = return_extractor_parameters(parameters_file)
+    else:
+        extractor_parameters = parameters_file
 
     # retrieve error tolerance, and check whether units of err are in absolute
     # mass units or ppm
@@ -61,7 +70,7 @@ def pre_filter_rippers(
 
         first_spectrum_json = filtered_json.replace('_PRE_FILTERED', '1spectr')
         write_to_json(first_spectrum_dict, first_spectrum_json)
-        
+
         # finally, write the filtered dict to file
         print(f'writing ripper_dict to {filtered_json}')
         write_to_json(ripper_dict, filtered_json)
@@ -140,3 +149,15 @@ def apply_filter_dict_ripper_json(
     )
 
     return ripper_dict
+
+def extract_MS1(
+    silico_dict,
+    extractor_parameters,
+):
+    err = extractor_parameters["error"]
+    err_abs = extractor_parameters["err_abs"]
+    min_total_intensity = extractor_parameters["min_MS1_total_intensity"]
+    min_max_intensity = extractor_parameters["min_MS1_max_intensity"]
+
+
+    return {}

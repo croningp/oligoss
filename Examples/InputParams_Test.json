@@ -1,4 +1,5 @@
 {
+"screening_method": "exhaustive",
 
 "silico_generator": true,
 
@@ -95,7 +96,8 @@
 
 "directories":
     {   "ripper_folder": "C:/Users/group/polymermassspec/Examples/ripper_jsons",
-        "postprocessing_outputdir": null
+        "postprocessing_outputdir": null,
+        "insilico_output_folder": null
     }
 
 }

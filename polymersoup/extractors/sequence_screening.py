@@ -3,7 +3,7 @@ This file contains functions for extracting sequence-specific data from
 spectra
 
 """
-from .extractor_helpers import *
+from .run_extractors import *
 
 def generate_EIC(
     ions,
@@ -95,6 +95,44 @@ def generate_EIC(
     # return EIC
     return EIC
 
+def generate_MS1_EICs_sequence_dict(
+    silico_dict,
+    ripper_dict,
+    err,
+    err_abs,
+    min_max_intensity,
+    min_total_intensity
+):
+    """
+    Takes a silico_dict of sequences and corresponding MS1 ions, and outputs
+    MS1 EICs for sequences
+
+    Args:
+        silico_dict ([type]): [description]
+        ripper_dict ([type]): [description]
+        err ([type]): [description]
+        err_abs ([type]): [description]
+        min_max_intensity ([type]): [description]
+        min_total_intensity ([type]): [description]
+    """
+    for sequence in silico_dict:
+        if type(silico_dict[sequence]) == dict:
+            masses = silico_dict[sequence]["MS1"]
+        else:
+            masses = silico_dict[sequence]
+
+        silico_dict[sequence] = [float(mass) for mass in masses]
+
+        sequence_MS1_EIC = generate_EIC(
+            masses,
+            1,
+            ripper_dict,
+            err,
+            err_abs,
+            min_max_intensity,
+            min_total_intensity
+        )
+
 def confirm_fragments_sequence(
     precursors,
     fragment_dict,
@@ -111,15 +149,29 @@ def confirm_fragments_sequence(
     returns list of confirmed fragments associated with precursors
 
     Args:
-        precursors ([type]): [description]
-        fragment_dict ([type]): [description]
-        peak_list ([type]): [description]
-        ripper_dict ([type]): [description]
-        err ([type]): [description]
-        err_abs (bool, optional): [description]. Defaults to True.
-        ms_level (int, optional): [description]. Defaults to 2.
-        min_annotated_peak_assignment (int, optional): [description]. Defaults to 90.
-        essential_signatures (list, optional): [description]. Defaults to [].
+        precursors (list of floats): list of m/z values for sequence precursors
+        fragment_dict (dict): dictionary of fragments and associated masses
+            in insilico fragment dict format
+        peak_list (list of floats): list of ALL MS1 and MS2 / MSn masses
+            associated with sequence
+        ripper_dict (dict): dict of mass spec data in mzml ripper format
+        err (float): error tolerance used when matching masses; units can
+            either be in absolute mass units or ppm
+        err_abs (bool, optional): specifies whether err units are in absolute
+            mass units or ppm; if True, absolute mass unit is used.
+            Defaults to True.
+        ms_level (int, optional): specifies MS level for screening fragments
+            and precursors. Defaults to 2.
+        min_annotated_peak_assignment (int, optional): minimum % intensity of
+            most intense peak in a given spectrum that matches a mass in the
+            peak list. Defaults to 90.
+        essential_signatures (list, optional): list of signatures that MUST
+            be found in a spectrum for fragments to be confirmed from that
+            spectrum. Defaults to [].
+    Returns:
+        confirmed_fragments (list of strings): list of fragment ids for
+            fragments in fragment_dict that have been confirmed as present in
+            mass spectrum data from ripper_dict
     """
     # remove spectra at fragmentation ms level that do not have matching
     # precursors
@@ -136,21 +188,42 @@ def confirm_fragments_sequence(
     # initiate list to store confirmed fragment ids
     confirmed_fragments = []
 
-    # iterate through spectra and find most intense peak
+    # iterate through spectra
     for spectrum in ripper_dict:
 
-        most_intense_peak = find_most_intense_peak_spectrum(spectrum)
-        if not find_target(
-            most_intense_peak[0],
+        # calculate annotated_peak_assignemnt from spectrum, peak_list
+        annotated_peak_assignment = find_maximum_annotated_peak_intensity(
+            spectrum,
             peak_list,
             err,
             err_abs
-        ):
-            top_hit = find_most_intense_matching_peak(
-                spectrum, 
-                peak_list,
-                err,
-                err_abs)
+        )
+
+        # if annotated_peak_assignment is below specified lower threshold,
+        # pass over spectrum without searching for fragments
+        if annotated_peak_assignment < min_annotated_peak_assignment:
+            pass
+
+        # if annotated_peak_assignment is equal to or exceeds threshold, search
+        # spectrum for fragments provided in fragment_dict
+        else:
+
+            # add fragments found in spectrum to list of confirmed fragments
+            # associated with sequence
+            confirmed_fragments.extend(
+                find_fragments_spectrum(
+                    spectrum,
+                    fragment_dict,
+                    err,
+                    err_abs,
+                    essential_signatures
+                )
+            )
+    # remove any duplicates from confirmed fragment list
+    confirmed_fragments = list(set(confirmed_fragments))
+
+    # finally, return list of confirmed fragments
+    return confirmed_fragments
 
 def find_most_intense_peak_spectrum(
     spectrum
@@ -183,34 +256,34 @@ def find_most_intense_peak_spectrum(
     return most_intense
 
 def find_most_intense_matching_peak(
-    spectrum, 
+    spectrum,
     peak_list,
     err,
     err_abs):
     """
-    takes a list of theoretical peaks associated with a sequence, a spectrum 
-    containing observed peaks and associated intensities, and returns the 
+    takes a list of theoretical peaks associated with a sequence, a spectrum
+    containing observed peaks and associated intensities, and returns the
     intensity of the most intense matching peak
-    
+
     Args:
         spectrum (dict): spectrum dict in mzml ripper dict format
         peak_list (list): list of theoretical m/z values associated with a
-                        sequence 
-        err (float): 
+                        sequence
+        err (float):
         err_abs ([type]): [description]
-    
+
     Returns:
         top_intensity (float): intensity of most intense matching peak
     """
 
     # set top matching intensity to 0; this will be reset if matching peaks
-    # are found with intensity > 0 
-    top_intensity = 0 
+    # are found with intensity > 0
+    top_intensity = 0
 
-    # iterate through theoretical peaks associated with sequence 
+    # iterate through theoretical peaks associated with sequence
     for peak_mass in peak_list:
 
-        # find real peaks in spectrum that match theoretical sequence peak 
+        # find real peaks in spectrum that match theoretical sequence peak
         # mass
         matches = find_target(
             peak_mass,
@@ -219,10 +292,10 @@ def find_most_intense_matching_peak(
             err_abs
         )
 
-        # get intensities of all matching peaks, sorted in ascending order 
+        # get intensities of all matching peaks, sorted in ascending order
         intensities = sorted(
             [
-                float(spectrum[f'{match}']) 
+                float(spectrum[f'{match}'])
                 for match in matches
             ]
         )
@@ -231,5 +304,128 @@ def find_most_intense_matching_peak(
         # intense match; if so, reset top_intensity
         if intensities[-1] > top_intensity:
             top_intensity = intensities[-1]
-    
+
     return top_intensity
+
+def find_maximum_annotated_peak_intensity(
+    spectrum,
+    peak_list,
+    err,
+    err_abs
+):
+    """
+    Searches a spectrum in mzml ripper dict format for peaks (m/z values) in
+    a peak list and returns % intensity of most intense matching peak relative
+    to most intense peak in the spectrum
+
+    Args:
+        spectrum (dict): spectrum dict in mzml ripper format
+        peak_list (list of floats): list of peaks (m/z values), typically peaks
+                    associated with a target sequence
+        err (float): error tolerance in matching peak masses - can be in
+                    absolute mass units or ppm
+        err_abs (bool): specifies whether err units are in absolute mass units
+                    or ppm; if True, units = absolute mass units
+
+    Returns:
+        float: maximum annotated peak intensity in % of most intense peak
+    """
+
+    # find intensity of most intense peak in spectrum
+    most_intense_peak = find_most_intense_peak_spectrum(spectrum)[-1]
+
+    # find intensity of most intense spectrum peak that matches something in
+    # the peak list
+    most_intense_matching_peak = find_most_intense_matching_peak(
+        spectrum,
+        peak_list,
+        err,
+        err_abs
+    )
+
+    # return maximum annotated peak intensity in % of most intense peak in
+    # spectrum
+    if most_intense_matching_peak > 0:
+        return (most_intense_matching_peak/most_intense_peak) * 100
+    else:
+        return 0
+
+def find_fragments_spectrum(
+    spectrum,
+    fragment_dict,
+    err,
+    err_abs,
+    essential_signatures=[]
+):
+    """
+    Takes an MS2 / MSn fragment dict, MS2 / MSn spectrum and returns list of
+    fragments with matching ions in the spectrum
+
+    Args:
+        spectrum (dict): spectrum dict in mzml ripper format
+        fragment_dict (dict): fragment dictionary in standard insilico format
+        err (float): error tolerance for matching fragment masses; units can
+                    either be absolute mass units or ppm
+        err_abs (bool): specifies whether err units are in absolute mass
+                    units or ppm; if True, err is in absolute mass units
+        essential_signtures (list): list of signature fragment ids that must
+                    be found in spectrum if any fragments are to be confirmed
+                    from said spectrum (defaults to [])
+
+    Returns:
+        confirmed_fragments (list of strings): list of fragment ids from
+                    input fragment_dict that have one or more matching masses
+                    in the spectrum
+    """
+    # initiate list to store confirmed fragments
+    confirmed_fragments = []
+
+    # retrieve masses from spectrum
+    spectrum_masses = [float(mass) for mass in spectrum['mass_list']]
+
+    # iterate through SIGNATURE FRAGMENTS
+    for signature, signature_masses in fragment_dict['signatures'].items():
+
+        # retrieve masses in spectrum that match fragment target masses
+        matches = find_multiple_targets(
+            signature_masses,
+            spectrum_masses,
+            err,
+            err_abs
+        )
+
+        # if any spectrum masses are a match for fragment masses, add
+        # fragment id to list of confirmed fragments
+        if matches:
+            confirmed_fragments.append(signature)
+
+    # check whether there are any essential signatures, i.e. signatures that
+    # MUST be found in the spectrum for fragments to be confirmed
+    if essential_signatures:
+
+        # if any essential signatures are not found, return empty list of
+        # confirmed fragments
+        for signature in essential_signatures:
+            if signature not in confirmed_fragments:
+                return []
+
+    # iterate through NON-SIGNATURE fragments
+    for fragment, masses in fragment_dict.items():
+        if fragment == 'signatures':
+            pass
+
+        # retrieve masses in spectrum that match fragment target masses
+        matches = find_multiple_targets(
+            masses,
+            spectrum_masses,
+            err,
+            err_abs
+        )
+
+        # if any spectrum masses are a match for fragment masses, add
+        # fragment id to list of confirmed fragments
+        if matches:
+            confirmed_fragments.append(fragment)
+
+    # return list of fragments found in spectrum
+    return confirmed_fragments
