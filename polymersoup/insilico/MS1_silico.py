@@ -275,7 +275,8 @@ def generate_ms1_mass_dictionary_adducts_losses(
     chain_terminators=None,
     universal_rxn=True,
     start_tags=None,
-    end_tags=None
+    end_tags=None,
+    sequencing=True
 ):
 
     # generate neutral mass dictionary of all possible sequences arising from
@@ -284,7 +285,7 @@ def generate_ms1_mass_dictionary_adducts_losses(
         monomers,
         max_length,
         min_length,
-        True,
+        sequencing,
         universal_rxn,
         chain_terminators,
         start_tags,

@@ -31,15 +31,64 @@ def find_target(
         matches (list): list of candidates that match target within specified
                         error
     """
+
+    # check whether err is in absolute mass units or ppm
     if not err_abs:
+
+        # convert err to ppm (if not absolute mass units)
         err = (target*err)*10**-6
 
+    # calculate minimum and maximum range for matching target to candidate
     min_hit, max_hit = target-err, target+err
 
+    # find candidates that match target within error threshold
     matches = filter(
         lambda x: x >= min_hit and x <= max_hit,
         candidates
     )
+
+    # finally, return candidates that match target within error threshold
+    return matches
+
+def find_multiple_targets(
+    targets,
+    candidates,
+    err,
+    err_abs
+):
+    """
+    Takes multiple target masses (m/z values) and returns matches from a list
+    of candidate masses
+
+    Args:
+        targets (list of floats): list of target m/z values
+        candidates (list of floats): list of candidate m/z values to match to
+                    targets
+        err (float): error tolerance for matching targets to target masses;
+                    units can either be in absolute mass units or ppm
+        err_abs (bool): specifies whether err units are absolute mass units
+                    or ppm; if True, units = absolute mass units
+
+    Returns:
+        matches (list of floats): list of candidate masses that match one or
+                    more targets within error threshold specified
+    """
+
+    # initiate list to store candidate masses that match target(s)
+    matches = []
+
+    # iterate through targets and return candidate masses that match target
+    # masses within specified error threshold
+    for target in targets:
+        matches.extend(find_target(
+            target,
+            candidates,
+            err,
+            err_abs
+        ))
+
+    # return list of candidates that match ONE OR MORE target within error
+    # threshold specified
     return matches
 
 def filter_retention_time(
@@ -106,6 +155,7 @@ def filter_parent_ion(
 
     # Iterate through each spectrum
     for key, spectrum in msdict.items():
+
         # Get the parent and all target mass matches
         parent = float(spectrum["parent"])
         ions = [float(ion) for ion in spectrum["mass_list"]]
