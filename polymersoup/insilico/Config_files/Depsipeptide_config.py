@@ -311,7 +311,7 @@ FRAG_SERIES = {
             "neg": -H,
             "exceptions": {
                 "pos": {
-                    "hydroxyA": -OH
+                    "-1": {"hydroxy_A": -OH}
                 }
             }
         },
