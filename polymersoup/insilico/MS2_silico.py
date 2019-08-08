@@ -76,6 +76,15 @@ def build_fragment_series_single_sequence(
     # time
     for i in range(start, len(sequence)-end):
         fragment, sub_sequence = f'{fragment_series}{i+1}', sequence[0:i+1]
+        
+        # HERE: put check for 'exceptions' in frag_info:
+
+        # STEP 1: check for 'exceptions' in FRAG_SERIES[fragment_series]
+        # STEP 2: if 'exceptions', check for mode in FRAG_SERIES[fragment_series]['exceptions']
+        # STEP 3: if 'exceptions' in mode, iterate through termini in mode
+        # STEP 4: for each terminus, check rxn_class of monomer @ that terminus
+        # STEP 5: if monomer's rxn_class in FRAG_SERIES[fragment_series]['exceptions'][mode][terminus]
+        # STEP 6: reset mass_diff 
         fragment_mass = helpers.find_sequence_mass(sub_sequence) + mass_diff
         fragment_dict[fragment] = [float(f'{fragment_mass:.4f}')]
         if losses:

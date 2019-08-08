@@ -28,10 +28,23 @@ NH2 = 16.01872
 CH3CN = 41.02655
 CH3OH = 32.02622
 
+# Solvent Dictionary
+
 SOLVENTS = {
     "H2O": H2O, # water
     "ACN": CH3CN, # acetonitrile
     "MeOH": CH3OH # methanol
+}
+
+# Functional Group Dictionary
+
+FG = {
+    "H2O": H2O, # water
+    "NH3": NH3, # ammonia
+    "H": H, # proton
+    "OH": OH, # hydroxyl group
+    "COOH": COOH, # carboxylic acid group
+    "NH2": NH2, # primary amino group
 }
 
 """

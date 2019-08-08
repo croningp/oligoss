@@ -44,7 +44,8 @@ def return_extractor_parameters(
         extractor_parameters (dict): dictionary of parameters and associated
                     info for data extraction
     """
-    extractor_parameters = read_parameters(parameters_file)["extractor_parameters"]
+    extractor_parameters = read_parameters(parameters_file)[
+        "extractor_parameters"]
 
     return extractor_parameters
 
@@ -62,6 +63,26 @@ def return_postprocess_parameters(
         postprocess_parameters (dict): dictionary of parameters and associated
                     info for sequence confirmation and postprocessing
     """
-    postprocess_parameters = read_parameters(parameters_file)["postprocessing_parameters"]
+    postprocess_parameters = read_parameters(parameters_file)[
+        "postprocessing_parameters"]
 
     return postprocess_parameters
+
+def return_polymer_parameters(
+    parameters_file
+):
+    """
+    [summary]
+    
+    Args:
+        parameters_file ([type]): [description]
+    
+    Returns:
+        [type]: [description]
+    """
+    polymer_config_file = open_json(parameters_file)[
+        "directories"]["polymer_config_file"]
+
+    polymer_config_dict = open_json(polymer_config_file)
+
+    return polymer_config_dict
