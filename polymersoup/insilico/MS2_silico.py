@@ -590,6 +590,7 @@ def generate_unique_fragment_ms2_massdict(massdict):
                 where 'frag_1', 'frag_2' = fragment string ids for fragments
                 that are unique to sequence
     """
+
     # generate dictionary of isobaric sets in format:
     #       {
     #           sorted(seq): [seqs]

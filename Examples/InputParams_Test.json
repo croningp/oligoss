@@ -17,8 +17,8 @@
         "add_modifications": false,
 
         "MS1": {
-            "monomers": ["H", "S", "F", "L"],
-            "max_length": 9,
+            "monomers": ["H", "G", "S", "L"],
+            "max_length": 10,
             "ms1_adducts": ["H"],
             "min_z": 1,
             "max_z": null,
@@ -30,7 +30,7 @@
             "universal_rxn": true,
             "terminal_tags": {
                 "0": null,
-                "-1": ["F"]
+                "-1": null
             }
         },
 
@@ -60,13 +60,19 @@
 "extractor_parameters":
     {   "error": 0.01,
         "err_abs": true,
-        "min_ms2_peak_abundance": 100,
+        "min_ms2_peak_abundance": 90,
         "pre_run_filter": true,
+        
+        "min_MS1_total_intensity": null,
+        "min_MS2_total_intensity": null,
+        "min_MS1_max_intensity": 1E6,
+        "min_MS2_max_intensity": null,
         
         "pre_screen_filters": {
             "min_rt": 0,
-            "max_rt": 50,
+            "max_rt": 35,
             "essential_signatures": null,
+            "signature_types": ["Im"],
             "signature_ms_level": 2,
             "massdiff_bins": true,
             "ms2_precursors": null,
@@ -87,18 +93,20 @@
     {   "exclude_frags": null,
         "optional_core_frags": ["b1"],
         "core_linear_series": ["b", "y"],
+        "excluded_fragments": null,
         "dominant_signature_cap": 70,
-        "subsequence_coverage": true,
-        "subsequence_weight": 0.5,
+        "essential_fragments": null,
+        "subsequence_weight": 0.0,
         "min_rt": null,
-        "max_rt": null
+        "max_rt": null,
+        "min_viable_confidence": 55
     },
 
 "directories":
     {   "ripper_folder": "C:/Users/group/polymermassspec/Examples/ripper_jsons",
         "postprocessing_outputdir": null,
         "insilico_output_folder": null,
-        "polymer_config_file": ""
+        "polymer_config": "C:/Users/group/polymermassspec/polymersoup/insilico/Config_files/Depsipeptide_config.py"
     }
 
 }
