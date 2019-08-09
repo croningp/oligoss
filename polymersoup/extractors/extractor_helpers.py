@@ -7,7 +7,9 @@ Criteria are:
     5.) Maximum intensity
 
 .. moduleauthor:: Graham Keenan 2019
+.. moduleauthor:: David Doran 2019
 """
+import time
 
 def find_target(
     target,
@@ -32,6 +34,11 @@ def find_target(
                         error
     """
 
+    # ensure everything is a float
+    target = float(target)
+    candidates = [float(candidate) for candidate in candidates]
+    err = float(err)
+
     # check whether err is in absolute mass units or ppm
     if not err_abs:
 
@@ -42,10 +49,10 @@ def find_target(
     min_hit, max_hit = target-err, target+err
 
     # find candidates that match target within error threshold
-    matches = filter(
+    matches = list(filter(
         lambda x: x >= min_hit and x <= max_hit,
         candidates
-    )
+    ))
 
     # finally, return candidates that match target within error threshold
     return matches
@@ -89,7 +96,40 @@ def find_multiple_targets(
 
     # return list of candidates that match ONE OR MORE target within error
     # threshold specified
+
     return matches
+
+def sum_intensity_targets_spectrum(
+    spectrum_dict,
+    found_targets
+):
+    """
+    This function takes a spectrum, a list of ions confirmed to be present
+    in that spectrum, and returns the combined intensity / abundance of those
+    ions in the spectrum
+
+    Args:
+        spectrum_dict (dict): single spectrum dict in mzml ripper format
+        found_targets (list of floats): list of ion m/z values that have been
+            found in the spectrum
+
+    Returns:
+        intensity (float): combined intensity / abundance of all found_targets
+    """
+    intensity = 0
+
+    # ion m/z keys in spectrum_dict are strings of four point floats
+    # floats may have been trimmed to one or two decimal places; so will not
+    # be found in dict - this is accounted for and fixed if necessary
+    for found_target in found_targets:
+        try:
+            intensity += float(spectrum_dict[f'{found_target}'])
+        except KeyError:
+            found_target = str(found_target) + '0000'
+            found_target = found_target[0:found_target.find('.')+5]
+            intensity += float(spectrum_dict[f'{found_target}'])
+
+    return intensity
 
 def filter_retention_time(
         msdata: dict,
@@ -144,7 +184,6 @@ def filter_parent_ion(
     Returns:
         dict: Spectra which pass the filter
     """
-
     # dict for filtered spectra
     filtered = {}
 
@@ -156,19 +195,22 @@ def filter_parent_ion(
     # Iterate through each spectrum
     for key, spectrum in msdict.items():
 
-        # Get the parent and all target mass matches
-        parent = float(spectrum["parent"])
-        ions = [float(ion) for ion in spectrum["mass_list"]]
-        found_parent = find_target(parent, ions, err, err_abs)
+        try:
+            # Get the parent and all target mass matches
+            parent = float(spectrum["parent"])
+            ions = [float(ion) for ion in spectrum["mass_list"]]
+            found_parent = find_target(parent, ions, err, err_abs)
+        except KeyError:
+            print(f'spectrum keys = {spectrum.keys()}')
 
         # If any matches are found, add the spectrum
         if found_parent:
             filtered[key] = spectrum
 
-    msdict[f'ms{ms_level}'] = filtered
+    msdata[f'ms{ms_level}'] = filtered
 
     # Return spectra sorted by parent
-    return msdict
+    return msdata
 
 def filter_signature_ions(
         msdata: dict,
@@ -204,10 +246,10 @@ def filter_signature_ions(
         # Check if signature ions are present
         found_ions = [
             ion for ion in sig_ions if find_target(
-                ion,
-                mass_list,
-                err,
-                err_abs)
+                target=ion,
+                candidates=mass_list,
+                err=err,
+                err_abs=err_abs)
         ]
 
         # If any matches are found, add to list
@@ -454,7 +496,6 @@ def apply_pre_screening_filters(
             or ppm
     """
     # check for min, max rt and apply filter
-    print(f'min, max rt = {min_rt}, {max_rt}')
     if not min_rt and not max_rt:
         ripper_dict = ripper_dict
         print('ripper dict not filtered by retention time')
@@ -463,7 +504,10 @@ def apply_pre_screening_filters(
             min_rt = 0
         if not max_rt:
             max_rt = math.inf
-        ripper_dict = filter_retention_time(ripper_dict, [min_rt, max_rt])
+        ripper_dict = filter_retention_time(
+            msdata=ripper_dict,
+            ret_time_range=[min_rt, max_rt]
+        )
 
     # check for essential signatures; if any are specified, filter out
     # spectra that do not contain these signatures at specified ms level

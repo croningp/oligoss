@@ -106,7 +106,7 @@ def generate_MSMS_sequence_dict(
         full_MSMS_dict[sequence] = {
             'MS1': MS1[sequence],
             'MS2': MS2[sequence]
-            }
+        }
 
     full_MSMS_dict = add_peak_lists_massdict(full_MSMS_dict)
 
@@ -123,67 +123,209 @@ def generate_MSMS_sequence_dict(
 
     return full_MSMS_dict
 
-generate_MSMS_sequence_dict()
 
 def generate_MS1_compositional_dict(
     silico_parameters
 ):
+    """
+    This function generates a dictionary of compositions (not sequences) and
+    associated MS1 ions for all possible compositions that can arise from
+    constraints specified in input parameters .json file
 
-    # check if silico_parameters is provided as a file path to input parameters
-    # .json file or already opened as a dict; if file path, open as dict
-    if type(silico_parameters) == str:
-        silico_parameters = open_json(silico_parameters)['silico_parameters']
+    Args:
+        silico_parameters (dict): dictionary of in silico parameters passed on
+            from input parameters .json file
 
-    # load starting monomers
-    monomers = silico_parameters['MS1']['monomers']
+    Returns:
+        MS1_dict (dict): dictionary of compositions and their corresponding
+            MS1 m/z values in format : {composition: [m/z...]...}
+    """
 
-    # load minimum and maximum sequence length
-    min_length = silico_parameters['MS1']['min_length']
-    max_length = silico_parameters['MS1']['max_length']
+    # load MS1 in silico parameters
+    ms1_params = silico_parameters["MS1"]
 
-    # load mass spec mode - either pos or neg
-    mode = silico_parameters['mode']
-
-    # load MS1 adducts
-    adducts = silico_parameters['MS1']['ms1_adducts']
-
-    # load minimum and maximum MS1 charge state for sequences
-    min_z = silico_parameters['MS1']['min_z']
-    max_z = silico_parameters['MS1']['max_z']
-
-    # check whether side chain-specific neutral loss products are to be
-    # included in MS1 compositional info, the maximum number of such losses
-    # allowed per sequence, and any associated adducts
-    losses = silico_parameters['MS1']['losses']
-    max_neutral_losses = silico_parameters['MS1']['max_neutral_losses']
-    loss_products_adducts = silico_parameters['MS1']['loss_products_adducts']
-
-    # find out whether all monomers are universally cross-reactive
-    universal_rxn = silico_parameters['MS1']['universal_rxn']
-
-    # list any monomers that terminate elongation
-    chain_terminators = silico_parameters['MS1']['chain_terminators']
-
-    # retrieve any tags to add on to termini
-    terminal_tags = silico_parameters['MS1']['terminal_tags']
-    start_tags = terminal_tags['0']
-    end_tags = terminal_tags['-1']
-
+    # pass on MS1 silico parameters to MS1_Silico.py function to create the
+    # composition MS1 dictionary
     MS1_dict = generate_ms1_mass_dictionary_adducts_losses(
-        monomers,
-        max_length,
-        adducts,
-        mode,
-        min_z,
-        max_z,
-        losses,
-        max_neutral_losses,
-        loss_products_adducts,
-        min_length,
-        chain_terminators,
-        start_tags,
-        end_tags,
+        monomers=ms1_params["monomers"],
+        max_length=ms1_params["max_length"],
+        adducts=ms1_params["ms1_adducts"],
+        mode=silico_parameters["mode"],
+        min_z=ms1_params["min_z"],
+        max_z=ms1_params["max_z"],
+        losses=ms1_params["losses"],
+        max_total_losses=ms1_params["max_neutral_losses"],
+        loss_product_adducts=ms1_params["loss_products_adducts"],
+        min_length=ms1_params["min_length"],
+        chain_terminators=ms1_params["chain_terminators"],
+        start_tags=ms1_params["terminal_tags"]["0"],
+        end_tags=ms1_params["terminal_tags"]["-1"],
         sequencing=False
     )
 
     return MS1_dict
+
+def generate_MSMS_insilico_from_compositions(
+    composition_dict,
+    silico_parameters,
+    uniques=False
+):
+    """
+    This function takes a dictionary of product compositions and associated
+    MS1 ions, and returns a full_MSMS_sequence dictionary containing in silico
+    data for both MS1 ions and MS2 fragments for every possible sequence that
+    matches a composition in the input composition_dict
+
+    Args:
+        composition_dict (dict): dictionary of compositions and corresponding
+            MS1 ion m/z values
+        silico_parameters (dict): dictionary of in silico parameters passed on
+            from input parameters .json file
+        uniques (bool, optional): specifies whether to find unique MS2
+            fragmentsfor each sequence and return these in the final sequence
+            dict.
+            Defaults to False.
+
+    Returns:
+        [type]: [description]
+    """
+    full_MSMS_sequence_dict = {}
+
+    ms1_params = silico_parameters["MS1"]
+    ms2_params = silico_parameters["MS2"]
+
+
+    for composition, MS1_ions in composition_dict.items():
+        monomers = list(set([c for i, c in enumerate(composition)]))
+        sequence_length = len(composition)
+
+        start_tags = ms1_params["terminal_tags"]["0"]
+        end_tags = ms1_params["terminal_tags"]["-1"]
+
+        if start_tags:
+            sequence_length -= 1
+        if end_tags:
+            sequence_length -= 1
+
+        sequences = generate_all_sequences(
+            monomers,
+            max_length=sequence_length,
+            min_length=sequence_length,
+            sequencing=True,
+            chain_terminators=ms1_params["chain_terminators"],
+            start_tags=start_tags,
+            end_tags=end_tags
+        )
+
+        sequences = list(filter(
+            lambda seq: sorted(seq) == sorted(composition),
+            sequences
+        ))
+
+        ms2_dict = generate_ms2_mass_dictionary(
+            sequences=sequences,
+            fragment_series=ms2_params["fragment_series"],
+            adducts=ms2_params["ms2_adducts"],
+            mode=silico_parameters["mode"],
+            add_signatures=ms2_params["add_signatures"],
+            signatures=ms2_params["signatures"],
+            losses=ms2_params["ms2_losses"],
+            max_total_losses=ms2_params["ms2_max_neutral_losses"],
+            loss_product_adducts=ms2_params["ms2_loss_products_adducts"],
+            uniques=False
+        )
+
+        full_MSMS_sequence_dict.update(
+            {sequence: {
+                "MS1": MS1_ions,
+                "MS2": ms2_dict[sequence]
+            }
+            for sequence in ms2_dict
+        })
+
+        full_MSMS_sequence_dict = add_peak_lists_massdict(
+            massdict=full_MSMS_sequence_dict
+        )
+
+    return full_MSMS_sequence_dict
+
+def find_unique_fragments_sequences_fragment_subset(
+    sequence_dict
+):
+    """
+    Takes a dictionary of sequences and associated MS2 fragments, and returns
+    a dictionary of sequences and lists of fragments that are unique to each
+    sequences. This function is to be used to identify unique fragments from
+    subsets of fragments, not full theoretical MSMS in silico sequence dicts.
+    Intended use is for finding unique fragments from fragments that have been
+    confirmed as being associated with sequences by functions in extractors
+    and postprocessing
+
+    Args:
+        sequence_dict (dict): dictionary of sequences and MS2 fragments in
+            format: {
+                seq: {
+                    'frag': [m/z...]
+                }
+                ...
+            }
+        where seq = sequence, 'frag' = fragment id, and m/z = m/z value of
+        fragment ion(s)
+
+    Returns:
+        unique_fragment_dict (dict): dictionary of sequences and associated
+            fragment ids for fragments that are unique to each sequence
+    """
+
+    # iterate through sequence_dict and ensure it is in correct format
+    for sequence, sequence_info in sequence_dict.items():
+
+        if "MS2" in sequence_info.keys():
+            sequence_dict[sequence] = sequence_info["MS2"]
+
+    # group sequences by composition for comparison of isobaric sequences
+    isobaric_sequence_dict = generate_dict_isobaric_sequences(
+        sequence_dict.keys()
+    )
+
+    # initiate dict to store sequences and their unique fragments for output
+    unique_fragment_dict = {}
+
+    # iterate through isobaric sequence dict to access lists of isobaric
+    # sequences, which have the same composition
+    for isobaric_sequences in isobaric_sequence_dict.values():
+
+        # if there is only one sequence of this composition, there is no
+        # need to look for unique fragments
+        if len(isobaric_sequences) == 1:
+            unique_fragment_dict[isobaric_sequences[0]] = []
+            ms2_dict = {}
+
+        else:
+
+            # generate mini ms2 fragment dict for current set of isobaric
+            # sequences
+            ms2_dict = {
+                seq: sequence_dict[seq]
+                for seq in isobaric_sequences
+            }
+
+        # find unique fragments for each sequence in ms2_dict
+        unique_fragment_isobaric_dict = find_unique_fragments_isobaric_set(
+            isobaric_sequence_dict
+        )
+
+        # add sequences and their unique fragments to unique_fragment_dict,
+        # with slight simplification of format compared to dict returned from
+        # unique_fragment_isobaric_dict function
+        unique_fragment_dict.update(
+            {
+                seq: unique_fragment_isobaric_dict[seq]['unique_fragments']
+                for seq in isobaric_sequences
+            }
+        )
+
+    # return dictionary of sequences and lists of unique fragments in format:
+    # {seq: ['unique_frag'...]} where seq = sequence, and 'unique_frag' =
+    # fragment id for fragment that is unique to that sequence
+    return unique_fragment_dict

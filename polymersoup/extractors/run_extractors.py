@@ -8,8 +8,8 @@ from .extractor_helpers import *
 from ..parameter_handlers import *
 
 def pre_filter_rippers(
-    ripper_folder='C:/Users/group/polymermassspec/Examples/ripper_jsons',
-    parameters_file='C:/Users/group/PolymerMassSpec/Examples/InputParams_Test.json'
+    ripper_folder,
+    extractor_parameters
 ):
     """
     Takes a folder containing mzml_ripper jsons, input parameters file for
@@ -17,8 +17,8 @@ def pre_filter_rippers(
 
     Args:
         ripper_folder (str): path to folder containing mzml ripper jsons
-        parameters_file (str): full filepath to input parameters json file.
-        Defaults to 'C:/Users/group/PolymerMassSpec/Examples/InputParams_Test.json'.
+        extractor_parameters (dict): dictionary of extractor parameters passed
+            on from input parameters .json file
     """
     # create directory for output folder, where filtered ripper_jsons will be
     # saved
@@ -29,10 +29,8 @@ def pre_filter_rippers(
         os.mkdir(filter_outputdir)
 
     # retrieve data extractor parameters from parameters file
-    if type(parameters_file) == str:
-        extractor_parameters = return_extractor_parameters(parameters_file)
-    else:
-        extractor_parameters = parameters_file
+    if type(extractor_parameters) == str:
+        extractor_parameters = return_extractor_parameters(extractor_parameters)
 
     # retrieve error tolerance, and check whether units of err are in absolute
     # mass units or ppm
@@ -57,19 +55,14 @@ def pre_filter_rippers(
         # filter ripper_dict according to pre_screening_filters specified
         # in input parameters .json file
         ripper_dict = apply_filter_dict_ripper_json(
-            ripper_dict,
-            filter_parameters
+            ripper_dict=ripper_dict,
+            filter_dict=filter_parameters
         )
 
         # name output file for filtered mass spec data in ripper_dict
         ripper_filename = os.path.basename(ripper_json)
         filtered_json = ripper_filename.replace('.json', '_PRE_FILTERED.json')
         filtered_json = os.path.join(filter_outputdir, filtered_json)
-
-        first_spectrum_dict = {}
-
-        first_spectrum_json = filtered_json.replace('_PRE_FILTERED', '1spectr')
-        write_to_json(first_spectrum_dict, first_spectrum_json)
 
         # finally, write the filtered dict to file
         print(f'writing ripper_dict to {filtered_json}')
@@ -101,18 +94,6 @@ def apply_filter_dict_ripper_json(
     if type(ripper_dict) == str:
         ripper_dict = open_json(ripper_dict)
 
-    # extract filter parameters for passing on to later functions
-    min_rt = filter_dict['min_rt']
-    max_rt = filter_dict['max_rt']
-
-    # check for essential signatures - spectra at signature_ms_level that do
-    # not contain these signature peaks will be removed from ripper_dict
-    essential_sigs = filter_dict['essential_signatures']
-    signature_ms_level = filter_dict['signature_ms_level']
-
-    # retrieve any ms2 precursors to be applied to filter
-    ms2_precursors = filter_dict['ms2_precursors']
-
     # THIS IS HACKY - CHANGE IT ASAP SO THAT PRECURSORS
     # AND PRECURSOR MS LEVELS ARE READ IN AS DICT
     precursor_ms_level = 2
@@ -133,19 +114,19 @@ def apply_filter_dict_ripper_json(
     # return filtered ripper_dict with spectra not meeting filter criteria
     # removed
     ripper_dict = apply_pre_screening_filters(
-        ripper_dict,
-        min_rt,
-        max_rt,
-        essential_sigs,
-        signature_ms_level,
-        ms2_precursors,
-        precursor_ms_level,
-        min_MS1_total_intensity,
-        min_MS2_total_intensity,
-        min_MS1_max_intensity,
-        min_MS2_max_intensity,
-        err,
-        err_abs
+        ripper_dict=ripper_dict,
+        min_rt=filter_dict['min_rt'],
+        max_rt=filter_dict['max_rt'],
+        essential_signatures=filter_dict['essential_signatures'],
+        signature_ms_level=filter_dict['signature_ms_level'],
+        precursor_ions=filter_dict['ms2_precursors'],
+        precursor_ion_ms_level=precursor_ms_level,
+        min_MS1_total_intensity=min_MS1_total_intensity,
+        min_MS2_total_intensity=min_MS2_total_intensity,
+        min_MS1_max_intensity=min_MS1_max_intensity,
+        min_MS2_max_intensity=min_MS2_max_intensity,
+        err=err,
+        err_abs=err_abs
     )
 
     return ripper_dict

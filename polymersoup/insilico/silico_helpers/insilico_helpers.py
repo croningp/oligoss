@@ -7,6 +7,7 @@ from ..Config_files.Depsipeptide_config import *
 from ..Config_files.Peptide_Acylations_config import *
 import copy
 import time
+import itertools
 
 def find_sequence_mass(
     sequence,
@@ -23,10 +24,15 @@ def find_sequence_mass(
     Returns:
         sequence_mass {float} -- [neutral monoisotopic mass of input sequence]
     """
+
+    # calculate sequence mass by summing the mass of its constituent monomers,
+    # subtracting the monomer addition MASS_DIFF for every monomer addition
     sequence_mass = sum([MONOMERS[c][0] for i, c in enumerate(sequence)])
     sequence_mass -= (len(sequence)-1)*MASS_DIFF
+
+    # check whether sequence mass is to be trimmed to four decimal places
     if four_point_float:
-        sequence_mass = float(f"{sequence_mass:.4f}")
+        sequence_mass = round(sequence_mass, 4)
     return sequence_mass
 
 def add_adducts_sequence_mass(
@@ -233,22 +239,39 @@ def generate_all_sequences(
         sequences {list} -- [list of possible sequences that could arise from
                             input monomers within the constraints set]
     """
+
+    # copy monomers list for combinatorial addition of monomers to elongating
+    # sequences
     sequences = copy.deepcopy(monomers)
+
+    # start building sequences of length i+1 for whole range of i
     for i in range(0,max_length-1):
+
+        # build new sequences of length i+1 by adding monomers on to pre-made
+        # sequences of length i
         for monomer in monomers:
             sequences.extend(
                 [seq+monomer for seq in sequences
                 if len(seq) == i +1])
+
+    # check whether sequencing or just compositional dict is required; if
+    # not sequencing, return compositions
     if not sequencing:
         sequences = ["".join(sorted(seq)) for seq in sequences]
+
+    # remove duplicate sequences and / or compositions
     sequences = list(set(sequences))
 
+    # check for chain terminating monomers; if present, remove sequences that
+    # can only be produced by elongating past position of terminating monomers
     if chain_terminators:
         sequences = [
             seq for seq in sequences
             if (seq[0] in chain_terminators
             or seq[-1] in chain_terminators)
         ]
+
+    # check for 0 terminal tags to add to sequences; add if specified
     if start_tags:
         tagged_seqs = []
         for start_tag in start_tags:
@@ -258,6 +281,7 @@ def generate_all_sequences(
                 )
         sequences = tagged_seqs
 
+    # check for -1 terminal tags to add to sequences; add if specified
     if end_tags:
         tagged_seqs = []
         for end_tag in end_tags:
@@ -267,12 +291,18 @@ def generate_all_sequences(
                 )
 
         sequences = tagged_seqs
+
+    # again, check whether to return sequences or just compositions
     if not sequencing:
         sequences = list(set(["".join(sorted(seq)) for seq in sequences]))
 
+    # remove sequences and / or compositions that do not exceed minimum
+    # sequence length threshold specified
     sequences = [seq for seq in sequences if len(seq) >= min_length]
 
+    # return list of sequences and / or compositions
     return sequences
+
 
 def generate_all_sequences_rxn_classes(monomers):
     """
@@ -348,7 +378,6 @@ def add_sidechain_neutral_loss_products_sequence(
 
         # iterate through associated side chain losses for monomer and subtract
         # from sequence masses
-
         for loss in loss_monomers[monomer]:
             for i in range(1, occurence+1):
                 neutral_loss = loss*i
@@ -417,6 +446,7 @@ def generate_reading_frames_sequence(sequence):
     # one by one, generate reading frames and check if they are unique (i.e.
     # not yet in reading_frames list); if so, add to list of reading frames
     for i in range(0, len(sequence)+1):
+
         # take last monomer in sequence (sequence[-1]) and make it the first
         # monomer
         sequence = sequence[-1] + sequence[0:len(sequence)-1]
@@ -442,6 +472,7 @@ def generate_dict_isobaric_sequences(sequences):
         )
     )
     print(f'organising {len(sequences)} sequences into {len(sorted_sequences)} isobaric groups')
+
     # generate dictionary of sequence compositions (key = sorted sequences)
     # and lists of sequences matching those compositions (value = sequence list)
     isobaric_dict = {
@@ -473,7 +504,7 @@ def add_peak_lists_massdict(massdict):
     # initiate output dict to store dictionary to be returned
     output_dict = {}
 
-    # iterat through sequences  and subdicts in input massdict
+    # iterate through sequences  and subdicts in input massdict
     for sequence, subdict in massdict.items():
 
         # initiate list to store all MS1 and MS2 ions associated with sequence
