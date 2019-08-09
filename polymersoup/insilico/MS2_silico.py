@@ -34,23 +34,26 @@ def build_fragment_series_single_sequence(
         fragment_dict -- dictionary of fragments and corresponding m/z
                             values
     """
+    # define frag_info (makes nested dictionary navigation more readable)
+    frag_info = FRAG_SERIES[fragment_series]
+    
     # get fragment terminus (i.e. end of sequence fragment series starts from)
-    terminus = FRAG_SERIES[fragment_series]['terminus']
+    terminus = frag_info['terminus']
 
     # get fragment mass diff (i.e. mass difference between fragments and
     # equivalent sub-sequences)
-    mass_diff = FRAG_SERIES[fragment_series]['mass_diff'][mode]
+    mass_diff = frag_info['mass_diff'][mode]
     if not mass_diff:
         print(f'{fragment_series} fragment series does not exist for {mode} mode')
         return {}
 
     # get fragment series starting position along linear polymer (i.e. number
     # of residues from terminus to start building fragment series)
-    start = FRAG_SERIES[fragment_series]['start']
+    start = frag_info['start']
 
     # get fragment series ending position along linear polymer (i.e. number of
     # residues from terminus to stop building fragment series)
-    end = FRAG_SERIES[fragment_series]['end']
+    end = frag_info['end']
 
     # fragment series begins at last residue, reverse the sequence before
     # building the series (e.g. peptide 'y' fragments)
@@ -77,15 +80,18 @@ def build_fragment_series_single_sequence(
     for i in range(start, len(sequence)-end):
         fragment, sub_sequence = f'{fragment_series}{i+1}', sequence[0:i+1]
         
-        # HERE: put check for 'exceptions' in frag_info:
+        # check for 'exceptions' in frag_info
+        exception = ms2_fragment_exceptions(
+            frag_info=frag_info,
+            sub_sequence=sub_sequence,
+            mode=mode
+        )
+        
+        # if 'exceptions', reset mass difference to the value of the 'exception'
+        if exception:
+            mass_diff = exception
 
-        # STEP 1: check for 'exceptions' in FRAG_SERIES[fragment_series]
-        # STEP 2: if 'exceptions', check for mode in FRAG_SERIES[fragment_series]['exceptions']
-        # STEP 3: if 'exceptions' in mode, iterate through termini in mode
-        # STEP 4: for each terminus, check rxn_class of monomer @ that terminus
-        # STEP 5: if monomer's rxn_class in FRAG_SERIES[fragment_series]['exceptions'][mode][terminus]
-        # STEP 6: reset mass_diff 
-        fragment_mass = find_sequence_mass(sub_sequence) + mass_diff
+        fragment_mass = helpers.find_sequence_mass(sub_sequence) + mass_diff
         fragment_dict[fragment] = [float(f'{fragment_mass:.4f}')]
         if losses:
             loss_fragment_dict[fragment] = add_sidechain_neutral_loss_products_sequence(
@@ -117,6 +123,56 @@ def build_fragment_series_single_sequence(
 
     # finally, return MS2 fragment dictionary
     return fragment_dict
+
+def ms2_fragment_exceptions(frag_info, sub_sequence, mode):
+
+    """ This function checks if there are any monomers in the sub_sequence
+    that require 'exceptions' during the MS2 fragment building.
+
+    Required for some fragment series e.g. peptide y-series for hydroxy acids
+    that change sub_sequence mass_diff and / or intrinsic ion depending on 
+    functional group / reactivity class of terminating / initiating monomer.
+    
+    Arguments:
+        frag_info {string} -- location of fragment information
+        sub_sequence -- fragment currently being checked for exceptions
+            (from build_fragment_series_single_sequence)
+        mode {str} -- specifies whether fragmented species are cationic or
+                anionic, use 'pos' for cations and 'neg' for anions
+                (default: {'pos'})
+
+    Returns:
+        'frag_info['exceptions'][mode][exception_groups[0]]' -- list
+        of groups that require different MS2 fragment building (exceptions).
+    """
+    # check for 'exceptions' in frag_info
+    if 'exceptions' in frag_info:
+
+    # check for mode in frag_info['exceptions']
+        if mode in frag_info['exceptions']: 
+
+            # iterate through termini in mode
+            for terminus in frag_info['exceptions'][mode]:
+
+                # define terminus in which exception applies
+                terminal_pos = int(terminus)
+
+                # identify the residue at that terminus in the sub_sequence
+                # and find the functional groups present
+                residue = sub_sequence[terminal_pos]
+                func_groups = find_functional_groups_monomer(residue)
+                
+                # create a list of exceptions groups in the residue
+                exception_groups = [
+                    group for group in func_groups
+                    if group in frag_info['exceptions'][mode]
+                ]
+                # if there is an exception_group list, return
+                if exception_groups:
+                    return frag_info['exceptions'][mode][exception_groups[0]]
+                else:
+                    return None
+      
 
 def load_fragment_exceptions(
     sequences,
@@ -313,11 +369,11 @@ def add_adducts_ms2_fragments(
             for mass in masses:
                 mass -= intrinsic_adduct
                 adduct_masses.extend(add_adducts_sequence_mass(
-                    mass,
-                    adducts,
-                    1,
-                    1,
-                    mode))
+                    neutral_mass=mass,
+                    adducts=adducts,
+                    min_z=1,
+                    max_z=1,
+                    mode=mode))
 
             # if standard fragments (i.e. with unchanged input masses) are to
             # be returned, include these in output adduct_masses list

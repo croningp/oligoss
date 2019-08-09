@@ -108,6 +108,26 @@ def add_adducts_sequence_mass(
                 [float(f"{mass:0.4f}")
                 for mass in charged_sequence_masses])))
 
+def find_functional_groups_monomer(
+    monomer
+):
+    """ This function returns the functional groups present in a monomer
+    
+    Arguments:
+        monomer {string} -- One letter monomer code that has associated neutral
+        monoisotopic mass, list of functional groups with their associated 
+        frequency per monomer.
+    
+    Returns:
+        func_groups -- List of functional groups present in the monomer.
+    """
+    
+    monomer_info = MONOMERS[monomer]
+
+    func_groups = [lambda x: x[0] for x in monomer_info[1]]
+    
+    return func_groups
+
 def add_adduct_complexes_sequence_mass(
     sequence,
     neutral_mass,
