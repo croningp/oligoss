@@ -43,8 +43,9 @@ def find_target(
     if not err_abs:
 
         # convert err to ppm (if not absolute mass units)
+        print(f'absolute error threshold for {err} ppm with target {target}:')
         err = (target*err)*10**-6
-
+        print(f'{err} amu')
     # calculate minimum and maximum range for matching target to candidate
     min_hit, max_hit = target-err, target+err
 
@@ -184,33 +185,39 @@ def filter_parent_ion(
     Returns:
         dict: Spectra which pass the filter
     """
-    # dict for filtered spectra
-    filtered = {}
 
     if ms_level < 2:
         raise Exception(f'ms_level for parent ion filter must be 2 or greater, current ms_level set to {ms_level}')
 
-    msdict = msdata[f'ms{ms_level}']
+    # initialise dict to store filtered spectra, keeping all spectra at
+    # ms levels not selected for filtering
+    filtered_dict = {
+        ms : msdata[ms]
+        for ms in msdata
+        if ms != ms_level
+    }
+    filtered_dict.update({f'ms{ms_level}': {} })
 
     # Iterate through each spectrum
-    for key, spectrum in msdict.items():
+    for key, spectrum in msdata[f'ms{ms_level}'].items():
 
-        try:
-            # Get the parent and all target mass matches
-            parent = float(spectrum["parent"])
-            ions = [float(ion) for ion in spectrum["mass_list"]]
-            found_parent = find_target(parent, ions, err, err_abs)
-        except KeyError:
-            print(f'spectrum keys = {spectrum.keys()}')
+        # Get the parent and all target mass matches
+        parent = float(spectrum["parent"])
+
+        found_parents = find_multiple_targets(
+            targets=parent_ions,
+            candidates=[parent],
+            err=err,
+            err_abs=err_abs
+        )
 
         # If any matches are found, add the spectrum
-        if found_parent:
-            filtered[key] = spectrum
+        if found_parents:
+            filtered_dict[f'ms{ms_level}'][key] = spectrum
 
-    msdata[f'ms{ms_level}'] = filtered
-
+    # if a so much as smell the hints of a deep copy, al slit yer throat
     # Return spectra sorted by parent
-    return msdata
+    return filtered_dict
 
 def filter_signature_ions(
         msdata: dict,
@@ -571,7 +578,6 @@ def apply_pre_screening_filters(
     if min_MS2_max_intensity:
         if min_MS2_max_intensity < 1:
             min_MS2_max_intensity = min_MS2_max_intensity*min_MS1_max_intensity
-            print(f'min MS2 max intensity = {min_MS2_max_intensity}')
         ripper_dict = filter_max_intensity(
             ripper_dict,
             min_MS2_max_intensity,

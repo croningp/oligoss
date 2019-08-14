@@ -47,10 +47,84 @@ def assign_confidence_sequences(
     return confidence_dict
 
 def find_Rt_I_sequences(
-    sequence_EIC_dict,
-    postprocess_parameters,
-    isobaric_assignment=False
+    MS1_EICs,
+    MS2_EICs,
+    confident_assignments,
+    postprocess_parameters
 ):
+    """
+    Takes dicts of MS1 and MS2 EICs, confidently assigned sequences, and fits
+    a retention time and intensity to each confidently assigned sequence
+
+    Args:
+        MS1_EICs (dict): dictionary of COMPOSITIONS and corresponding MS1 EICs
+        MS2_EICs (dict): dictionary of SEQUENCES and corresponding MS2 EICs
+        confident_assignments (dict): dictionary of sequences and their
+            in silico MS1 and MS2 data for sequences that have been confirmed
+            with high confidence
+        postprocess_parameters (dict): dictionary of postprocess parameters
+            passed on from input parameters .json file
+
+    Raises:
+        Exception: [description]
+
+    Returns:
+        [type]: [description]
+    """
+    compositions = {}
+
+    for sequence in confident_assignments:
+        composition = "".join(sorted(sequence))
+
+        if composition not in compositions:
+            compositions[composition] = [sequence]
+
+        else:
+            compositions[composition].append(sequence)
+
+        if composition not in MS1_EICs:
+            raise Exception(f'something has gone wrong with {sequence}')
 
 
-    pass
+    final_Rt_Is = {}
+
+    for seq in MS2_EICs:
+        seq_Rt_I = get_Rt_I_from_ms2_EIC(
+            MS1_EIC = MS1_EICs["".join(sorted(seq))],
+            MS2_EIC=MS2_EICs[seq],
+            ms2_Rt_bin=postprocess_parameters["ms2_Rt_bin"],
+            flexible_ms2_rt=postprocess_parameters["ms2_Rt_flexible"]
+        )
+        final_Rt_Is[seq] = seq_Rt_I
+
+    for composition in compositions:
+
+        sequences = [
+            seq for seq in compositions[composition]
+            if (seq not in MS2_EICs
+                and seq in confident_assignments)
+        ]
+
+
+        seq_Rt_Is = get_Rt_I_from_ms1_EIC(
+            EIC=MS1_EICs[composition],
+            Rt_bin=postprocess_parameters["Rt_bin"],
+            backup_Rt_bin=postprocess_parameters["backup_Rt_bin"],
+            n_targets=len(sequences),
+            min_relative_intensity=postprocess_parameters[
+                "min_relative_intensity"]
+        )
+
+        print(f'following data points found for {sequences}: {seq_Rt_Is}')
+        for i in range(0, len(seq_Rt_Is)):
+            final_Rt_Is[sequences[i]] = seq_Rt_Is[i]
+
+        final_Rt_Is.update(
+            {
+                seq: ['unassigned', 'unassigned']
+                for seq in sequences
+                if seq not in final_Rt_Is
+            }
+        )
+
+    return final_Rt_Is

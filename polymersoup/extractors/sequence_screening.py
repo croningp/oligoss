@@ -56,7 +56,7 @@ def generate_EIC(
     EIC = []
 
     # iterate through spectra, and list masses found in each spectrum
-    for spectrum, spectrum_info in ripper_dict.items():
+    for spectrum_info in ripper_dict.values():
 
         # convert masses to floats
         masses = [float(mass) for mass in spectrum_info['mass_list']]
@@ -74,7 +74,6 @@ def generate_EIC(
                 err=err,
                 err_abs=err_abs
             )
-
             # if the spectrum parent does not match proposed precursors, the
             # spectrum is not suitable for screening
             if not parent_matches:
@@ -122,12 +121,14 @@ def generate_EIC(
             spectrum_dict=spectrum_info,
             found_targets=matches
         )
-
+        if matches and intensity == 0:
+            raise Exception(f'no intensity found for {matches}')
         # retrieve spectrum's retention time
         retention_time = float(spectrum_info['retention_time'])
 
         # add retention time, intensity as a sublist to EIC
-        EIC.append([retention_time, intensity])
+        if intensity > 0:
+            EIC.append([retention_time, intensity])
 
     # sort EIC by intensity
     # Rt_I = sublists of [retention_time, intensity] in EIC
@@ -228,8 +229,7 @@ def confirm_fragments_sequence(
     """
     # remove spectra at fragmentation ms level that do not have matching
     # precursors
-
-    ripper_dict = filter_parent_ion(
+    filtered_dict = filter_parent_ion(
         msdata=ripper_dict,
         parent_ions=precursors,
         err=err,
@@ -237,13 +237,13 @@ def confirm_fragments_sequence(
         ms_level=ms_level)
 
     # pull out spectra at fragmentation ms level
-    ripper_dict = ripper_dict[f'ms{ms_level}']
+    filtered_dict = filtered_dict[f'ms{ms_level}']
 
     # initiate list to store confirmed fragment ids
     confirmed_fragments = []
 
     # iterate through spectra
-    for spectrum, spectrum_info in ripper_dict.items():
+    for spectrum_info in filtered_dict.values():
 
         # calculate annotated_peak_assignemnt from spectrum, peak_list
         annotated_peak_assignment = find_maximum_annotated_peak_intensity(
@@ -308,6 +308,9 @@ def find_most_intense_peak_spectrum(
 
     # sort peaks by most intense
     masses = sorted(masses, key = lambda x: x[1])
+
+    if type(masses) != list:
+        raise Exception(f'lambda fucked')
 
     if type(masses) != list:
         raise Exception(f'lambda fucked')
@@ -429,7 +432,7 @@ def find_fragments_spectrum(
 ):
     """
     Takes an MS2 / MSn fragment dict, MS2 / MSn spectrum and returns list of
-    fragments with matching ions in the spectrum
+    fragments that have matching ions in the spectrum
 
     Args:
         spectrum (dict): spectrum dict in mzml ripper format
@@ -639,7 +642,6 @@ def extract_MS1(
         else:
             print(f'{sequence} not present at sufficent abundance for EIC')
 
-
     # return dict of found sequences and their corresponding MS1 EICs
     return EIC_dict
 
@@ -647,7 +649,8 @@ def extract_MS2(
     silico_dict,
     extractor_parameters,
     ripper_dict,
-    filter_most_intense=True
+    filter_most_intense=True,
+    extract_uniques=True
 ):
     """
     This function takes a silico MSMS sequence dict and generates MS2 EICs
@@ -670,49 +673,56 @@ def extract_MS2(
     EIC_dict = {}
 
     # retrieve MS2 min max and min total intensities
-    min_max_intensity = extractor_parameters["MS2"][
-        "min_MS2_max_intensity"]
-    min_total_intensity = extractor_parameters["MS2"][
-        "min_MS2_total_intensity"
-    ]
+    min_max_intensity = extractor_parameters["min_MS2_max_intensity"]
+    min_total_intensity = extractor_parameters["min_MS2_total_intensity"]
 
     # work out whether min max and min total MS2 intensities are supplied
     # as absolute intensity thresholds or decimal fractions of MS1 values
     if min_max_intensity and min_max_intensity <= 1:
         min_max_intensity = min_max_intensity*extractor_parameters[
-            "MS1"]["min_MS1_max_intensity"]
+            "min_MS1_max_intensity"]
 
     if min_total_intensity and min_total_intensity <= 1:
         min_total_intensity = min_total_intensity*extractor_parameters[
-            "MS1"]["min_MS1_total_intensity"]
+            "min_MS1_total_intensity"]
 
     # iterate through sequences, generating MS2 EICs for each of their
     # fragments
     for sequence, sequence_info in silico_dict.items():
 
         # retrieve sequence fragment dict
-        fragments = sequence_info["MS2"]
+        if "MS2" in silico_dict[sequence]:
+            fragments = sequence_info["MS2"]
+        else:
+            fragments = sequence_info
 
         # initate empty list for sequence MS2 EIC
         ms2_sequence_EIC = []
 
         # iterate through fragment ion mass lists, generating MS2 EICs for
         # each
-        for masses in fragments.values():
+        for fragment, masses in fragments.items():
 
             # generate EIC for fragment
-            fragment_EIC = generate_EIC(
-                ions=masses,
-                ms_level=2,
-                ripper_dict=ripper_dict,
-                err=extractor_parameters["error"],
-                err_abs=extractor_parameters["err_abs"],
-                min_max_intensity=min_max_intensity,
-                min_total_intensity=min_total_intensity,
-                precursors=sequence_info["MS1"],
-                mapi=extractor_parameters["min_ms2_peak_abundance"],
-                peak_list=sequence_info["peak_list"]
-            )
+            if fragment in sequence_info["unique_fragments"]:
+                fragment_EIC = generate_EIC(
+                    ions=masses,
+                    ms_level=2,
+                    ripper_dict=ripper_dict,
+                    err=extractor_parameters["error"],
+                    err_abs=extractor_parameters["err_abs"],
+                    min_max_intensity=min_max_intensity,
+                    min_total_intensity=min_total_intensity,
+                    precursors=sequence_info["MS1"],
+                    mapi=extractor_parameters["min_ms2_peak_abundance"],
+                    peak_list=sequence_info["peak_list"]
+                )
+                
+                if not fragment_EIC:
+                    raise Exception(f'no EIC found for unique {fragment} for {sequence}')
+
+            else:
+                fragment_EIC = []
 
             # calculate intensity of fragment MS2 EIC
             fragment_intensity = sum(
@@ -734,7 +744,8 @@ def extract_MS2(
                     ms2_sequence_EIC = fragment_EIC
 
         # add sequence and its ms2_sequence_EIC to EIC_dict
-        EIC_dict[sequence] = ms2_sequence_EIC
+        if ms2_sequence_EIC:
+            EIC_dict[sequence] = ms2_sequence_EIC
 
     # return dict of sequences and ms2 EICs
     return EIC_dict

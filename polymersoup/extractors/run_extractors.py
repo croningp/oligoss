@@ -130,15 +130,3 @@ def apply_filter_dict_ripper_json(
     )
 
     return ripper_dict
-
-def extract_MS1(
-    silico_dict,
-    extractor_parameters,
-):
-    err = extractor_parameters["error"]
-    err_abs = extractor_parameters["err_abs"]
-    min_total_intensity = extractor_parameters["min_MS1_total_intensity"]
-    min_max_intensity = extractor_parameters["min_MS1_max_intensity"]
-
-
-    return {}

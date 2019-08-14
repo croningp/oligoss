@@ -70,7 +70,7 @@ def get_subsequence_coverage(
         # sorted in ascending order (e.g. ['y1', 'y3'] becomes [1, 3])
         confirmed_indeces = sorted([
             int(frag[1::])
-            for frag in confirmed_fragments
+            for frag in core_confirmed
             if frag not in excluded_fragments
         ])
 
@@ -126,7 +126,7 @@ def calculate_subsequence_coverage(
         start_fragment = fragment_indeces[i]
 
         # initialse coverage from start_fragment to
-        sub_sequence_length = 0
+        sub_sequence_length = 1
 
         # increment sub_sequence_length as long as there the fragment series
         # is uninterrupted
@@ -187,15 +187,25 @@ def assign_confidence_sequence(
         confidence (float): final confidence assignment (in % )
     """
 
-    # if any essential fragments are missing, restrict confidence assignment
-    # to an upper limit of essential_fragment_cap
+    # initiate list to store missing essential fragments
     missing_essentials = []
 
+    # check that all essential fragments are in in silico fragments
     if essential_fragments:
-        missing_essentials.extend([
+        print(f'essential_fragments = {essential_fragments}')
+        essential_fragments = list(
+            filter(
+                lambda frag: frag in insilico_fragments, essential_fragments
+            )
+        )
+
+    # if any essential fragments are missing, restrict confidence assignment
+    # to an upper limit of essential_fragment_cap
+    if essential_fragments:
+        missing_essentials = [
             frag for frag in essential_fragments
             if frag not in confirmed_fragments
-        ])
+        ]
 
     # default cap on confidence assignment is 100%; only reduce this if
     # essential fragments are missing
@@ -205,10 +215,10 @@ def assign_confidence_sequence(
 
     # add any optional fragments that have not been confirmed to list of
     # fragments to exclude from consideration
-    exclude_fragments.extend([
+    exclude_fragments = [
         frag for frag in optional_fragments
         if frag not in confirmed_fragments
-    ])
+    ]
 
     # remove exclude_fragments from in silico fragments
     insilico_fragments = [
@@ -313,20 +323,216 @@ def trim_EIC(
     # return trimmed EIC
     return EIC
 
-def get_Rt_I_from_EIC(
-    EIC,
-    n_targets=1,
-    min_Rt=None,
-    max_Rt=None,
-    min_absolute_intensity=None,
-    min_relative_intensity=None,
-    Rt_bin=0.2
+def get_Rt_I_binning(
+    target_EIC,
+    target_Rt,
+    Rt_bin
 ):
+    """
+    Takes an EIC, a target retention time and target bin for screening
+    retention time, and returns the most intense Rt_I pair within that bin
+    region
 
-    EIC = trim_EIC(
-        EIC=EIC,
-        min_Rt=min_Rt,
-        max_Rt=max_Rt,
-        min_absolute_intensity=min_absolute_intensity,
+    Args:
+        target_EIC (list of lists): list of Rt_I sublists
+        target_Rt (float): target retention time
+        Rt_bin (float): bin tolerance for returning most intense Rt_I pair -
+            most intense data point within range
+            (target_Rt-Rt_bin, target_Rt+Rt_bin) will be returned
+
+    Returns:
+        Rt_I: Rt_I pair for most intense data point within Rt_bin
+    """
+    # remove data points that do not fit within Rt_bin
+    working_EIC = list(
+        filter(
+            lambda Rt_I: abs(Rt_I[0]-Rt_bin) >= target_Rt,
+            target_EIC
+        )
+    )
+
+    # if any data is left, return most intense data point
+    if working_EIC:
+        working_EIC = sorted(
+            working_EIC, key=lambda Rt_I: Rt_I[1]
+        )
+        return working_EIC[-1]
+
+    # return nothing if no data survives Rt_bin filter
+    return []
+
+def get_Rt_I_from_ms2_EIC(
+    MS1_EIC,
+    MS2_EIC,
+    ms2_Rt_bin,
+    flexible_ms2_rt=True
+):
+    """
+    Takes an MS1 and MS2 EIC for target, and returns Rt_I intensity from MS1
+    by matching MS1 EIC to most intense data point in MS2 EIC
+
+    Args:
+        MS1_EIC (list of lists): list of [Rt, I] sublists for MS1 EIC
+        MS2_EIC (list of lists): list of [Rt, I] sublists for MS2 EIC
+        ms2_Rt_bin (float): specifies retention time tolerance for matching
+            MS2 retention time to MS2 retention time
+        flexible_ms2_rt (bool, optional): specifies whether to widen ms2_Rt_bin
+            until matching MS1 EIC [Rt, I] is found. Defaults to True.
+
+    Raises:
+        Exception: raise Exception if MS1 EIC is empty
+
+    Returns:
+        ms1_Rt_I: MS1 retention time and intensity that most closely matches
+            MS2 data within the constraints set
+    """
+    if len(MS1_EIC) == 0:
+        raise Exception('you have an empty MS1 EIC. This is a very serious problem. It\'s bad, and you should feel bad!')
+
+    # get MS2 EIC retention time
+    ms2_Rt = sorted(
+        MS2_EIC, key=lambda Rt_I: Rt_I[1]
+    )[-1][1]
+
+    # set up working copy of MS1 EIC
+    working_ms1_EIC = MS1_EIC
+
+    # initate empty list to store assigned MS1 Rt_I
+    ms1_Rt_I = []
+
+    # if no flexibility is NOT permitted, return whatever Rt_I data point is
+    # found for one round of screening MS1 EIC
+    if not flexible_ms2_rt:
+        ms1_Rt_I = get_Rt_I_binning(
+            target_EIC=working_ms1_EIC,
+            target_Rt=ms2_Rt,
+            Rt_bin=ms2_Rt_bin
+        )
+
+        return ms1_Rt_I
+
+    # if flexibility is permittd, keep doubling Rt_bin for matching MS1 and MS2
+    # EICs until an Rt_I match is found and returned
+    while not ms1_Rt_I:
+
+        ms1_Rt_I = get_Rt_I_binning(
+            target_EIC=working_ms1_EIC,
+            target_Rt=ms2_Rt,
+            Rt_bin=ms2_Rt_bin
+        )
+
+        ms2_Rt_bin = ms2_Rt_bin*2
+
+    return ms1_Rt_I
+
+def return_peaks_EIC(
+    EIC,
+    n_peaks,
+    Rt_bin,
+    min_relative_intensity=None
+):
+    """
+    Takes an EIC and returns peaks that fit within retention time limit (Rt_bin),
+    starting from most intense peak
+
+    Args:
+        EIC (list of lists): list of [Rt, I] sublists
+        n_peaks (int): number of peaks to return
+        Rt_bin (float): minimum gap between peaks (in retention time)
+        min_relative_intensity (float, optional): minimum intensity of peaks
+            as a DECIMCAL FRACTION OF MOST INTENSE PEAK. Defaults to None.
+
+    Returns:
+        peaks (list of lists): list of [Rt, I] sublists for matching peaks
+    """
+
+    # initiate list to store found peaks
+    peaks = []
+
+    # create working copy of input EIC and sort by intensity
+    working_ms1_EIC = sorted(
+        EIC, key=lambda Rt_I: Rt_I[1]
+    )
+
+    # set minimum relative intensity to 0 if no value has been specified
+    if not min_relative_intensity:
+        min_relative_intensity = 0
+
+    # iterate through EIC for specified number of targets
+    for i in range(0, n_peaks):
+
+        # find most intense peak in EIC, add to peaks
+        peak = working_ms1_EIC[-1]
+        peaks.append(peak)
+
+        # return found peaks if all targets are accounted for
+        if len(peaks) == n_peaks:
+            return peaks
+
+        # remove peaks that are too close to previously found target peaks
+        working_ms1_EIC = list(
+            filter(
+                lambda Rt_I:
+                abs(Rt_I[0]-peak[0]) >= Rt_bin
+                and Rt_I[1] >= min_relative_intensity*peak[-1],
+                working_ms1_EIC
+            )
+        )
+
+        # ensure EIC remains sorted by intensity
+        working_ms1_EIC = sorted(
+            working_ms1_EIC, key=lambda Rt_I: Rt_I[1]
+        )
+
+    # return list of found targets
+    return peaks
+
+def get_Rt_I_from_ms1_EIC(
+    EIC,
+    Rt_bin,
+    backup_Rt_bin=None,
+    n_targets=1,
+    min_relative_intensity=None
+):
+    """
+    Takes an MS1 EIC and returns matching MS1 peaks that match target(s)
+    within constraints set
+    Args:
+        EIC (list of lists): list of [Rt, I] sublists
+        Rt_bin (float): minimum gap between peaks (in retention time)
+        backup_Rt_bin (float, optional): backup to Rt_bin: minimum gap between
+            peaks if Rt_bin is too stringent for data. Defaults to None.
+        n_targets (int, optional): specifies number of target peaks to
+            return. Defaults to 1.
+        min_relative_intensity (float, optional): minimum relative intensity
+            for peaks to be returned expressed as a DECMICAL FRACTION OF MOST
+            INTENSE PEAK IN THE EIC. Defaults to None.
+
+    Returns:
+        found_targets (list of lists): list of [Rt, I] sublists for found peaks
+    """
+    # create working copy of EIC and sort by intensity
+    working_ms1_EIC = sorted(
+        EIC, key=lambda Rt_I: Rt_I[1]
+    )
+
+    # return found targets within standard Rt_bin tolerance
+    found_targets = return_peaks_EIC(
+        EIC=working_ms1_EIC,
+        n_peaks=n_targets,
+        Rt_bin=Rt_bin,
         min_relative_intensity=min_relative_intensity
     )
+
+    # if back-up Rt_bin has been supplied, use this if required
+    if len(found_targets) < n_targets:
+        if backup_Rt_bin:
+            found_targets = return_peaks_EIC(
+                EIC=working_ms1_EIC,
+                n_peaks=n_targets,
+                Rt_bin=backup_Rt_bin,
+                min_relative_intensity=min_relative_intensity
+            )
+
+    # return [Rt, I] sublist of peaks found
+    return found_targets
