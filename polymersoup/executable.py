@@ -18,6 +18,11 @@ def launch_screen(input_parameters_file='C:/Users/group/PolymerMassSpec/Examples
         input_parameters_file (str): full file path to input parameters .json
             file
     """
+
+    if sys.version_info < (3, 6):
+        print("you are running Python version {0}".format(sys.version))
+        raise Exception("this package required Python version 3.6 or later")
+
     # load parameters
     parameters_dict = generate_parameters_dict(input_parameters_file)
 
@@ -66,6 +71,18 @@ def exhaustive_screen(
     # load parameters for postprocessing operations
     postprocess_parameters = parameters_dict["postprocessing_parameters"]
 
+    # load output folder for saving data, create if it does not exist
+    output_folder = directories['output_folder']
+    if not os.path.exists(output_folder):
+        os.mkdir(output_folder)
+
+    write_to_json(
+        write_dict=parameters_dict,
+        output_json=os.path.join(output_folder, 'run_parameters.json')
+    )
+    # load parameters for postprocessing operations
+    postprocess_parameters = parameters_dict["postprocessing_parameters"]
+
     # load parameters for postprocessing operations
     postprocess_parameters = parameters_dict["postprocessing_parameters"]
 
@@ -84,7 +101,7 @@ def exhaustive_screen(
         os.path.join(filtered_ripper_folder, file)
         for file in os.listdir(filtered_ripper_folder)
     ]
-
+    
     # iterate through filtered ripper .json files
     for filtered_ripper in filtered_rippers:
 
@@ -99,7 +116,7 @@ def exhaustive_screen(
             extractor_parameters=extractor_params,
             ripper_dict=ripper_dict
         )
-        
+
         # save MS1 EICs
         write_MS1_EIC_file(
             input_data_file=filtered_ripper,
@@ -149,7 +166,7 @@ def exhaustive_screen(
             confirmed_fragment_dict=confirmed_fragment_dict
         )
 
-        
+
         # assign final confidence scores to all sequences with confirmed
         # fragments
         confidence_scores = assign_confidence_sequences(
@@ -159,6 +176,13 @@ def exhaustive_screen(
         )
         
         # write confidence scores to .json file 
+        write_confidence_assignments(
+            input_data_file=filtered_ripper,
+            output_folder=output_folder,
+            confidence_assignments=confidence_scores
+        )
+
+        # write confidence scores to .json file
         write_confidence_assignments(
             input_data_file=filtered_ripper,
             output_folder=output_folder,
@@ -192,20 +216,20 @@ def exhaustive_screen(
         print(f'These sequences are now being assigned retention times')
 
         # find any unique fragments from confirmed fragments of confidently
-        # assigned sequences, add these to silico dict of high confidence 
-        # sequences 
+        # assigned sequences, add these to silico dict of high confidence
+        # sequences
         unique_fragment_dict = find_unique_fragments_sequence_dict(
             sequence_dict=confident_assignments
         )
 
-        # write unique fragment dict to output .json file 
+        # write unique fragment dict to output .json file
         write_unique_fragment_dict(
             input_data_file=filtered_ripper,
             output_folder=output_folder,
             unique_fragment_dict=unique_fragment_dict
         )
 
-        # get MS2 EICs for sequences with confirmed unique fragments 
+        # get MS2 EICs for sequences with confirmed unique fragments
         MS2_EICs = extract_MS2(
             silico_dict=unique_fragment_dict,
             extractor_parameters=extractor_params,
@@ -235,4 +259,5 @@ def exhaustive_screen(
             output_folder=output_folder,
             final_Rt_I_dict=final_Rt_Is
         )
+
 launch_screen(sys.argv[1])

@@ -209,18 +209,18 @@ def write_MS2_EIC_file(
     MS2_EICs
 ):
     """
-    Writes MS2 EICs to a .json file 
-    
+    Writes MS2 EICs to a .json file
+
     Args:
         input_data_file (str): full file path to mzml ripper data file used to
             generate MS2 EICs
         output_folder (str): path to output folder directory, where data will
             be saved
-        MS2_EICs (dict): dictionary of sequences  and their corresponding 
+        MS2_EICs (dict): dictionary of sequences  and their corresponding
             MS2 EICs
     """
     input_file = os.path.basename(input_data_file).replace(".json", "")
-    
+
     output_file = os.path.join(output_folder, f'{input_file}_MS2_EICs.json')
 
     write_to_json(
@@ -229,7 +229,7 @@ def write_MS2_EIC_file(
     )
 
     print(f'MS2 EICs written to {output_file}')
-    
+
 def write_pre_fragment_screen_sequence_JSON(
     input_data_file,
     output_folder,
