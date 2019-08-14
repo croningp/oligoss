@@ -36,7 +36,7 @@ def build_fragment_series_single_sequence(
     """
     # define frag_info (makes nested dictionary navigation more readable)
     frag_info = FRAG_SERIES[fragment_series]
-    
+
     # get fragment terminus (i.e. end of sequence fragment series starts from)
     terminus = frag_info['terminus']
 
@@ -79,19 +79,19 @@ def build_fragment_series_single_sequence(
     # time
     for i in range(start, len(sequence)-end):
         fragment, sub_sequence = f'{fragment_series}{i+1}', sequence[0:i+1]
-        
+
         # check for 'exceptions' in frag_info
         exception = ms2_fragment_exceptions(
             frag_info=frag_info,
             sub_sequence=sub_sequence,
             mode=mode
         )
-        
+
         # if 'exceptions', reset mass difference to the value of the 'exception'
         if exception:
             mass_diff = exception
 
-        fragment_mass = helpers.find_sequence_mass(sub_sequence) + mass_diff
+        fragment_mass = find_sequence_mass(sub_sequence) + mass_diff
         fragment_dict[fragment] = [float(f'{fragment_mass:.4f}')]
         if losses:
             loss_fragment_dict[fragment] = add_sidechain_neutral_loss_products_sequence(
@@ -130,9 +130,9 @@ def ms2_fragment_exceptions(frag_info, sub_sequence, mode):
     that require 'exceptions' during the MS2 fragment building.
 
     Required for some fragment series e.g. peptide y-series for hydroxy acids
-    that change sub_sequence mass_diff and / or intrinsic ion depending on 
+    that change sub_sequence mass_diff and / or intrinsic ion depending on
     functional group / reactivity class of terminating / initiating monomer.
-    
+
     Arguments:
         frag_info {string} -- location of fragment information
         sub_sequence -- fragment currently being checked for exceptions
@@ -149,7 +149,7 @@ def ms2_fragment_exceptions(frag_info, sub_sequence, mode):
     if 'exceptions' in frag_info:
 
     # check for mode in frag_info['exceptions']
-        if mode in frag_info['exceptions']: 
+        if mode in frag_info['exceptions']:
 
             # iterate through termini in mode
             for terminus in frag_info['exceptions'][mode]:
@@ -161,7 +161,7 @@ def ms2_fragment_exceptions(frag_info, sub_sequence, mode):
                 # and find the functional groups present
                 residue = sub_sequence[terminal_pos]
                 func_groups = find_functional_groups_monomer(residue)
-                
+
                 # create a list of exceptions groups in the residue
                 exception_groups = [
                     group for group in func_groups
@@ -172,7 +172,7 @@ def ms2_fragment_exceptions(frag_info, sub_sequence, mode):
                     return frag_info['exceptions'][mode][exception_groups[0]]
                 else:
                     return None
-      
+
 
 def load_fragment_exceptions(
     sequences,
@@ -538,6 +538,8 @@ def find_unique_fragments_isobaric_set(isobaric_sequencedict):
             if fragment.find('signature') == -1:
                 all_fragment_masses.extend(masses)
 
+    unique_fragment_dict = {}
+
     # iterate through isobaric sequences again
     for sequence in isobaric_sequencedict:
 
@@ -560,10 +562,11 @@ def find_unique_fragments_isobaric_set(isobaric_sequencedict):
                 if mass_count == len(masses):
                     uniques.append(fragment)
 
-        # update sequence dict with unique fragments associated with sequence
-        isobaric_sequencedict[sequence].update({'unique_fragments': uniques})
+        unique_fragment_dict[sequence] = uniques
 
-    return isobaric_sequencedict
+    print(f'unique_fragment_dict ={unique_fragment_dict}')
+    return unique_fragment_dict
+
 
 def generate_unique_fragment_ms2_massdict(massdict):
     """

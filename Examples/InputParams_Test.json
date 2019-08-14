@@ -17,8 +17,8 @@
         "add_modifications": false,
 
         "MS1": {
-            "monomers": ["H", "G", "S", "L"],
-            "max_length": 10,
+            "monomers": ["S", "H", "G", "L"],
+            "max_length": 3,
             "ms1_adducts": ["H"],
             "min_z": 1,
             "max_z": null,
@@ -43,18 +43,10 @@
             "add_signatures": true,
             "signatures": null,
             "min_z": 1,
-            "max_z": 1,
-            "uniques": true
-        }
-    },
+            "max_z": 1
+        },
 
-"modifications": {
-    "sidechain_modifications": [],
-    "terminal_linkers": [],
-    "terminal_modifications": {
-        "0": ["Ole"],
-        "-1": null
-        }
+        "modifications": ""
     },
 
 "extractor_parameters":
@@ -66,11 +58,11 @@
         "min_MS1_total_intensity": null,
         "min_MS2_total_intensity": null,
         "min_MS1_max_intensity": 1E6,
-        "min_MS2_max_intensity": null,
+        "min_MS2_max_intensity": 1E-3,
         
         "pre_screen_filters": {
             "min_rt": 0,
-            "max_rt": 35,
+            "max_rt": 10,
             "essential_signatures": null,
             "signature_types": ["Im"],
             "signature_ms_level": 2,
@@ -96,17 +88,21 @@
         "excluded_fragments": null,
         "dominant_signature_cap": 70,
         "essential_fragments": null,
-        "subsequence_weight": 0.0,
+        "subsequence_weight": 1,
         "min_rt": null,
         "max_rt": null,
-        "min_viable_confidence": 55
+        "Rt_bin": 0.25,
+        "backup_Rt_bin": 0.1,
+        "ms2_Rt_bin": 0.5,
+        "ms2_Rt_flexible": true,
+        "min_viable_confidence": 55,
+        "min_relative_intensity": null
     },
 
 "directories":
     {   "ripper_folder": "C:/Users/group/polymermassspec/Examples/ripper_jsons",
-        "postprocessing_outputdir": null,
-        "insilico_output_folder": null,
-        "polymer_config": "C:/Users/group/polymermassspec/polymersoup/insilico/Config_files/Depsipeptide_config.py"
+        "polymer_config": "C:/Users/group/polymermassspec/polymersoup/insilico/Config_files/Depsipeptide_config.py",
+        "output_folder": "C:/Users/group/polymermassspec/Examples/output"
     }
 
 }

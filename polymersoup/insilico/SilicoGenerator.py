@@ -6,8 +6,8 @@ functions for generating theoretical MS and MSMS sequence data
 
 from .MS1_silico import *
 from .MS2_silico import *
-from ..parameter_handlers import * 
-from .silico_helpers.insilico_helpers import * 
+from ..parameter_handlers import *
+from .silico_helpers.insilico_helpers import *
 
 
 
@@ -249,7 +249,7 @@ def generate_MSMS_insilico_from_compositions(
 
     return full_MSMS_sequence_dict
 
-def find_unique_fragments_sequences_fragment_subset(
+def find_unique_fragments_sequence_dict(
     sequence_dict
 ):
     """
@@ -277,19 +277,13 @@ def find_unique_fragments_sequences_fragment_subset(
             fragment ids for fragments that are unique to each sequence
     """
 
-    # iterate through sequence_dict and ensure it is in correct format
-    for sequence, sequence_info in sequence_dict.items():
-
-        if "MS2" in sequence_info.keys():
-            sequence_dict[sequence] = sequence_info["MS2"]
-
     # group sequences by composition for comparison of isobaric sequences
     isobaric_sequence_dict = generate_dict_isobaric_sequences(
-        sequence_dict.keys()
+        sequences=sequence_dict.keys()
     )
 
     # initiate dict to store sequences and their unique fragments for output
-    unique_fragment_dict = {}
+    unique_fragment_dict = sequence_dict
 
     # iterate through isobaric sequence dict to access lists of isobaric
     # sequences, which have the same composition
@@ -298,34 +292,25 @@ def find_unique_fragments_sequences_fragment_subset(
         # if there is only one sequence of this composition, there is no
         # need to look for unique fragments
         if len(isobaric_sequences) == 1:
-            unique_fragment_dict[isobaric_sequences[0]] = []
-            ms2_dict = {}
+            unique_fragment_dict[isobaric_sequences[0]].update(
+                {"unique_fragments": []}
+            )
 
         else:
-
             # generate mini ms2 fragment dict for current set of isobaric
             # sequences
             ms2_dict = {
-                seq: sequence_dict[seq]
+                seq: sequence_dict[seq]["MS2"]
                 for seq in isobaric_sequences
             }
 
-        # find unique fragments for each sequence in ms2_dict
-        unique_fragment_isobaric_dict = find_unique_fragments_isobaric_set(
-            isobaric_sequence_dict
-        )
+            # find unique fragments for each sequence in ms2_dict
+            unique_fragment_isobaric_dict = find_unique_fragments_isobaric_set(
+                ms2_dict
+            )
 
-        # add sequences and their unique fragments to unique_fragment_dict,
-        # with slight simplification of format compared to dict returned from
-        # unique_fragment_isobaric_dict function
-        unique_fragment_dict.update(
-            {
-                seq: unique_fragment_isobaric_dict[seq]['unique_fragments']
-                for seq in isobaric_sequences
-            }
-        )
-
-    # return dictionary of sequences and lists of unique fragments in format:
-    # {seq: ['unique_frag'...]} where seq = sequence, and 'unique_frag' =
-    # fragment id for fragment that is unique to that sequence
+            for seq in ms2_dict:
+                unique_fragment_dict[seq].update(
+                    {"unique_fragments": unique_fragment_isobaric_dict[seq]}
+                )
     return unique_fragment_dict

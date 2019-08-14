@@ -58,13 +58,13 @@ def generate_mass_dictionary(
     # if so, sequence generator used is simpler and (probably) faster
     if universal_rxn:
         sequences = generate_all_sequences(
-            monomers,
-            max_length,
-            min_length,
-            sequencing,
-            chain_terminators,
-            start_tags,
-            end_tags
+            monomers=monomers,
+            max_length=max_length,
+            min_length=min_length,
+            sequencing=sequencing,
+            chain_terminators=chain_terminators,
+            start_tags=start_tags,
+            end_tags=end_tags
             )
 
     # if input monomers are not universally cross-reactive, more complicated
@@ -122,11 +122,11 @@ def add_adducts_ms1_massdict(
     # adduct_massdict
     for sequence, neutral_mass in massdict.items():
         adduct_massdict[sequence] = add_adducts_sequence_mass(
-            neutral_mass,
-            adducts,
-            min_z,
-            max_z,
-            mode
+            neutral_mass=neutral_mass,
+            adducts=adducts,
+            min_z=min_z,
+            max_z=max_z,
+            mode=mode
         )
 
     # return ms1 massdict with charged adducts
@@ -282,14 +282,14 @@ def generate_ms1_mass_dictionary_adducts_losses(
     # generate neutral mass dictionary of all possible sequences arising from
     # input monomers and constraints set
     MS1_neutral = generate_mass_dictionary(
-        monomers,
-        max_length,
-        min_length,
-        sequencing,
-        universal_rxn,
-        chain_terminators,
-        start_tags,
-        end_tags
+        monomers=monomers,
+        max_length=max_length,
+        min_length=min_length,
+        sequencing=sequencing,
+        universal_rxn=universal_rxn,
+        chain_terminators=chain_terminators,
+        start_tags=start_tags,
+        end_tags=end_tags
     )
 
     # generate a separate mass dictionary, including side chain-specific
