@@ -4,12 +4,8 @@ Polymer Data
 """
 from .Constants.GlobalChemicalConstants import *
 from .Config_files.Depsipeptide_config import *
-from .helpers.insilico_helpers import *
+from .silico_helpers.insilico_helpers import *
 
-def __init__():
-    """
-    [init]
-    """
 def build_fragment_series_single_sequence(
     sequence,
     fragment_series,
@@ -38,23 +34,26 @@ def build_fragment_series_single_sequence(
         fragment_dict -- dictionary of fragments and corresponding m/z
                             values
     """
+    # define frag_info (makes nested dictionary navigation more readable)
+    frag_info = FRAG_SERIES[fragment_series]
+
     # get fragment terminus (i.e. end of sequence fragment series starts from)
-    terminus = FRAG_SERIES[fragment_series]['terminus']
+    terminus = frag_info['terminus']
 
     # get fragment mass diff (i.e. mass difference between fragments and
     # equivalent sub-sequences)
-    mass_diff = FRAG_SERIES[fragment_series]['mass_diff'][mode]
+    mass_diff = frag_info['mass_diff'][mode]
     if not mass_diff:
         print(f'{fragment_series} fragment series does not exist for {mode} mode')
         return {}
 
     # get fragment series starting position along linear polymer (i.e. number
     # of residues from terminus to start building fragment series)
-    start = FRAG_SERIES[fragment_series]['start']
+    start = frag_info['start']
 
     # get fragment series ending position along linear polymer (i.e. number of
     # residues from terminus to stop building fragment series)
-    end = FRAG_SERIES[fragment_series]['end']
+    end = frag_info['end']
 
     # fragment series begins at last residue, reverse the sequence before
     # building the series (e.g. peptide 'y' fragments)
@@ -80,6 +79,18 @@ def build_fragment_series_single_sequence(
     # time
     for i in range(start, len(sequence)-end):
         fragment, sub_sequence = f'{fragment_series}{i+1}', sequence[0:i+1]
+
+        # check for 'exceptions' in frag_info
+        exception = ms2_fragment_exceptions(
+            frag_info=frag_info,
+            sub_sequence=sub_sequence,
+            mode=mode
+        )
+
+        # if 'exceptions', reset mass difference to the value of the 'exception'
+        if exception:
+            mass_diff = exception
+
         fragment_mass = find_sequence_mass(sub_sequence) + mass_diff
         fragment_dict[fragment] = [float(f'{fragment_mass:.4f}')]
         if losses:
@@ -112,6 +123,56 @@ def build_fragment_series_single_sequence(
 
     # finally, return MS2 fragment dictionary
     return fragment_dict
+
+def ms2_fragment_exceptions(frag_info, sub_sequence, mode):
+
+    """ This function checks if there are any monomers in the sub_sequence
+    that require 'exceptions' during the MS2 fragment building.
+
+    Required for some fragment series e.g. peptide y-series for hydroxy acids
+    that change sub_sequence mass_diff and / or intrinsic ion depending on
+    functional group / reactivity class of terminating / initiating monomer.
+
+    Arguments:
+        frag_info {string} -- location of fragment information
+        sub_sequence -- fragment currently being checked for exceptions
+            (from build_fragment_series_single_sequence)
+        mode {str} -- specifies whether fragmented species are cationic or
+                anionic, use 'pos' for cations and 'neg' for anions
+                (default: {'pos'})
+
+    Returns:
+        'frag_info['exceptions'][mode][exception_groups[0]]' -- list
+        of groups that require different MS2 fragment building (exceptions).
+    """
+    # check for 'exceptions' in frag_info
+    if 'exceptions' in frag_info:
+
+    # check for mode in frag_info['exceptions']
+        if mode in frag_info['exceptions']:
+
+            # iterate through termini in mode
+            for terminus in frag_info['exceptions'][mode]:
+
+                # define terminus in which exception applies
+                terminal_pos = int(terminus)
+
+                # identify the residue at that terminus in the sub_sequence
+                # and find the functional groups present
+                residue = sub_sequence[terminal_pos]
+                func_groups = find_functional_groups_monomer(residue)
+
+                # create a list of exceptions groups in the residue
+                exception_groups = [
+                    group for group in func_groups
+                    if group in frag_info['exceptions'][mode]
+                ]
+                # if there is an exception_group list, return
+                if exception_groups:
+                    return frag_info['exceptions'][mode][exception_groups[0]]
+                else:
+                    return None
+
 
 def load_fragment_exceptions(
     sequences,
@@ -308,11 +369,11 @@ def add_adducts_ms2_fragments(
             for mass in masses:
                 mass -= intrinsic_adduct
                 adduct_masses.extend(add_adducts_sequence_mass(
-                    mass,
-                    adducts,
-                    1,
-                    1,
-                    mode))
+                    neutral_mass=mass,
+                    adducts=adducts,
+                    min_z=1,
+                    max_z=1,
+                    mode=mode))
 
             # if standard fragments (i.e. with unchanged input masses) are to
             # be returned, include these in output adduct_masses list
@@ -459,27 +520,53 @@ def find_unique_fragments_isobaric_set(isobaric_sequencedict):
         isobaric_sequencedict: input dict, with list of unique fragments added
                                     to MS2 fragments
     """
+    # initiate list to store fragment masses, for later use in counting
+    # occurence of each fragment mass
     all_fragment_masses = []
 
+    # iterate through each isobaric sequence in the input isobaric_sequencedict
     for sequence in isobaric_sequencedict:
+
+        # retrieve fragment dict for sequence
         frag_dict = isobaric_sequencedict[sequence]
+
+        # for each fragment, add associated m/z values to all_fragment_masses
         for fragment, masses in frag_dict.items():
+
+            # do not include signature fragments, as these are a very different
+            # beast
             if fragment.find('signature') == -1:
                 all_fragment_masses.extend(masses)
 
+    unique_fragment_dict = {}
+
+    # iterate through isobaric sequences again
     for sequence in isobaric_sequencedict:
+
+        # initiate list to store unique fragments, then retrieve fragment dict
         uniques = []
         frag_dict = isobaric_sequencedict[sequence]
+
+        # for each fragment and associated m/z values, count the total occurence
+        # of m/z values in the full fragment mass list (all_fragment_masses)
         for fragment, masses in frag_dict.items():
             if fragment.find('signature') == -1:
                 mass_count = sum(
                     [all_fragment_masses.count(mass)
                     for mass in masses]
                 )
+
+                # check if each fragment m/z value is found only once in the
+                # full list of all_fragment_masses; if this is the case, the
+                # fragment is unique => add fragment to list of uniques
                 if mass_count == len(masses):
                     uniques.append(fragment)
-        isobaric_sequencedict[sequence].update({'unique_fragments': uniques})
-    return isobaric_sequencedict
+
+        unique_fragment_dict[sequence] = uniques
+
+    print(f'unique_fragment_dict ={unique_fragment_dict}')
+    return unique_fragment_dict
+
 
 def generate_unique_fragment_ms2_massdict(massdict):
     """
@@ -506,6 +593,7 @@ def generate_unique_fragment_ms2_massdict(massdict):
                 where 'frag_1', 'frag_2' = fragment string ids for fragments
                 that are unique to sequence
     """
+
     # generate dictionary of isobaric sets in format:
     #       {
     #           sorted(seq): [seqs]
@@ -550,8 +638,11 @@ def find_fragments_by_index(
                     ['y14', 'b14'] if target_index = 14)
     """
 
+    # remove one letter code from fragments, leaving only string of fragment
+    # index - e.g. 'b14' => '14', 'y2' => '2'
     fragments = [fragment[1::] for fragment in fragment]
 
+    # return list of fragments with index matching target
     fragments = [
         fragment for fragment in fragments
         if int(fragment) == target_index

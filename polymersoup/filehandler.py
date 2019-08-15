@@ -5,7 +5,9 @@ for de novo peptide polymer soup sequencing
 
 """
 import os
+import csv
 import json
+from .insilico.Config_files.Depsipeptide_config import *
 
 def __init__():
     pass
@@ -39,6 +41,46 @@ def write_to_json(
         json.dump(write_dict, fp)
 
     print(f'data written to  {output_json}')
+
+def write_new_csv(
+    csv_file,
+    headers=None,
+    delimitingchar=','
+):
+    """
+    Writes a new .csv file
+
+    Args:
+        csv_file (str): full file path to new .csv file to be written
+        headers (list, optional): list of headers to be written to first
+            row of .csv file. Defaults to None.
+        delimitingchar (str, optional): delimiter for separating columns in
+            output .csv file. Defaults to ','.
+    """
+    with open (csv_file, 'w') as write_file:
+
+        write = csv.writer(write_file, delimiter = delimitingchar)
+        if headers:
+            write.writerow(headers)
+
+def append_csv_row(
+    csv_file,
+    append_list,
+    delimitchar=','
+):
+    """
+    Appends a new row to existing .csv file
+
+    Args:
+        csv_file (str): full file path to pre-written .csv file
+        append_list (list): list of strings to write to new .csv row
+        delimitchar (str, optional): delimiter for separating columns in
+            .csv file. Defaults to ','.
+    """
+    with open(csv_file, 'a') as ofile:
+        writer = csv.writer(ofile, delimiter=delimitchar)
+        writer.writerow(append_list)
+
 
 def read_parameters(parameters_file):
     """
@@ -133,3 +175,207 @@ def generate_insilico_writefile_string(
         write_string = write_string + f"-1terminaltags={end_tags}"
     write_string = f"{write_string}.json"
     return os.path.join(folder, write_string)
+
+def write_MS1_EIC_file(
+    input_data_file,
+    output_folder,
+    MS1_EICs
+):
+    """
+    Writes an MS1 EIC dict to a .json file
+
+    Args:
+        input_data_file (str): full file path to mzml ripper data file used to
+            generate MS1 EICs
+        output_folder (str): path to output folder directory, where data will
+            be saved
+        MS1_EICs (dict): dictionary of sequences and / or compositions and
+            their corresponding MS1 EICs
+    """
+
+    input_file = os.path.basename(input_data_file).replace(".json", "")
+
+    output_file = os.path.join(output_folder, f'{input_file}_MS1_EICs.json')
+
+    write_to_json(
+        write_dict=MS1_EICs,
+        output_json=output_file
+    )
+    print(f'MS1 EICs written to {output_file}')
+
+def write_MS2_EIC_file(
+    input_data_file,
+    output_folder,
+    MS2_EICs
+):
+    """
+    Writes MS2 EICs to a .json file
+
+    Args:
+        input_data_file (str): full file path to mzml ripper data file used to
+            generate MS2 EICs
+        output_folder (str): path to output folder directory, where data will
+            be saved
+        MS2_EICs (dict): dictionary of sequences  and their corresponding
+            MS2 EICs
+    """
+    input_file = os.path.basename(input_data_file).replace(".json", "")
+
+    output_file = os.path.join(output_folder, f'{input_file}_MS2_EICs.json')
+
+    write_to_json(
+        write_dict=MS2_EICs,
+        output_json=output_file
+    )
+
+    print(f'MS2 EICs written to {output_file}')
+
+def write_pre_fragment_screen_sequence_JSON(
+    input_data_file,
+    output_folder,
+    MSMS_silico_dict
+):
+    """
+    Writes in silico sequence dict for sequences that have been detected by
+    MS1 composition - i.e. BEFORE CONFIRMING MS2 FRAGMENTS AND ASSIGNING
+    CONFIDENCE
+
+    Args:
+        input_data_file (str): full file path to input mzml ripper data file
+        output_folder (str): directory of output folder, where data will be
+            saved
+        MSMS_silico_dict (dict): in silico sequence dict for sequences,
+            potential MS1 precursors and MS2 fragments
+    """
+    input_file = os.path.basename(input_data_file).replace(".json", "")
+    input_file = input_file + "_PRE_fragment_screening_silico_dict.json"
+
+    output_file = os.path.join(output_folder, input_file)
+
+    write_to_json(
+        write_dict=MSMS_silico_dict,
+        output_json=output_file
+    )
+
+    print(f'full MSMS silico dict for sequences detected at MS1 written to:')
+    print(output_file)
+
+def write_confidence_assignments(
+    input_data_file,
+    output_folder,
+    confidence_assignments
+):
+    """
+    Writes confidence assignments for sequences with confirmed MS1 precursors
+    and MS2 fragments to a .json file
+
+    Args:
+        input_data_file (str): full file path to input mzml ripper data file
+        output_folder (str): directory of output folder, where data will be
+            saved
+        confidence_assignments (dict): dictionary of sequences and their
+            assigned confidence scores
+    """
+
+    input_file = os.path.basename(input_data_file).replace(".json", "")
+    input_file = input_file + "_sequence_confidence_assignments.json"
+
+    output_file = os.path.join(output_folder, input_file)
+
+    write_to_json(
+        write_dict=confidence_assignments,
+        output_json=output_file
+    )
+
+    print(f'confidence assignments written to {output_file}')
+
+def write_confirmed_fragment_dict(
+    input_data_file,
+    output_folder,
+    confirmed_fragment_dict
+):
+    """
+    [summary]
+
+    Args:
+        input_data_file (str): full file path to input mzml ripper data file
+        output_folder (str): directory of output folder, where data will be
+            saved
+        confirmed_fragment_dict (dict): dictionary of sequences and confirmed
+            fragments for all sequences that have ANY confirmed MS2 fragments
+    """
+    input_file = os.path.basename(input_data_file).replace(".json", "")
+    input_file = input_file + "_confirmed_fragment_dict.json"
+
+    output_file = os.path.join(output_folder, input_file)
+
+    write_to_json(
+        write_dict=confirmed_fragment_dict,
+        output_json=output_file
+    )
+
+    print(f'confirmed fragment dict written to {confirmed_fragment_dict}')
+
+def write_unique_fragment_dict(
+    input_data_file,
+    output_folder,
+    unique_fragment_dict
+):
+    """
+    Writes a dictionary of confidently assigned sequences and their
+    corresponding in silico fragment data for fragments that have been confirmed,
+    including unique fragments
+
+    Args:
+        input_data_file (str): full file path to input mzml ripper data file
+        output_folder (str): directory of output folder, where data will be
+            saved
+        unique_fragment_dict (dict): dictionary of confident sequences and
+            corresponding in silico data for confirmed fragments, including
+            unique confirmed fragments
+    """
+    input_file = os.path.basename(input_data_file).replace(".json", "")
+    input_file = input_file + "_confirmed_fragments_with_uniques.json"
+
+    output_file = os.path.join(output_folder, input_file)
+
+    write_to_json(
+        write_dict=unique_fragment_dict,
+        output_json=output_file
+    )
+
+    print(f"unique fragment dictionary written to {output_file}")
+
+def write_final_retention_time_assignments(
+    input_data_file,
+    output_folder,
+    final_Rt_I_dict
+):
+    """
+    Writes final retention time and intensity assignments to output .csv
+    file
+
+    Args:
+        input_data_file (str): full file path to input mzml ripper data file
+        output_folder (str): directory of output folder, where data will be
+            saved
+        final_Rt_I_dict (dict): dictionary of sequences and retention time +
+            intensity assignments
+    """
+    input_file = os.path.basename(input_data_file).replace(".json", "")
+    input_file = input_file + "_final_Rt_I_assignments.csv"
+
+    output_file = os.path.join(output_folder, input_file)
+
+    write_new_csv(
+        csv_file=output_file,
+        headers=['sequence', 'Rt', 'I']
+    )
+
+    for sequence, Rt_I in final_Rt_I_dict.items():
+        append_csv_row(
+            csv_file=output_file,
+            append_list=[sequence, Rt_I[0], Rt_I[1]]
+        )
+
+    print(f'retention time assignments written to {output_file}')

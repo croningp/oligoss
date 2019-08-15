@@ -1,5 +1,7 @@
 *.json
-!*params*.json
+!*Arg*.json
+.md
+!*read*.md
 __pycache__/
 *.pyc
 .vscode/
@@ -7,3 +9,4 @@ __pycache__/
 *.txt
 build/
 dist/
+.csv
