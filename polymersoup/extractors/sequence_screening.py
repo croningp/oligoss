@@ -137,14 +137,16 @@ def generate_EIC(
     # check for specified minimum max intensity threshold. If this is specified
     # and most intense point on EIC does not exceed this, return blank EIC
     if min_max_intensity:
-        if EIC[-1][1] < min_max_intensity:
-            EIC = []
+        if EIC:
+            if EIC[-1][1] < min_max_intensity:
+                EIC = []
 
     # check for specified minimum total intensity threshold. If this is
     # specified and sum of EIC intensity does not exceed this, return blank EIC
     if min_total_intensity:
-        if sum([Rt_I[1] for Rt_I in EIC]) < min_total_intensity:
-            EIC = []
+        if EIC:
+            if sum([Rt_I[1] for Rt_I in EIC]) < min_total_intensity:
+                EIC = []
 
     # return EIC
     return EIC
@@ -717,7 +719,7 @@ def extract_MS2(
                     mapi=extractor_parameters["min_ms2_peak_abundance"],
                     peak_list=sequence_info["peak_list"]
                 )
-                
+
                 if not fragment_EIC:
                     raise Exception(f'no EIC found for unique {fragment} for {sequence}')
 

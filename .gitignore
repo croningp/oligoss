@@ -1,6 +1,7 @@
 *.json
 !*Arg*.json
-!*params*.json
+.md
+!*read*.md
 __pycache__/
 *.pyc
 .vscode/
