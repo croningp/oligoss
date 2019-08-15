@@ -61,7 +61,7 @@ MODIFICATIONS_DICT = {
 
     # "terminus" = terminus acylated by oleic acid; 0 = N-terminus (i.e.
     # starting terminus)
-        "terminus": 0,
+        "termini": [0],
 
     # "side_chain_attachments" = list of monomer one letter codes for monomers
     # with side chains that can be acylated by oleic acid
