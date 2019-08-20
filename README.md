@@ -396,7 +396,7 @@ __"core_linear_series"__:
 
 - Description: list of fragment series one letter codes for fragment series that should be used in confidence calculations. NOTE: it is assumed that each series in this list will receive an equal weighting in confidence calculation; if this is not suitable for your chemistry, please let us know!!!
 
-- Options: list of valid fragment one letter codes. NOTE: this MUST not inclue signatures
+- Options: list of valid fragment one letter codes. NOTE: this MUST not include signatures
 
 - Recommended: ["b", "y"] for peptides in positive mode (["y"] for peptides in negative mode)
 
