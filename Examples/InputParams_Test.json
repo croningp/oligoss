@@ -31,6 +31,9 @@
             "terminal_tags": {
                 "0": null,
                 "-1": null
+            },
+            "side_chain_tags": {
+                
             }
         },
 
@@ -96,7 +99,8 @@
         "ms2_Rt_bin": 0.5,
         "ms2_Rt_flexible": true,
         "min_viable_confidence": 55,
-        "min_relative_intensity": null
+        "min_relative_intensity": null,
+        "plot_EICs": true
     },
 
 "directories":

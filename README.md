@@ -86,7 +86,7 @@ __"monomers"__:
 - Description: list of monomers used in your reaction(s). These __MUST__ match monomer one letter codes supplied in polymer-specific config file (see __"Polymer Config File"__ section, below)
 
 - Options: any combination of monomer one letter codes supplied in
-polymer-specific config fil
+polymer-specific config file
 
 __"max_length"__:
 
