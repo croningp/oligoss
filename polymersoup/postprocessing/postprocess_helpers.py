@@ -544,20 +544,20 @@ def get_Rt_I_from_ms1_EIC(
     # return [Rt, I] sublist of peaks found
     return found_targets
 
-def create_EIC_plots(EIC_json):
+def create_EIC_plots(EICs_json):
     """
     This function creates an EIC plot (retention time vs intensity) for
     each sequence in the EICS.json and saves each figure as a .png files.
     
     Arguments:
-        EIC_json (str) -- ".._EICs.json" created by previous post processing
+        EICs_json (str) -- ".._EICs.json" created by previous post processing
             functions.
 
     """
 
     # read EICs.json
     with open(EICs_json, 'r') as EICs_json_data:
-    EICs_dict = json.load(EICs_json_data)
+        EICs_dict = json.load(EICs_json_data)
 
     # create pandas dataframe from json data
     EICs_normalized_data = pd.DataFrame.from_dict(json_normalize(EICs_dict), orient='columns')
