@@ -50,7 +50,9 @@ def find_Rt_I_sequences(
     MS1_EICs,
     MS2_EICs,
     confident_assignments,
-    postprocess_parameters
+    postprocess_parameters,
+    confidence_scores,
+    return_confidence=True
 ):
     """
     Takes dicts of MS1 and MS2 EICs, confidently assigned sequences, and fits
@@ -64,6 +66,11 @@ def find_Rt_I_sequences(
             with high confidence
         postprocess_parameters (dict): dictionary of postprocess parameters
             passed on from input parameters .json file
+        confidence_scores (dict): dictionary of confirmed sequences and 
+            assigned confidence scores 
+    Kewyword Args:
+        return_confidence (bool): specifies whether to return sequences' 
+            confidence score in output. Defaults to True 
 
     Raises:
         Exception: [description]
@@ -126,5 +133,12 @@ def find_Rt_I_sequences(
                 if seq not in final_Rt_Is
             }
         )
+
+    # check whether to return sequence confidence scores; if so, add to output
+    if return_confidence:
+        for seq in final_Rt_Is:
+            final_Rt_Is[seq].append(
+                confidence_scores[seq]
+            )
 
     return final_Rt_Is

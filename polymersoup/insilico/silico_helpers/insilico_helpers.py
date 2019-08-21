@@ -4,7 +4,6 @@ in silico operations
 """
 from ..Constants.GlobalChemicalConstants import *
 from ..Config_files.Depsipeptide_config import *
-from ..Config_files.Peptide_Acylations_config import *
 import copy
 import time
 import itertools
@@ -418,11 +417,6 @@ def add_sidechain_neutral_loss_products_sequence(
 
     return final_masses
 
-#####
-# ADD MODIFICATION FUNCTIONS HERE - ADD MODIFICATION TO SEQUENCE STRING,
-# SEQUENCE MASS(ES)
-
-#####
 def generate_reading_frames_sequence(sequence):
     """
     Takes a linear sequence and outputs a list of reading frame shifts for
@@ -441,7 +435,7 @@ def generate_reading_frames_sequence(sequence):
     # initiate reading frames list with input sequence
     reading_frames = [sequence]
 
-    # get list of unique monomers within sequence; if only kind of one monomer
+    # get list of unique monomers within sequence; if only one kind of monomer
     # is present, there can only be one reading frame for the sequence.
     # Therefore, sequence is returned
     unique_monomers = list(set([c for i, c in enumerate(sequence)]))

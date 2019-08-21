@@ -13,7 +13,8 @@ def build_fragment_series_single_sequence(
     mode='pos',
     losses=True,
     max_total_losses=None,
-    loss_product_adducts=None
+    loss_product_adducts=None,
+    check_exceptions=False
 ):
     """
     This function takes a sequence and builds an MS2 fragment series,
@@ -29,6 +30,12 @@ def build_fragment_series_single_sequence(
         mode {str} -- specifies whether fragmented species are cationic or
                     anionic, use 'pos' for cations and 'neg' for anions
                     (default: {'pos'})
+        max_total_losses (int) -- specifies maximum number of side chain
+            neutral loss products permitted per fragment
+        loss_product_adducts (list) -- list of adducts to add to loss products
+        check_exceptions (bool) -- specifies whether to check for exceptions
+            to standard fragmentation rules based on the monomers present in
+            the sequence
 
     Returns:
         fragment_dict -- dictionary of fragments and corresponding m/z
@@ -68,10 +75,6 @@ def build_fragment_series_single_sequence(
     # frag_series = fragment series code (str - one character for
     # non-signatures)
 
-    # check whether to include side chain-specific loss products in fragment
-    # mass lists; if not, fragment_dict is returned with full fragment masses
-    # only
-
     # initiate dict to store fragment side chain-specific loss product masses
     loss_fragment_dict = {}
 
@@ -80,32 +83,51 @@ def build_fragment_series_single_sequence(
     for i in range(start, len(sequence)-end):
         fragment, sub_sequence = f'{fragment_series}{i+1}', sequence[0:i+1]
 
-        # check for 'exceptions' in frag_info
-        exception = ms2_fragment_exceptions(
-            frag_info=frag_info,
-            sub_sequence=sub_sequence,
-            mode=mode
-        )
+        if check_exceptions:
 
-        # if 'exceptions', reset mass difference to the value of the 'exception'
-        if exception:
-            mass_diff = exception
+            # check for 'exceptions' in frag_info
+            exceptions = find_ms2_fragment_exceptions(
+                frag_info=frag_info,
+                sub_sequence=sub_sequence,
+                mode=mode
+            )
+        else:
+            exceptions = None
 
-        fragment_mass = find_sequence_mass(sub_sequence) + mass_diff
-        fragment_dict[fragment] = [float(f'{fragment_mass:.4f}')]
+        # if 'exceptions', reset mass difference to the value of the exception
+        if exceptions:
+            mass_diffs = exceptions
+        else:
+            mass_diffs = [mass_diff]
+
+        # get fragment masses, taking into account any possible exceptions
+        fragment_masses = [
+            find_sequence_mass(sub_sequence) + mass_diff
+            for mass_diff in mass_diffs
+        ]
+
+        # add fragment masses to fragment dict
+        fragment_dict[fragment] = [
+            float(f'{fragment_mass:.4f}')
+            for fragment_mass in fragment_masses
+        ]
+
+        # check whether to include side chain-specific loss products in fragment
+        # mass lists; if not, fragment_dict is returned with full fragment masses
+        # only 
         if losses:
             loss_fragment_dict[fragment] = add_sidechain_neutral_loss_products_sequence(
-                sub_sequence,
-                fragment_mass,
-                max_total_losses
+                sequence=sub_sequence,
+                sequence_masses=fragment_masses,
+                max_total_losses=max_total_losses
             )
 
     # add adducts to full fragment masses (non-loss products)
     fragment_dict = add_adducts_ms2_fragments(
-        fragment_dict,
-        adducts,
-        mode,
-        fragment_series)
+        fragment_dict=fragment_dict,
+        adducts=adducts,
+        mode=mode,
+        fragment_series=fragment_series)
 
     # add adducts to ms2 loss products if any are specified for loss products
     if loss_product_adducts:
@@ -124,10 +146,14 @@ def build_fragment_series_single_sequence(
     # finally, return MS2 fragment dictionary
     return fragment_dict
 
-def ms2_fragment_exceptions(frag_info, sub_sequence, mode):
+def find_ms2_fragment_exceptions(
+    frag_info,
+    sub_sequence,
+    mode):
 
     """ This function checks if there are any monomers in the sub_sequence
-    that require 'exceptions' during the MS2 fragment building.
+    that require 'exceptions' to standard fragmentation and / or ionisation
+    rules during the MS2 fragment building.
 
     Required for some fragment series e.g. peptide y-series for hydroxy acids
     that change sub_sequence mass_diff and / or intrinsic ion depending on
@@ -148,7 +174,7 @@ def ms2_fragment_exceptions(frag_info, sub_sequence, mode):
     # check for 'exceptions' in frag_info
     if 'exceptions' in frag_info:
 
-    # check for mode in frag_info['exceptions']
+        # check for mode in frag_info['exceptions']
         if mode in frag_info['exceptions']:
 
             # iterate through termini in mode
@@ -167,40 +193,19 @@ def ms2_fragment_exceptions(frag_info, sub_sequence, mode):
                     group for group in func_groups
                     if group in frag_info['exceptions'][mode]
                 ]
-                # if there is an exception_group list, return
+
+                # if there is an exception_group list, return exception
+                # massdiffs
+                exceptions = []
                 if exception_groups:
-                    return frag_info['exceptions'][mode][exception_groups[0]]
-                else:
-                    return None
-
-
-def load_fragment_exceptions(
-    sequences,
-    fragment_series,
-    mode
-):
-    """
-    This functions checks for any monomer and fragment series combinations that
-    require exceptions to adduct rules and / or sub_sequence mass_diffs. If
-    none are found, regular fragment builder function is used; otherwise,
-    more complicated fragment builder taking exceptions into account is
-    required
-
-    Args:
-        sequences (list): list of sequence strings
-        fragment_series (list): list of fragment types that will have
-                                exceptions to their mass_diff depending on
-                                certain monomer types being present at the
-                                final and / or first residue in the subsequence.
-                                Example: peptide y-fragment mass_diff = +H in
-                                positive mode; but if the final monomer in
-                                the sub_sequence is a hydroxy acid, this becomes
-                                -OH in positive mode. NOTE: do NOT allow
-                                addition of adducts to fragments with exceptions
-        mode (str): either 'pos' or 'neg' for positive or negative mode mass
-                                spec, respectively
-    """
-
+                    exceptions.extend(
+                        [
+                            frag_info['exceptions'][mode][exception_group]
+                            for exception_group in exception_groups
+                        ]
+                    )
+                return list(set(exceptions))
+    return None
 
 def build_multiple_fragment_series_single_sequence(
     sequence,
@@ -211,7 +216,8 @@ def build_multiple_fragment_series_single_sequence(
     signatures=None,
     losses=True,
     max_total_losses=None,
-    loss_product_adducts=None
+    loss_product_adducts=None,
+    check_exceptions=False
 ):
     """
     Takes a single sequence, list of fragment series (e.g. ['b', 'y'] for
@@ -252,21 +258,24 @@ def build_multiple_fragment_series_single_sequence(
     for series in fragment_series:
         fragment_dict.update(
             build_fragment_series_single_sequence(
-                sequence,
-                series,
-                adducts,
-                mode,
-                losses,
-                max_total_losses,
-                loss_product_adducts))
+                sequence=sequence,
+                fragment_series=series,
+                adducts=adducts,
+                mode=mode,
+                losses=losses,
+                max_total_losses=max_total_losses,
+                loss_product_adducts=loss_product_adducts
+            )
+        )
 
     # checks if monomer-specific MS2 signature ion fragments are to be added
     # if specified, signature ions are then added to fragment dict
     if add_signatures:
         fragment_dict.update({
             'signatures': generate_monomer_ms2_signature_ions_sequence(
-                sequence,
-                signatures)})
+                sequence=sequence,
+                signatures=signatures)})
+
     return fragment_dict
 
 def add_adducts_ms2_fragments(
@@ -373,7 +382,9 @@ def add_adducts_ms2_fragments(
                     adducts=adducts,
                     min_z=1,
                     max_z=1,
-                    mode=mode))
+                    mode=mode
+                )
+            )
 
             # if standard fragments (i.e. with unchanged input masses) are to
             # be returned, include these in output adduct_masses list
@@ -489,14 +500,14 @@ def generate_ms2_mass_dictionary(
     print(f'building MS2 fragment series for {len(sequences)} sequences')
     ms2_fragment_dict = {
         sequence: build_multiple_fragment_series_single_sequence(
-            sequence,
-            fragment_series,
-            adducts,
-            mode,
-            add_signatures,
-            signatures,
-            losses,
-            max_total_losses)
+            sequence=sequence,
+            fragment_series=fragment_series,
+            adducts=adducts,
+            mode=mode,
+            add_signatures=add_signatures,
+            signatures=signatures,
+            losses=losses,
+            max_total_losses=max_total_losses)
         for sequence in sequences}
 
     if uniques:
@@ -506,6 +517,19 @@ def generate_ms2_mass_dictionary(
 
     return ms2_fragment_dict
 
+def confirm_exceptions_sequence_dict(
+    monomers,
+    fragment_series
+):
+
+    func_groups = []
+    for monomer in monomers:
+        func_groups.extend(
+            [
+                find_functional_groups_monomer(monomer)
+            ]
+        )
+    
 def find_unique_fragments_isobaric_set(isobaric_sequencedict):
     """
     finds unique MS2 fragments from an MS2 fragment mass dictionary in which
@@ -610,7 +634,8 @@ def generate_unique_fragment_ms2_massdict(massdict):
     # unique to sequences within each set
     for sequences in isobaric_dict.values():
         sequence_dict = {
-            sequence: massdict[sequence] for sequence in sequences}
+            sequence: massdict[sequence] for sequence in sequences
+        }
 
         # update unique_fragment_dict with full MS2 sequence dict for sequence
         # in isobaric_group, with unique fragments added for each sequence
@@ -730,10 +755,10 @@ def add_terminal_ms2_modification_sequence_fragment_subsets(
         # fragment masses
         for fragment, masses in fragment_dict.items():
             modified_fragdict[fragment] = add_modification_sequence_mass_list(
-                masses,
-                modification_mass,
-                modification_massdiff,
-                universal_shift
+                mass_list=masses,
+                modification_mass=modification_mass,
+                mod_mass_diff=modification_massdiff,
+                universal_shift=universal_shift
             )
 
     # if fragment series begins at opposite terminus to modification_terminus,
@@ -751,10 +776,10 @@ def add_terminal_ms2_modification_sequence_fragment_subsets(
         # for modification
         for fragment in modified_fragments:
             modified_fragdict[fragment] = add_modification_sequence_mass_list(
-                fragment_dict[fragment],
-                modification_mass,
-                modification_massdiff,
-                universal_shift
+                mass_list=fragment_dict[fragment],
+                modification_mass=modification_mass,
+                mod_mass_diff=modification_massdiff,
+                universal_shift=universal_shift
             )
 
             # update modified_fragdict with unmodified fragments so that all

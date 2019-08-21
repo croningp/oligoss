@@ -65,7 +65,7 @@ def generate_mass_dictionary(
             chain_terminators=chain_terminators,
             start_tags=start_tags,
             end_tags=end_tags
-            )
+        )
 
     # if input monomers are not universally cross-reactive, more complicated
     # function is required to read polymer config file and generate only

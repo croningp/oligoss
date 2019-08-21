@@ -439,7 +439,7 @@ def return_peaks_EIC(
     min_relative_intensity=None
 ):
     """
-    Takes an EIC and returns peaks that fit within retention time limit 
+    Takes an EIC and returns peaks that fit within retention time limit
     (Rt_bin), starting from most intense peak
 
     Args:
@@ -548,7 +548,7 @@ def create_EIC_plots(EICs_json):
     """
     This function creates an EIC plot (retention time vs intensity) for
     each sequence in the EICS.json and saves each figure as a .png files.
-    
+
     Arguments:
         EICs_json (str) -- ".._EICs.json" created by previous post processing
             functions.
@@ -561,7 +561,7 @@ def create_EIC_plots(EICs_json):
 
     # create pandas dataframe from json data
     EICs_normalized_data = pd.DataFrame.from_dict(
-        json_normalize(EICs_dict), 
+        json_normalize(EICs_dict),
         orient='columns'
     )
 
@@ -596,10 +596,10 @@ def create_EIC_plots(EICs_json):
         plt.title(EICs_data["sequence"][i])
         sns.lineplot(
             (
-                EICs_data["retention times"][i]),  
+                EICs_data["retention times"][i]),
             (
                 EICs_data["intensities"][i]), data=EICs_data
             )
-        
+
         # save figure as .png
         plt.savefig(f"{i}_{EICs_data['sequence'][i]}.png")
