@@ -186,9 +186,7 @@ def exhaustive_screen(
         )
 
         print(f"confidence_scores = {confidence_scores}")
-        proceed = input("do you want to proceed?")
-        if proceed.lower() != "y":
-            raise Exception("ok")
+        
         # write confidence scores to .json file
         write_confidence_assignments(
             input_data_file=filtered_ripper,
