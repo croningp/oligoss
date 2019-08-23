@@ -26,10 +26,12 @@ def assign_confidence_sequences(
     # a confidence score
     for sequence, confirmed_fragments in confirmed_dict.items():
 
+        print(f"assigning confidence for {sequence}")
+        
         # assign sequence a confidence score, using constraints specified in
         # input postprocess parameters from input parameters .json file
         confidence_assignment = assign_confidence_sequence(
-            insilico_fragments=silico_dict[sequence]["MS2"].keys(),
+            insilico_fragments=list(silico_dict[sequence]["MS2"].keys()),
             confirmed_fragments=confirmed_fragments,
             core_fragment_series=postprocess_params["core_linear_series"],
             optional_fragments=postprocess_params["optional_core_frags"],
@@ -136,9 +138,12 @@ def find_Rt_I_sequences(
 
     # check whether to return sequence confidence scores; if so, add to output
     if return_confidence:
-        for seq in final_Rt_Is:
-            final_Rt_Is[seq].append(
-                confidence_scores[seq]
-            )
+         
+        for seq, Rt_I in final_Rt_Is.items():
+            print(f"confidenc score for {seq} = {confidence_scores[seq]}")
+            write_list = [elem for elem in Rt_I]
+            write_list.append(confidence_scores[seq])
+            print(f"write_list = {write_list}")
+            final_Rt_Is[seq] = write_list
 
     return final_Rt_Is

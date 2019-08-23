@@ -208,7 +208,8 @@ def generate_all_sequences(
     sequencing=True,
     chain_terminators=None,
     start_tags=None,
-    end_tags=None):
+    end_tags=None,
+    isobaric_targets=None):
     """
     [This function takes a list of input monomers and outputs all possible
     sequences or compositions that could arise within the constraints set,
@@ -234,6 +235,9 @@ def generate_all_sequences(
                             are tagged at terminus -1 by each of the monomers
                             in end_tags - one tag per sequence, and only
                             tagged sequences are returned (default: {None})
+        isobaric_targets {list} -- list of sequences and / or compositions that
+                            output sequences must be isobaric to. (default: 
+                            {None})
     Returns:
         sequences {list} -- [list of possible sequences that could arise from
                             input monomers within the constraints set]
@@ -260,7 +264,11 @@ def generate_all_sequences(
 
     # remove duplicate sequences and / or compositions
     sequences = list(set(sequences))
-
+    
+    # remove sequences and / or compositions that do not exceed minimum
+    # sequence length threshold specified
+    sequences = [seq for seq in sequences if len(seq) >= min_length]
+    
     # check for chain terminating monomers; if present, remove sequences that
     # can only be produced by elongating past position of terminating monomers
     if chain_terminators:
@@ -295,10 +303,16 @@ def generate_all_sequences(
     if not sequencing:
         sequences = list(set(["".join(sorted(seq)) for seq in sequences]))
 
-    # remove sequences and / or compositions that do not exceed minimum
-    # sequence length threshold specified
-    sequences = [seq for seq in sequences if len(seq) >= min_length]
+    # check for isobaric target sequences; if specified, return only sequences
+    # that are isobaric to one or more of those targets 
+    if isobaric_targets:
+        isobaric_targets = [
+            sorted(target) for target in isobaric_targets
+        ]
 
+        sequences = [
+            seq for seq in sequences if sorted(seq) in isobaric_targets
+        ]
     # return list of sequences and / or compositions
     return sequences
 
