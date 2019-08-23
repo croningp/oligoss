@@ -267,7 +267,7 @@ FRAG_SERIES = {
             "pos": ELONGATION_UNIT,
             "neg": ELONGATION_UNIT
         },
-        "start": 0,
+        "start": 1,
         "end": 0
     },
     "x": {

@@ -80,6 +80,7 @@ def exhaustive_screen(
         write_dict=parameters_dict,
         output_json=os.path.join(output_folder, 'run_parameters.json')
     )
+
     # load parameters for postprocessing operations
     postprocess_parameters = parameters_dict["postprocessing_parameters"]
 
@@ -139,7 +140,8 @@ def exhaustive_screen(
             composition: compositional_silico_dict[composition]
             for composition in MS1_EICs
         }
-
+        print(f'compositions = {compositional_silico_dict}')
+        
         print(f'generating full MSMS dict for {len(MS1_EICs)} compositions')
 
         # generate full insilico fragmentation MSMS data for all possible
@@ -149,7 +151,7 @@ def exhaustive_screen(
             silico_parameters=silico_params,
             uniques=False
         )
-
+       
         # write full in silico dict to .json file
         write_pre_fragment_screen_sequence_JSON(
             input_data_file=filtered_ripper,
@@ -166,6 +168,8 @@ def exhaustive_screen(
             extractor_parameters=extractor_params
         )
 
+        print(f'confirmed fragment dict = {confirmed_fragment_dict}')
+
         # write confirmed fragment silico dict to .json file
         write_confirmed_fragment_dict(
             input_data_file=filtered_ripper,
@@ -181,6 +185,10 @@ def exhaustive_screen(
             postprocess_params=postprocess_parameters
         )
 
+        print(f"confidence_scores = {confidence_scores}")
+        proceed = input("do you want to proceed?")
+        if proceed.lower() != "y":
+            raise Exception("ok")
         # write confidence scores to .json file
         write_confidence_assignments(
             input_data_file=filtered_ripper,

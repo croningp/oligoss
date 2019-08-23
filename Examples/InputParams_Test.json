@@ -30,7 +30,7 @@
             "universal_rxn": true,
             "terminal_tags": {
                 "0": null,
-                "-1": null
+                "-1": ["F"]
             },
             "side_chain_tags": {
             },
@@ -39,7 +39,7 @@
         },
 
         "MS2": {
-            "fragment_series": ["b", "y", "a"],
+            "fragment_series": ["b", "y"],
             "ms2_adducts": ["H", "Na"],
             "ms2_losses": true,
             "ms2_max_neutral_losses": null,
@@ -50,7 +50,7 @@
             "max_z": 1
         }
     },
-
+ 
 "extractor_parameters":
     {   "error": 0.01,
         "err_abs": true,
@@ -68,7 +68,7 @@
             "essential_signatures": null,
             "signature_types": ["Im"],
             "signature_ms_level": 2,
-            "massdiff_bins": true,
+            "massdiff_bins": false,
             "ms2_precursors": null,
             "precursors": {
                 "1": null, 
@@ -88,16 +88,16 @@
         "optional_core_frags": ["b1"],
         "core_linear_series": ["b", "y"],
         "excluded_fragments": null,
-        "dominant_signature_cap": 70,
+        "dominant_signature_cap": 0,
         "essential_fragments": null,
-        "subsequence_weight": 0.25,
+        "subsequence_weight": 0,
         "min_rt": null,
         "max_rt": null,
-        "Rt_bin": 1E-3,
-        "backup_Rt_bin": 1E-4,
+        "Rt_bin": 0,
+        "backup_Rt_bin": 0,
         "ms2_Rt_bin": 0.5,
         "ms2_Rt_flexible": true,
-        "min_viable_confidence": 40,
+        "min_viable_confidence": 35,
         "min_relative_intensity": null,
         "plot_EICs": true,
 
@@ -111,7 +111,7 @@
 
 "directories":
     {   "ripper_folder": "Z:/group/David Doran/Data/PeptideSequencing/PolymerMassSpec/LinearStandards/SPPS/Orbi-Nanomate/FWYN_FYWN/ripper_jsons",
-        "output_folder": "Z:/group/David Doran/Data/PeptideSequencing/PolymerMassSpec/LinearStandards/SPPS/Orbi-Nanomate/FWYN_FYWN/out/subsequence_0.25",
+        "output_folder": "C:/Users/group/Documents/MSAnalysis/temp",
         "polymer_config": ""
     }
 

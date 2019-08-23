@@ -15,7 +15,8 @@ def generate_mass_dictionary(
     universal_rxn=True,
     chain_terminators=None,
     start_tags=None,
-    end_tags=None):
+    end_tags=None,
+    isobaric_targets=None):
     """
     [This function takes a list of monomers and outputs a dictionary of all
     possible sequences or compositions that could arise from input monomers
@@ -47,6 +48,9 @@ def generate_mass_dictionary(
         ending_monomers {list} -- [list of monomers. If this is input,
                             only sequences ending with a monomer in this list
                             will be returned] (default: {None})
+        isobaric_targets {list} -- list of sequences and / or compositions that
+                        output sequences must be isobaric to. (default: 
+                        {None})
 
     Returns:
         [massdict] -- [dictionary of sequences and associated neutral
@@ -64,7 +68,8 @@ def generate_mass_dictionary(
             sequencing=sequencing,
             chain_terminators=chain_terminators,
             start_tags=start_tags,
-            end_tags=end_tags
+            end_tags=end_tags,
+            isobaric_targets=isobaric_targets
         )
 
     # if input monomers are not universally cross-reactive, more complicated
@@ -276,7 +281,8 @@ def generate_ms1_mass_dictionary_adducts_losses(
     universal_rxn=True,
     start_tags=None,
     end_tags=None,
-    sequencing=True
+    sequencing=True,
+    isobaric_targets=None
 ):
 
     # generate neutral mass dictionary of all possible sequences arising from
@@ -289,7 +295,8 @@ def generate_ms1_mass_dictionary_adducts_losses(
         universal_rxn=universal_rxn,
         chain_terminators=chain_terminators,
         start_tags=start_tags,
-        end_tags=end_tags
+        end_tags=end_tags,
+        isobaric_targets=isobaric_targets
     )
 
     # generate a separate mass dictionary, including side chain-specific
