@@ -38,7 +38,7 @@ def write_to_json(
     """
 
     with open(output_json, 'w') as fp:
-        json.dump(write_dict, fp)
+        json.dump(write_dict, fp, indent=4)
 
     print(f'data written to  {output_json}')
 
@@ -369,13 +369,13 @@ def write_final_retention_time_assignments(
 
     write_new_csv(
         csv_file=output_file,
-        headers=['sequence', 'Rt', 'I']
+        headers=['sequence', 'Rt', 'I', 'confidence']
     )
 
     for sequence, Rt_I in final_Rt_I_dict.items():
         append_csv_row(
             csv_file=output_file,
-            append_list=[sequence, Rt_I[0], Rt_I[1]]
+            append_list=[sequence, Rt_I[0], Rt_I[1], Rt_I[2]]
         )
 
     print(f'retention time assignments written to {output_file}')

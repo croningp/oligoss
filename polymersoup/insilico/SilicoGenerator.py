@@ -160,7 +160,8 @@ def generate_MS1_compositional_dict(
         chain_terminators=ms1_params["chain_terminators"],
         start_tags=ms1_params["terminal_tags"]["0"],
         end_tags=ms1_params["terminal_tags"]["-1"],
-        sequencing=False
+        sequencing=False,
+        isobaric_targets=ms1_params["isobaric_targets"]
     )
 
     return MS1_dict

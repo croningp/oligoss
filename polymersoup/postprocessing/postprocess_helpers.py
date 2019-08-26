@@ -2,6 +2,13 @@
 This file contains core operations required by postprocessing module
 """
 
+import pandas as pd
+from pandas.io.json import json_normalize
+import json
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
 def get_subsequence_coverage(
     silico_fragments,
     confirmed_fragments,
@@ -41,17 +48,17 @@ def get_subsequence_coverage(
     for core_series in core_fragment_series:
 
         # get in silico fragments that belong to current core series
-        silico_core_fragments = [
-            frag for frag in silico_fragments
-            if frag[0] == core_series
-        ]
+        silico_core_fragments = get_core_fragments(
+            target_fragments=silico_fragments,
+            core_series=core_series
+        )
 
         # get confirmed fragments that belong to current core series
-        core_confirmed = [
-            frag for frag in confirmed_fragments
-            if frag[0] == core_series
-        ]
-
+        core_confirmed = get_core_fragments(
+            target_fragments=confirmed_fragments,
+            core_series=core_series
+        )
+        
         # get optional fragments that belong to current core series
         optional_core_fragments = [
             frag for frag in silico_core_fragments
@@ -143,6 +150,131 @@ def calculate_subsequence_coverage(
     # block)
     return sequence_coverage
 
+def get_core_fragments(
+    target_fragments,
+    core_series
+):
+    """
+    Takes a list of fragment ids, target core fragment series (one letter 
+    codes) and returns list of target fragments that fall within one or more
+    of the specified core series
+    
+    Args:
+        target_fragments (list): list of fragment id strings
+        core_series (list or str): list of core fragment series one letter 
+            codes OR single one letter code for single core series 
+    
+    Returns:
+        list: list of fragments in input target fragments that belong to one
+            or more core series 
+    """
+    # initialise list to store core fragments 
+    core_fragments = []
+
+    # make core_series a list if not already
+    if type(core_series) != list:
+        core_series = [core_series]
+    
+    # iterate through core series, adding fragments from target that belong
+    # to one or more core series to core_fragments 
+    for frag_series in core_series:
+        core_fragments.extend([
+            frag for frag in target_fragments 
+            if frag[0] == frag_series
+        ])
+
+    return list(set(core_fragments))
+
+def get_percent_found_fragments(
+    insilico_fragments,
+    confirmed_fragments,
+    core_fragment_series,
+    optional_fragments,
+    exclude_fragments
+):
+    """
+    Takes a list of in silico fragments for a sequence, confirmed fragments 
+    and one letter codes for core fragments, and returns % core fragments that
+    have been confirmed for sequence 
+    
+    Args:
+        insilico_fragments (list): list of fragment ids for in silico (i.e.
+            theoretical) sequence fragment
+        confirmed_fragments (list): list of fragment ids for confirmed (i.e.
+            observed) sequence fragments
+        core_fragment_series (list): list of ONE LETTER CODES for fragment 
+            series that are to be used to calculate percentage found fragments
+        optional_fragments (list): list of specific fragment ids to exclude
+            from calculation IF they have not been confirmed
+        exclude_fragments (list): list of specific fragment ids to exclude 
+            from calculation UNDER ANY CIRCUMSTANCES, including if they have
+            been confirmed 
+    
+    Returns:
+        float: % fragments that have been confirmed for a sequence 
+    """
+    # get list of in silico fragments that belong to core fragment series 
+    core_silico = get_core_fragments(
+        target_fragments=insilico_fragments,
+        core_series=core_fragment_series
+    )
+
+    # get list of confirmed fragments that belong to core fragment series 
+    core_confirmed = get_core_fragments(
+        target_fragments=confirmed_fragments,
+        core_series=core_fragment_series
+    )
+    
+    # check for fragments to exclude from confidence calculation; if any are
+    # specified, remove these fragments from silico and confirmed fragment
+    # lists if they are present 
+    if exclude_fragments:
+        core_silico = list(
+            filter(
+                lambda frag: frag not in exclude_fragments, 
+                core_silico
+            )
+        )
+
+        core_confirmed = list(
+            filter(
+                lambda frag: frag not in exclude_fragments,
+                core_confirmed
+            )
+        )
+
+    # check for optional fragments; if specified, remove any optional fragments
+    # that have not been confirmed from silico fragment list 
+    if optional_fragments:
+        missing_optional_fragments = [
+            frag for frag in core_silico
+            if (frag not in core_confirmed 
+            and frag in optional_fragments)
+        ]
+
+        core_silico = list(
+            filter(
+                lambda frag: frag not in missing_optional_fragments,
+                core_silico
+            )
+        )
+
+    print(f"core_silico = {core_silico}")
+    print(f"core_confirmed = {core_confirmed}")
+
+    # count number of theoretical (silico) and confirmed fragments 
+    n_silico, n_confirmed = len(core_silico), len(core_confirmed)
+
+    print(f"n_confirmed = {n_confirmed}")
+    print(f"n_silico = {n_silico}")
+
+    # return 0 if no fragments are confirmed 
+    if n_confirmed == 0:
+        return 0
+    
+    # return % found fragments to 2 decimal places 
+    return round((n_confirmed/n_silico)*100, 2)
+
 def assign_confidence_sequence(
     insilico_fragments,
     confirmed_fragments,
@@ -186,22 +318,31 @@ def assign_confidence_sequence(
     Returns:
         confidence (float): final confidence assignment (in % )
     """
+    print(f"in silico fragments = {insilico_fragments}")
+    print(f"confirmed fragments = {confirmed_fragments}")
+    
+    # work out percentage found fragments from core series 
+    percentage_found_fragments = get_percent_found_fragments(
+        insilico_fragments=insilico_fragments,
+        confirmed_fragments=confirmed_fragments,
+        core_fragment_series=core_fragment_series,
+        optional_fragments=optional_fragments,
+        exclude_fragments=exclude_fragments
+    )
 
     # initiate list to store missing essential fragments
     missing_essentials = []
 
     # check that all essential fragments are in in silico fragments
     if essential_fragments:
-        print(f'essential_fragments = {essential_fragments}')
         essential_fragments = list(
             filter(
                 lambda frag: frag in insilico_fragments, essential_fragments
             )
         )
-
+    
     # if any essential fragments are missing, restrict confidence assignment
     # to an upper limit of essential_fragment_cap
-    if essential_fragments:
         missing_essentials = [
             frag for frag in essential_fragments
             if frag not in confirmed_fragments
@@ -213,30 +354,6 @@ def assign_confidence_sequence(
     if missing_essentials:
         confidence_cap = essential_fragment_cap
 
-    # add any optional fragments that have not been confirmed to list of
-    # fragments to exclude from consideration
-    exclude_fragments = [
-        frag for frag in optional_fragments
-        if frag not in confirmed_fragments
-    ]
-
-    # remove exclude_fragments from in silico fragments
-    insilico_fragments = [
-        frag for frag in insilico_fragments
-        if frag not in exclude_fragments
-    ]
-
-    # remove exclude_fragments from confirmed fragments
-    confirmed_fragments = [
-        frag for frag in confirmed_fragments
-        if frag not in exclude_fragments
-    ]
-
-    # calculate percentage of theoretical (in silico) fragments that have been
-    # observed in confirmed_fragments
-    n_confirmed, n_silico = len(confirmed_fragments), len(insilico_fragments)
-    percentage_found_fragments = (n_confirmed / n_silico)*100
-
     # set sequence coverage to 0; this will only be calculated if
     # sequence_coverage_weight is greater than 0
     sequence_coverage = 0
@@ -245,11 +362,11 @@ def assign_confidence_sequence(
     # calculate sequence coverage
     if sequence_coverage_weight > 0:
         sequence_coverage = get_subsequence_coverage(
-            insilico_fragments,
-            confirmed_fragments,
-            core_fragment_series,
-            optional_fragments,
-            exclude_fragments
+            silico_fragments=insilico_fragments,
+            confirmed_fragments=confirmed_fragments,
+            core_fragment_series=core_fragment_series,
+            optional_fragments=optional_fragments,
+            excluded_fragments=exclude_fragments
         )
 
     # calculate final confidence by combining WEIGHTED values for percentage
@@ -432,13 +549,8 @@ def return_peaks_EIC(
     min_relative_intensity=None
 ):
     """
-    Takes an EIC and returns peaks that fit within retention time limit (Rt_bin),
-    starting from most intense peak
-
-    Args:
         EIC (list of lists): list of [Rt, I] sublists
         n_peaks (int): number of peaks to return
-        Rt_bin (float): minimum gap between peaks (in retention time)
         min_relative_intensity (float, optional): minimum intensity of peaks
             as a DECIMCAL FRACTION OF MOST INTENSE PEAK. Defaults to None.
 
@@ -536,3 +648,63 @@ def get_Rt_I_from_ms1_EIC(
 
     # return [Rt, I] sublist of peaks found
     return found_targets
+
+def create_EIC_plots(EICs_json):
+    """
+    This function creates an EIC plot (retention time vs intensity) for
+    each sequence in the EICS.json and saves each figure as a .png files.
+
+    Arguments:
+        EICs_json (str) -- ".._EICs.json" created by previous post processing
+            functions.
+
+    """
+
+    # read EICs.json
+    with open(EICs_json, 'r') as EICs_json_data:
+        EICs_dict = json.load(EICs_json_data)
+
+    # create pandas dataframe from json data
+    EICs_normalized_data = pd.DataFrame.from_dict(
+        json_normalize(EICs_dict),
+        orient='columns'
+    )
+
+    # change dataframe layout (sequence becomes indexed variable)
+    EICs_data = pd.melt(EICs_normalized_data)
+
+    # count number of rows
+    nrows = len(EICs_data)
+
+    # create new columns for retention times and intensities
+    EICs_data["retention times"] = EICs_data["value"]
+    EICs_data["intensities"] = EICs_data["value"]
+
+    # separate retention times and intensities to different rows
+    for i in range(nrows):
+        rt = list(zip(*EICs_data["value"][i]))[0]
+        EICs_data["retention times"][i] = rt
+        intensity = list(zip(*EICs_data["value"][i]))[1]
+        EICs_data["intensities"][i] = intensity
+
+    # remove 'value' column, rename 'variable' to sequence
+    EICs_data = EICs_data.drop(columns = 'value')
+    EICs_data.rename(columns = {'variable':'sequence'}, inplace=True)
+
+    # create EIC plot for each sequence (retention time vs intensity)
+    sns.set_style("ticks")
+    sns.set_palette("Set2")
+    for i in range(nrows):
+        plt.close()
+        plt.xlabel("Retention Time")
+        plt.ylabel("Intensity")
+        plt.title(EICs_data["sequence"][i])
+        sns.lineplot(
+            (
+                EICs_data["retention times"][i]),
+            (
+                EICs_data["intensities"][i]), data=EICs_data
+            )
+
+        # save figure as .png
+        plt.savefig(f"{i}_{EICs_data['sequence'][i]}.png")

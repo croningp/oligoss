@@ -17,26 +17,30 @@
         "add_modifications": false,
 
         "MS1": {
-            "monomers": ["S", "H", "G", "L"],
-            "max_length": 3,
+            "monomers": ["F", "W", "Y", "N"],
+            "max_length": 5,
+            "min_length": 1,
             "ms1_adducts": ["H"],
             "min_z": 1,
             "max_z": null,
             "losses": true,
             "max_neutral_losses": null,
             "loss_products_adducts": null,
-            "min_length": 1,
             "chain_terminators": null,
             "universal_rxn": true,
             "terminal_tags": {
                 "0": null,
-                "-1": null
-            }
+                "-1": ["F"]
+            },
+            "side_chain_tags": {
+            },
+            "cyclic_sequences": false,
+            "isobaric_targets": null
         },
 
         "MS2": {
             "fragment_series": ["b", "y"],
-            "ms2_adducts": ["Na"],
+            "ms2_adducts": ["H", "Na"],
             "ms2_losses": true,
             "ms2_max_neutral_losses": null,
             "ms2_loss_products_adducts": null,
@@ -44,11 +48,9 @@
             "signatures": null,
             "min_z": 1,
             "max_z": 1
-        },
-
-        "modifications": ""
+        }
     },
-
+ 
 "extractor_parameters":
     {   "error": 0.01,
         "err_abs": true,
@@ -58,15 +60,15 @@
         "min_MS1_total_intensity": null,
         "min_MS2_total_intensity": null,
         "min_MS1_max_intensity": 1E6,
-        "min_MS2_max_intensity": 1E-3,
+        "min_MS2_max_intensity": null,
         
         "pre_screen_filters": {
             "min_rt": 0,
-            "max_rt": 10,
-            "essential_signatures": null,
+            "max_rt": 50,
+            "essential_signatures": ["F"],
             "signature_types": ["Im"],
             "signature_ms_level": 2,
-            "massdiff_bins": true,
+            "massdiff_bins": false,
             "ms2_precursors": null,
             "precursors": {
                 "1": null, 
@@ -86,9 +88,9 @@
         "optional_core_frags": ["b1"],
         "core_linear_series": ["b", "y"],
         "excluded_fragments": null,
-        "dominant_signature_cap": 70,
+        "dominant_signature_cap": 0,
         "essential_fragments": null,
-        "subsequence_weight": 1,
+        "subsequence_weight": 0,
         "min_rt": null,
         "max_rt": null,
         "Rt_bin": 0.25,
@@ -96,13 +98,20 @@
         "ms2_Rt_bin": 0.5,
         "ms2_Rt_flexible": true,
         "min_viable_confidence": 55,
-        "min_relative_intensity": null
+        "min_relative_intensity": null,
+        "plot_EICs": true,
+
+        "cyclic_parameters": {
+            "min_shifted_fragments": 0,
+            "min_viable_linear_confidence": null,
+            "core_series": null,
+            "assign_cyclic_Rt": true
+        }
     },
 
 "directories":
-    {   "ripper_folder": "C:/Users/group/polymermassspec/Examples/ripper_jsons",
-        "polymer_config": "C:/Users/group/polymermassspec/polymersoup/insilico/Config_files/Depsipeptide_config.py",
-        "output_folder": "C:/Users/group/polymermassspec/Examples/output"
+    {   "ripper_folder": "Z:/group/David Doran/Data/PeptideSequencing/PolymerMassSpec/LinearStandards/SPPS/Orbi-Nanomate/FWYN_FYWN/ripper_jsons",
+        "output_folder": "C:/Users/group/Documents/MSAnalysis/temp"
     }
 
 }

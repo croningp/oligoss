@@ -237,7 +237,7 @@ def confirm_fragments_sequence(
         err=err,
         err_abs=err_abs,
         ms_level=ms_level)
-
+    
     # pull out spectra at fragmentation ms level
     filtered_dict = filtered_dict[f'ms{ms_level}']
 
@@ -346,11 +346,11 @@ def find_most_intense_matching_peak(
     # set top matching intensity to 0; this will be reset if matching peaks
     # are found with intensity > 0
     top_intensity = 0
+  
+    intensities = []
 
     # iterate through theoretical peaks associated with sequence
     for peak_mass in peak_list:
-
-        intensities = []
 
         # find real peaks in spectrum that match theoretical sequence peak
         # mass
@@ -360,7 +360,7 @@ def find_most_intense_matching_peak(
             err=err,
             err_abs=err_abs
         )
-
+    
         # get intensities of all matching peaks, sorted in ascending order
         for match in matches:
             try:
@@ -369,16 +369,14 @@ def find_most_intense_matching_peak(
                 match = str(match) + "0000"
                 match = match[0:match.find(".")+5]
                 intensities.append(float(spectrum[f'{match}']))
-
-        intensities.sort()
-
-        # check whether most intense match is more intense than previous most
-        # intense match; if so, reset top_intensity
-        if not intensities:
-            return top_intensity
-        else:
-            if intensities[-1] > top_intensity:
-                top_intensity = intensities[-1]
+    
+    intensities = sorted(intensities)
+    
+    if not intensities:
+        return top_intensity
+    else:
+        if intensities[-1] > top_intensity:
+            top_intensity = intensities[-1]
 
     return top_intensity
 
@@ -417,7 +415,7 @@ def find_maximum_annotated_peak_intensity(
         err=err,
         err_abs=err_abs
     )
-
+   
     # return maximum annotated peak intensity in % of most intense peak in
     # spectrum
     if most_intense_matching_peak > 0:
@@ -460,7 +458,7 @@ def find_fragments_spectrum(
 
     # iterate through SIGNATURE FRAGMENTS
     for signature, signature_masses in fragment_dict['signatures'].items():
-
+        
         # retrieve masses in spectrum that match fragment target masses
         matches = find_multiple_targets(
             signature_masses,
@@ -573,7 +571,7 @@ def confirm_fragments_sequence_dict(
             min_annotated_peak_assignment=extractor_parameters[
                 "min_ms2_peak_abundance"]
         )
-
+        
         # if fragments have been confirmed for sequence, add to confirmed
         # fragment dictionary
         if confirmed_fragments:

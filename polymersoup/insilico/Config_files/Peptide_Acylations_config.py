@@ -65,7 +65,7 @@ MODIFICATIONS_DICT = {
 
     # "side_chain_attachments" = list of monomer one letter codes for monomers
     # with side chains that can be acylated by oleic acid
-        "side chains attachments": ["K", "R"],
+        "side_chains_attachments": ["K", "R"],
 
         # "free_mod_fragments" = m/z values of free oleic acid fragments
         # produced from acylated precursors in both positive and negative mode

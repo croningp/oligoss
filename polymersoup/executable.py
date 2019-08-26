@@ -9,7 +9,7 @@ from .insilico.SilicoGenerator import *
 from .filehandler import *
 from .postprocessing.postprocess import *
 
-def launch_screen(input_parameters_file='C:/Users/group/PolymerMassSpec/Examples/InputParams_Test.json'):
+def launch_screen(input_parameters_file):
     """
     This function reads an input parameters .json file and decides what
     kind of screening method to use, then performs sequencing screen
@@ -58,12 +58,10 @@ def exhaustive_screen(
 
     # load location of mass spec data in mzml_ripper .json file format
     ripper_folder = directories['ripper_folder']
-    
     # load output folder for saving data, create if it does not exist
     output_folder = directories['output_folder']
     if not os.path.exists(output_folder):
         os.mkdir(output_folder)
-    
     write_to_json(
         write_dict=parameters_dict,
         output_json=os.path.join(output_folder, 'run_parameters.json')
@@ -101,15 +99,24 @@ def exhaustive_screen(
         os.path.join(filtered_ripper_folder, file)
         for file in os.listdir(filtered_ripper_folder)
     ]
-    
+
     # iterate through filtered ripper .json files
     for filtered_ripper in filtered_rippers:
+
+        # create subfolder for this data set 
+        write_folder = os.path.join(
+            output_folder, 
+            os.path.basename(filtered_ripper)
+        )
+
+        if not os.path.exists(write_folder):
+            os.mkdir(write_folder)
 
         # open filtered ripper .json file as dict
         ripper_dict = open_json(filtered_ripper)
 
         print(f'getting MS1 EICs for {len(compositional_silico_dict)} compositions')
-        EIC_start = time.time()
+       
         # get MS1 EICs for all compositions
         MS1_EICs = extract_MS1(
             silico_dict=compositional_silico_dict,
@@ -120,11 +127,9 @@ def exhaustive_screen(
         # save MS1 EICs
         write_MS1_EIC_file(
             input_data_file=filtered_ripper,
-            output_folder=output_folder,
+            output_folder=write_folder,
             MS1_EICs=MS1_EICs
         )
-
-        EIC_duration = time.time()-EIC_start
 
         # remove compositions that are not present at sufficient abundance
         # from in silico compositionl dict
@@ -132,7 +137,8 @@ def exhaustive_screen(
             composition: compositional_silico_dict[composition]
             for composition in MS1_EICs
         }
-
+        print(f'compositions = {compositional_silico_dict}')
+        
         print(f'generating full MSMS dict for {len(MS1_EICs)} compositions')
 
         # generate full insilico fragmentation MSMS data for all possible
@@ -142,11 +148,11 @@ def exhaustive_screen(
             silico_parameters=silico_params,
             uniques=False
         )
-
+       
         # write full in silico dict to .json file
         write_pre_fragment_screen_sequence_JSON(
             input_data_file=filtered_ripper,
-            output_folder=output_folder,
+            output_folder=write_folder,
             MSMS_silico_dict=full_MSMS_silico_dict
         )
 
@@ -159,13 +165,14 @@ def exhaustive_screen(
             extractor_parameters=extractor_params
         )
 
+        print(f'confirmed fragment dict = {confirmed_fragment_dict}')
+
         # write confirmed fragment silico dict to .json file
         write_confirmed_fragment_dict(
             input_data_file=filtered_ripper,
-            output_folder=output_folder,
+            output_folder=write_folder,
             confirmed_fragment_dict=confirmed_fragment_dict
         )
-
 
         # assign final confidence scores to all sequences with confirmed
         # fragments
@@ -174,18 +181,13 @@ def exhaustive_screen(
             confirmed_dict=confirmed_fragment_dict,
             postprocess_params=postprocess_parameters
         )
-        
-        # write confidence scores to .json file 
-        write_confidence_assignments(
-            input_data_file=filtered_ripper,
-            output_folder=output_folder,
-            confidence_assignments=confidence_scores
-        )
 
+        print(f"confidence_scores = {confidence_scores}")
+        
         # write confidence scores to .json file
         write_confidence_assignments(
             input_data_file=filtered_ripper,
-            output_folder=output_folder,
+            output_folder=write_folder,
             confidence_assignments=confidence_scores
         )
 
@@ -225,7 +227,7 @@ def exhaustive_screen(
         # write unique fragment dict to output .json file
         write_unique_fragment_dict(
             input_data_file=filtered_ripper,
-            output_folder=output_folder,
+            output_folder=write_folder,
             unique_fragment_dict=unique_fragment_dict
         )
 
@@ -240,7 +242,7 @@ def exhaustive_screen(
         # write MS2 EICs to .json file
         write_MS2_EIC_file(
             input_data_file=filtered_ripper,
-            output_folder=output_folder,
+            output_folder=write_folder,
             MS2_EICs=MS2_EICs
         )
 
@@ -250,13 +252,14 @@ def exhaustive_screen(
             MS1_EICs=MS1_EICs,
             MS2_EICs=MS2_EICs,
             confident_assignments=confident_assignments,
-            postprocess_parameters=postprocess_parameters
+            postprocess_parameters=postprocess_parameters,
+            confidence_scores=confidence_scores
         )
-
+        
         # write retention time and intensity assignments to output .csv file
         write_final_retention_time_assignments(
             input_data_file=filtered_ripper,
-            output_folder=output_folder,
+            output_folder=write_folder,
             final_Rt_I_dict=final_Rt_Is
         )
 
