@@ -152,7 +152,7 @@ LOSS_PRODUCTS = {
     "Q" : [NH3]
 }
 """
-lOSS_PRODUCTS: Side chains with hydroxyl and carboxylic acid groups can lose
+LOSS_PRODUCTS: Side chains with hydroxyl and carboxylic acid groups can lose
 H2O; amines can lose NH3; carboxamides can lose H2O and NH3
 
 """
@@ -251,6 +251,9 @@ Fragment properties:
             multiply charged in the absence of ionizable or intrinsically
             charged side chains, there are no permissible adducts for this
             series.
+
+MS2_SIGNATURE_IONS = MS2 fragments which can be used as markers for monomers
+            and / or small subsequences.
 """
 
 FRAG_SERIES = {

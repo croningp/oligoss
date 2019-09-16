@@ -57,6 +57,16 @@ CHAIN_TERMINATORS = list of monomers that terminate chain elongation
 LOSS_PRODUCTS = dictinary of monomer one letter codes and associated side chain
             neutral loss products, i.e. masses that can be lost from the monomer
             side chain.
+
+IONIZABLE_SIDECHAINS = dictionary of monomers that can be ionised with extra adducts
+    at the SIDE CHAIN, with associated adducts, minimum and maximum absolute charge
+    states in both positive and negative mode. Format = {"X": {"pos": (adduct, a, b),
+    "neg": (adduct, a, b)}} where "X" = monomer one letter code, adduct = adduct string
+    (must be found in either CATIONS OR ANIONS in GlobalChemicalConstantss), a = min 
+    side chain charge, b = max side chain charge for ionized form.
+
+INTRINSICALLY_CHARGED_MONOMERS = dictionary of monomers that have an intrinsic charge
+    (i.e. charged without addition of adducts), with associated lists of permissible adducts
 """
 
 MONOMERS = {"X": [0, [["rxn_class1", 1], ["rxn_class2", 1]]]}
@@ -95,13 +105,24 @@ LOSS_PRODUCTS = {
     "X": []
 }
 
+IONIZABLE_SIDECHAINS = {
+    "X": {"pos": (),
+          "neg": ()}
+}
+
+INTRINSICALLY_CHARGED_MONOMERS = {}
+"""
+IONIZABLE_SIDECHAINS: Side chains with free amines (K, R, H) can gain a proton
+and become cationic; side chains with free carboxylates (E, D) can lose a proton
+and become anionic
+"""
 """
 INSERT ADDITIONAL DETAILS REGARDING SIDE CHAIN LOSS PRODUCTS HERE
 
 """
 
 """
-Section 2: MS2 FRAGMENTATION
+SECTION 2: MS2 FRAGMENTATION
 
 This section should contain all the information required to construct a basic
 MS2 fragment series for linear polymers. Each fragment type is defined as a key
@@ -132,9 +153,41 @@ Fragment properties:
                     sequence 'AGVS' = the mass of (GVS+H) in positive mode, and
                     (GVS-H) in negative mode.
 
-'fragmentation_unit' - the minimum number of monomer units typically added and / or
-                    removed at a time when building a fragment series.
+'fragmentation_unit' - the minimum number of monomer units typically added and
+                    / or removed at a time when building a fragment series.
                     Default = ELONGATION_UNIT (see Section 1)
+
+'start' - the starting position of the fragment series within the fragmenting
+            sequence, relative to the first monomer in the sequence. If this is
+            0, fragment series will be generated along the full length of the
+            sequence; otherwise it will be generated from 0+n position, where
+            n = 'start'
+
+'end' - the ending position of the fragment series within the fragmenting
+            sequence, relative to the last monomer in the sequence. If this is
+            0, fragment series will be generated along the full length of the
+            sequence; otherwise it will be generated up until -(n+1) position,
+            where n = 'end'
+
+'intrinsic_adducts' - OPTIONAL. this subdictionary contains any intrinsic
+            adducts generated as default for a given fragment series in
+            positive and negative mode. Intrinsic adducts are adducts which
+            are added to the fragment as default (for example: +H for peptide y
+            fragments in positive mode). This information is important when
+            adding non-standard adducts (e.g. Na+, K+, Cl- etc..) to MS2
+            fragments, as intrinsic adduct masses must be removed when adding
+            other adduct masses
+
+'permissible_adducts' - OPTIONAL. this subdictionary contains lists of adducts
+            that may be found associated with a particular MS2 fragment series.
+            This is to be used only in cases where there are restrictions on
+            associated fragments, as otherwise it is assumed that any MS2
+            adducts included in the in silico run are compatible with all
+            fragment series. Example: peptide b fragments are inherently
+            charged as acylium ions, and as they are extremely unlikely to be
+            multiply charged in the absence of ionizable or intrinsically
+            charged side chains, there are no permissible adducts for this
+            series.
 
 MS2_SIGNATURE_IONS = MS2 fragments which can be used as markers for monomers
                     and / or small subsequences.
