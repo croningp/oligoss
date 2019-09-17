@@ -90,7 +90,10 @@ MONOMERS = {
     "V": [117.07899, [["amine", 1], ["carboxyl", 1]]],
     "W": [204.08989, [["amine", 1], ["carboxyl", 1]]],
     "Y": [181.07391, [["amine", 1], ["carboxyl", 1]]],
-    "g": [76.01606, [["hydroxyA", 1], ["carboxyl", 1]]]
+    "g": [76.01606, [["hydroxyA", 1], ["carboxyl", 1]]],
+    "j": [73.08915, [["amine", 1], ["carboxyl", 1]]],
+    "e": [237.10011, [["amine", 1], ["carboxyl", 1]]],
+    "k": [243.09510, [["amine", 1], ["carboxyl", 1]]]
 }
 
 """
@@ -98,8 +101,8 @@ A = alanine; C = cysteine; D = aspartic acid; E = glutamic acid;
 F = phenylalanine; G = glycine; H = histidine; I = isoleucine; K = lysine;
 L = leucine; M = methionine; N = asparagine; P = proline; Q = glutamine;
 R = arginine; S = serine; T = threonine; V = valine; W = tryptophan;
-Y = tyrosine
-g = glycolic acid
+Y = tyrosine; g = glycolic acid; e = L-glutamic benzyl ester;  
+k = Nε-Trifluoroacetyl-L-lysine; j = butyl amine
 
 """
 
@@ -149,7 +152,10 @@ LOSS_PRODUCTS = {
     "N" : [NH3, H2O],
     "R": [NH3],
     "K": [NH3],
-    "Q" : [NH3]
+    "Q" : [NH3],
+    "j": [73.08468],
+    "e": [108.05751],
+    "k": [95.9823]
 }
 """
 LOSS_PRODUCTS: Side chains with hydroxyl and carboxylic acid groups can lose
