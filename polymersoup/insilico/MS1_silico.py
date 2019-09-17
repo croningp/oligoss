@@ -302,11 +302,14 @@ def generate_ms1_mass_dictionary_adducts_losses(
     # generate a separate mass dictionary, including side chain-specific
     # neutral loss products for every sequence in the MS1_neutral mass
     # dictionary
-    MS1_loss_products = add_loss_products_ms1_massdict(
-        MS1_neutral,
-        max_total_losses
-    )
-
+    if losses:
+        MS1_loss_products = add_loss_products_ms1_massdict(
+            MS1_neutral,
+            max_total_losses
+        )
+    else:
+        MS1_loss_products = MS1_neutral
+        
     # before adding charged adducts to masses, check whether any specific
     # charged adducts have been specified to add to side chain loss product
     # masses. This is only to be used in cases where the adducts added to loss

@@ -43,7 +43,7 @@ def exhaustive_screen(
         parameters_dict (dict): input parameters dictionary in standard
             input parameters format
     """
-    start = time.time()
+    
     # load polymer-specific info - THIS IS CURRENTLY NOT IN USE
     polymer_data = parameters_dict['directories']['polymer_config']
 
