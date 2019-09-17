@@ -377,9 +377,11 @@ IMMONIUM_IONS = MS2_SIGNATURE_IONS = {
         "T": [74.06059], "A": [44.05003], "M": [104.0534, 120.0483],
         "Q": [101.0715], "P": [70.06568], "N": [87.05584], "W": [159.0922],
         "e": [102.0555, 192.10191], "k": [101.1079, 197.08962],
-        #'dominant' is a list of monomers for which the signature ion is
-        #expected to be present in all MS2 spectra of a sequence containing
-        #the monomer
+
+        # 'dominant' is a list of monomers for which the signature ion is
+        # expected to be present in all MS2 spectra of a sequence containing
+        # the monomer
+        
         "dominant": ["F", "I",  "L", "P", "H", "Y"]
         }
 }

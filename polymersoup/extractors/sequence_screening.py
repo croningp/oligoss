@@ -299,6 +299,10 @@ def find_most_intense_peak_spectrum(
 
 
     masses = []
+    
+    # if there are no masses in spectrum, return 0 
+    if not spectrum['mass_list']:
+        return (0,0)
 
     # get list of mass (m/z), intensity tuples for all peaks in spectrum
     for mass in spectrum['mass_list']:
