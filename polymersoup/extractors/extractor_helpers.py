@@ -43,9 +43,8 @@ def find_target(
     if not err_abs:
 
         # convert err to ppm (if not absolute mass units)
-        print(f'absolute error threshold for {err} ppm with target {target}:')
         err = (target*err)*10**-6
-        print(f'{err} amu')
+        
     # calculate minimum and maximum range for matching target to candidate
     min_hit, max_hit = target-err, target+err
 
