@@ -180,13 +180,13 @@ def generate_MS1_EICs_sequence_dict(
         silico_dict[sequence] = [float(mass) for mass in masses]
 
         sequence_MS1_EIC = generate_EIC(
-            masses,
-            1,
-            ripper_dict,
-            err,
-            err_abs,
-            min_max_intensity,
-            min_total_intensity
+            ions=masses,
+            ms_level=1,
+            ripper_dict=ripper_dict,
+            err=err,
+            err_abs=err_abs,
+            min_max_intensity=min_max_intensity,
+            min_total_intensity=min_total_intensity
         )
 
 def confirm_fragments_sequence(
@@ -297,8 +297,11 @@ def find_most_intense_peak_spectrum(
                     (m/z, I)
     """
 
-
     masses = []
+    
+    # if there are no masses in spectrum, return 0 
+    if not spectrum['mass_list']:
+        return (0,0)
 
     # get list of mass (m/z), intensity tuples for all peaks in spectrum
     for mass in spectrum['mass_list']:
@@ -311,11 +314,6 @@ def find_most_intense_peak_spectrum(
     # sort peaks by most intense
     masses = sorted(masses, key = lambda x: x[1])
 
-    if type(masses) != list:
-        raise Exception(f'lambda fucked')
-
-    if type(masses) != list:
-        raise Exception(f'lambda fucked')
     # retrieve most intense m/z in format (m/z, I) where m/z = peak m/z and I
     # = intensity of peak with m/z
     most_intense = masses[-1]
@@ -461,10 +459,10 @@ def find_fragments_spectrum(
         
         # retrieve masses in spectrum that match fragment target masses
         matches = find_multiple_targets(
-            signature_masses,
-            spectrum_masses,
-            err,
-            err_abs
+            targets=signature_masses,
+            candidates=spectrum_masses,
+            err=err,
+            err_abs=err_abs
         )
 
         # if any spectrum masses are a match for fragment masses, add
@@ -489,10 +487,10 @@ def find_fragments_spectrum(
         if fragment != 'signatures':
             # retrieve masses in spectrum that match fragment target masses
             matches = find_multiple_targets(
-                masses,
-                spectrum_masses,
-                err,
-                err_abs
+                targets=masses,
+                candidates=spectrum_masses,
+                err=err,
+                err_abs=err_abs
             )
 
         # if any spectrum masses are a match for fragment masses, add

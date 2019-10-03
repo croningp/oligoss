@@ -43,9 +43,8 @@ def find_target(
     if not err_abs:
 
         # convert err to ppm (if not absolute mass units)
-        print(f'absolute error threshold for {err} ppm with target {target}:')
         err = (target*err)*10**-6
-        print(f'{err} amu')
+        
     # calculate minimum and maximum range for matching target to candidate
     min_hit, max_hit = target-err, target+err
 
@@ -305,8 +304,6 @@ def filter_total_intensity(
                 # Exceeds the threshold, add to list
                 if total >= intensity_threshold:
                     filtered[key] = spectrum
-                    if ms_level == 1:
-                        print(f'{key} total intensity = {total}, threshold = {intensity_threshold}')
 
         msdata[f'ms{ms_level}'] = filtered
 
@@ -402,10 +399,10 @@ def filter_mass_difference(
 
                     # Check if minus product found
                     match1 = find_target(
-                        minus,
-                        mass_list,
-                        err,
-                        err_abs)
+                        target=minus,
+                        candidates=mass_list,
+                        err=err,
+                        err_abs=err_abs)
 
                     # Found, log monomer and move onto next peak
                     if match1:
@@ -414,10 +411,10 @@ def filter_mass_difference(
 
                     # No minus product, check plus product
                     match2 = find_target(
-                        plus,
-                        mass_list,
-                        err,
-                        err_abs)
+                        target=plus,
+                        candidates=mass_list,
+                        err=err,
+                        err_abs=err_abs)
 
                     # Found, log monomer and move onto next peak
                     if match1 or match2:
@@ -521,21 +518,21 @@ def apply_pre_screening_filters(
     if essential_signatures:
         for signature in essential_signatures:
             ripper_dict = filter_signature_ions(
-                ripper_dict,
-                [signature],
-                err,
-                err_abs,
-                signature_ms_level)
+                msdata=ripper_dict,
+                sig_ions=[signature],
+                err=err,
+                err_abs=err_abs,
+                ms_level=signature_ms_level)
 
     # check for precursor ions; if any are specified, filter out any MSn
     # spectra that do not match any of these precursors
     if precursor_ions:
         ripper_dict = filter_parent_ion(
-            ripper_dict,
-            precursor_ions,
-            err,
-            err_abs,
-            precursor_ion_ms_level
+            msdata=ripper_dict,
+            parent_ions=precursor_ions,
+            err=err,
+            err_abs=err_abs,
+            ms_level=precursor_ion_ms_level
         )
 
     # check for minimum MS1 total intensity; if specified, filter out any MS1
@@ -543,8 +540,8 @@ def apply_pre_screening_filters(
     if min_MS1_total_intensity:
         print(f'filtering out MS1 spectra with total I below {min_MS1_total_intensity}')
         ripper_dict = filter_total_intensity(
-            ripper_dict,
-            min_MS1_total_intensity,
+            msdata=ripper_dict,
+            intensity_threshold=min_MS1_total_intensity,
             ms_level=1
         )
 
@@ -556,8 +553,8 @@ def apply_pre_screening_filters(
         if min_MS2_total_intensity < 1:
             min_MS2_total_intensity = min_MS2_total_intensity * min_MS2_total_intensity
         ripper_dict = filter_total_intensity(
-            ripper_dict,
-            min_MS2_total_intensity,
+            msdata=ripper_dict,
+            intensity_threshold=min_MS2_total_intensity,
             ms_level=2
         )
 
@@ -566,8 +563,8 @@ def apply_pre_screening_filters(
     # spectra that have a total intensity below this value
     if min_MS1_max_intensity:
         ripper_dict = filter_max_intensity(
-            ripper_dict,
-            min_MS1_max_intensity,
+            msdata=ripper_dict,
+            intensity_threshold=min_MS1_max_intensity,
             ms_level=1
         )
 
@@ -579,8 +576,8 @@ def apply_pre_screening_filters(
         if min_MS2_max_intensity < 1:
             min_MS2_max_intensity = min_MS2_max_intensity*min_MS1_max_intensity
         ripper_dict = filter_max_intensity(
-            ripper_dict,
-            min_MS2_max_intensity,
+            msdata=ripper_dict,
+            intensity_threshold=min_MS2_max_intensity,
             ms_level=2
         )
     return ripper_dict
