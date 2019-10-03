@@ -431,6 +431,11 @@ def add_sidechain_neutral_loss_products_sequence(
 
     return final_masses
 
+#####
+# ADD MODIFICATION FUNCTIONS HERE - ADD MODIFICATION TO SEQUENCE STRING,
+# SEQUENCE MASS(ES)
+
+#####
 def generate_reading_frames_sequence(sequence):
     """
     Takes a linear sequence and outputs a list of reading frame shifts for

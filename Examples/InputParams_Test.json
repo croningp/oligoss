@@ -111,8 +111,7 @@
 
 "directories":
     {   "ripper_folder": "Z:/group/David Doran/Data/PeptideSequencing/PolymerMassSpec/LinearStandards/SPPS/Orbi-Nanomate/FWYN_FYWN/ripper_jsons",
-        "output_folder": "C:/Users/group/Documents/MSAnalysis/temp",
-        "polymer_config": ""
+        "output_folder": "C:/Users/group/Documents/MSAnalysis/temp"
     }
 
 }

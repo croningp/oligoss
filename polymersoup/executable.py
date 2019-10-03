@@ -43,9 +43,6 @@ def exhaustive_screen(
         parameters_dict (dict): input parameters dictionary in standard
             input parameters format
     """
-    
-    # load polymer-specific info - THIS IS CURRENTLY NOT IN USE
-    polymer_data = parameters_dict['directories']['polymer_config']
 
     # load parameters for in silico operations
     silico_params = parameters_dict['silico_parameters']
@@ -58,12 +55,10 @@ def exhaustive_screen(
 
     # load location of mass spec data in mzml_ripper .json file format
     ripper_folder = directories['ripper_folder']
-
     # load output folder for saving data, create if it does not exist
     output_folder = directories['output_folder']
     if not os.path.exists(output_folder):
         os.mkdir(output_folder)
-
     write_to_json(
         write_dict=parameters_dict,
         output_json=os.path.join(output_folder, 'run_parameters.json')
@@ -80,7 +75,6 @@ def exhaustive_screen(
         write_dict=parameters_dict,
         output_json=os.path.join(output_folder, 'run_parameters.json')
     )
-
     # load parameters for postprocessing operations
     postprocess_parameters = parameters_dict["postprocessing_parameters"]
 

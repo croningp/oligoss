@@ -549,13 +549,8 @@ def return_peaks_EIC(
     min_relative_intensity=None
 ):
     """
-    Takes an EIC and returns peaks that fit within retention time limit
-    (Rt_bin), starting from most intense peak
-
-    Args:
         EIC (list of lists): list of [Rt, I] sublists
         n_peaks (int): number of peaks to return
-        Rt_bin (float): minimum gap between peaks (in retention time)
         min_relative_intensity (float, optional): minimum intensity of peaks
             as a DECIMCAL FRACTION OF MOST INTENSE PEAK. Defaults to None.
 
