@@ -573,9 +573,18 @@ def return_peaks_EIC(
     # iterate through EIC for specified number of targets
     for i in range(0, n_peaks):
 
-        # find most intense peak in EIC, add to peaks
-        peak = working_ms1_EIC[-1]
-        peaks.append(peak)
+        try:
+
+            # find most intense peak in EIC, add to peaks
+            peak = working_ms1_EIC[-1]
+            peaks.append(peak)
+        
+        except IndexError: 
+
+            print(f"number of peaks assigned = {len(peaks)}")
+            print(f"there are no peaks left though, so the {i+1}th sequence")
+            print(f"in this isobaric set is getting an assignment of 0,0")
+            peaks.append([0, 0])
 
         # return found peaks if all targets are accounted for
         if len(peaks) == n_peaks:

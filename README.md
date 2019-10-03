@@ -66,7 +66,7 @@ All run parameters are passed in through a single JSON file.
 
 Input parameters are divided into three sections:
 
-### silico parameters:
+### 1. silico parameters:
 
 __General silico parameters__:
 
@@ -100,10 +100,17 @@ __"max_length"__:
 
 - Recommendations: we do not recommend attempting to sequence product pools with more than 2 million potential sequences at this stage. Anything up to and including this should be doable (if not, please let us know!!!)
 
+__"min_length"__:
+
+- Description: specifies minimum length of target sequence(s)
+
+- Options: integer
+
+- Recommended: 1 for most experiments
+
 __"ms1_adducts"__:
 
-- Description: list of adducts to screen for in MS1 data. Adducts are supplied as lists of strings, each adduct string __MUST__ be present
-in GlobalChemicalConstants.py. If you require adducts that are not in this file, please let us know.
+- Description: list of adducts to screen for in MS1 data. Adducts are supplied as lists of strings, each adduct string __MUST__ be present in GlobalChemicalConstants.py. If you require adducts that are not in this file, please let us know.
 
 - Options: any combination of adducts in the GlobalChemicalConstants file that match overall charge state of mode
 
@@ -118,6 +125,12 @@ __"min_z"__:
 - Recommended: 1 for standard samples. __NOTE__: if you have any monomers that are _intrinsically_ charged, do __NOT__ account for this by increasing "min_z". Rather, update the polymer-specific config file
 and this will be factored in to any runs with charged monomers (see __"Polymer Config File"__ section, below)
 
+__"max_z"__:
+
+- Description: specifies maximum __absolute__ charge state for MS1 precursor ions.
+
+- Options: integer
+
 __"losses"__:
 
 - Description: specifies whether to include side chain-specific neutral loss products for MS1 precursor ions.
@@ -125,14 +138,6 @@ __"losses"__:
 - Options: true or false
 
 - Recommended: true, unless you are certain from previous observations that these loss products will not be observed. __NOTE__: this can drastically affect the results, __be careful__
-
-__"loss_products_adducts"__:
-
-- Description: specifies whether to add extra adducts to loss products
-
-- Options: any list of adducts found in GlobalChemicalConstants.py
-
-- Recommended: null
 
 __"max_neutral_losses"__:
 
@@ -142,13 +147,13 @@ __"max_neutral_losses"__:
 
 - Recommended: null, unless you have a problem with false positives due to screening for too many precursor ions (this may be an issue for sequence pools with a large excess of loss product-prone side chains)
 
-__"min_length"__:
+__"loss_products_adducts"__:
 
-- Description: specifies minimum length of target sequence(s)
+- Description: specifies whether to add extra adducts to loss products
 
-- Options: integer
+- Options: any list of adducts found in GlobalChemicalConstants.py
 
-- Recommended: 1 for most experiments
+- Recommended: null
 
 __"chain_terminators"__:
 
@@ -172,7 +177,24 @@ __"terminal_tags"__:
 
 - Options: null or list of tag codes (__currently set up for monomer tags__, but other tags are coming next week)
 
-- Recommended:
+__"side_chain_tags"__:
+
+- Description: dictionary where keys are amino acids and their values consist of a list of possible side
+chain modifications.
+
+- Options: null or a dictionary of the format: key = amino acid, value = list of side chain modifications for that amino acid.
+
+__"cyclic_sequences"__:
+
+- Description: states whether or not cyclic sequences may be formed during the experiment.
+
+- Options: True or False
+
+- Recommended: False unless you are certain that cyclic sequences can be formed during your experiments.
+
+__"isobaric_targets"__:
+
+- Description: to be completed
 
 ```
 __MS2 silico parameters__:
@@ -202,7 +224,7 @@ __"ms2_losses"__:
 
 - Recommended: true
 
-__"max_neutral_losses"__:
+__"ms2_max_neutral_losses"__:
 
 - Description: specify upper cap on number of side chain-specific neutral loss products to include for MS2 fragments
 
@@ -252,7 +274,7 @@ __"max_z"__:
 
 ```
 
-## extractor_parameters:
+## 2. extractor_parameters:
 
 __general extractor parameters__:
 
@@ -265,7 +287,7 @@ __"error"__:
 
 - Recommended: 0.01 (absolute)
 
-__"error_abs"__:
+__"err_abs"__:
 
 - Description: specifies whether error units are in absolute mass units or ppm
 
@@ -335,9 +357,17 @@ __"signature_ms_level"__:
 
 - Recommended: 2, as presently we only have data for MS2 signatures
 
+__"massdiff_bins"__:
+
+- Description: *to be completed*
+
+- Options: true or false
+
+- Recommended: *to be completed*
+
 __"ms2_precursors"__:
 
-- Descritption: list of precursor ions for matching to MS2 parents in observed MS2 spectra. Any MS2 spectra that do not have a parent matching one or more of these precursors will be discarded from consideration.
+- Description: list of precursor ions for matching to MS2 parents in observed MS2 spectra. Any MS2 spectra that do not have a parent matching one or more of these precursors will be discarded from consideration.
 
 - Options: null or list of floats
 
@@ -376,7 +406,7 @@ __"min_MS2_max_intensity"__:
 - Recommended: null
 
 ```
-## postprocess parameters:
+## 3. postprocess parameters:
 
 ```
 
@@ -503,8 +533,15 @@ __"min_relative_intensity"__:
 - Options: null or float (range = 0 to 100)
 
 - Recommended: null, unless you are deliberately attempting to assign retention time of very low confidence sequences (which probably won't work anyway..)
-```
 
+__"plot EICs"__:
+
+- Description: option to plot all EICs and save the plots as png files into your output folder.
+    NOTE: not finished yet.
+
+- Options: true or false
+
+```
 ## directories:
 
 ```
@@ -525,3 +562,113 @@ __"output_folder"__:
 - Recommended: scapa data folder (obviously)
 
 ```
+
+__"Polymer Config File"__:
+
+# SECTION 1: GENERAL MS1 AND CHEMISTRY RULES:
+
+```
+__"MONOMERS"__:
+
+- Description: dictionary of monomer one letter codes, along with associated neutral monoisotopic masses and reactivity classes (functional groups). This dictionary should specify the neutral monoisotopic mass for each monomer, its reactive functional groups, and the number of each reactive functional group. This information is essential to ensure that all theoretical sequences generated are chemically feasible.
+
+- Format:  {'X': [mass, [[rxn_class1, n], [rxn_class2, y]]}
+where X = monomer one letter code; mass = neutral monoisotopic mass; rxn_class1 and rxn_class2 = reactivity classes (functional groups - e.g. amine, aldehyde); n = number of rxn_class1 functional groups; y = number of rxn_class2 functional groups.
+
+__"MASS_DIFF"__:
+
+- Description: the mass difference when adding an additional monomer on to a polymer chain.
+
+- Format: float
+
+- Options: For condensation polymer = H2O
+
+__"ELONGATION_UNIT"__:
+
+- Description: the number of additional monomer units typically added when elongating a polymer.
+
+- Format: integer
+
+- Options: This will typically be 1 for most polymers.
+
+__"REACTIVITY_CLASSES"__:
+
+- Description: dictionary of reactivity classes with associated compatible classes and monomers.
+
+- Format: {'classA' : [['classX', 'classY'], ['A', 'B']}
+where classA = reaction class, classX and classY = classes that are cross-reactive with classA, and A and B are monomers within reaction class classA.
+
+__"SYMMETRY"__:
+
+- Description: bool to define whether polymer is identical at both ends.
+
+- Options: true or false
+
+- Recommended: Set to false for polymers with different termini (e.g. N- and C- termini for peptides), true for polymers with identical functional groups at both termini in linear chains.
+
+__"CHAIN_TERMINATORS"__:
+
+- Description: list of monomers that terminate chain elongation.
+
+- Options: null unless you are certain a certain monomer will stop elongation of the chain in your reactions.
+
+__"LOSS_PRODUCTS"__:
+
+- Description: dictionary of monomer one letter codes and associated side chain neutral loss products, i.e. masses that can be lost from the monomer side chain.
+
+__"IONIZABLE_SIDECHAINS"__:
+
+- Description: dictionary of monomers that can be ionised with extra adducts at the SIDE CHAIN, with associated adducts, minimum and maximum absolute charge states in both positive and negative mode.
+
+- Format: {"X": {"pos": (adduct, a, b), "neg": (adduct, a, b)}}
+where "X" = monomer one letter code, adduct = adduct string (must be found in either CATIONS OR ANIONS in GlobalChemicalConstantss), a = min side chain charge, b = max side chain charge for ionized form.
+
+__"INTRINSICALLY_CHARGED_MONOMERS"__:
+
+- Description: dictionary of monomers that have an intrinsic charge (i.e. charged without addition of adducts), with associated lists of permissible adducts
+
+```
+
+# SECTION 2: MS2 FRAGMENTATION
+
+- Description: This section should contain all the information required to construct a basic MS2 fragment series for linear polymers. Each fragment type is defined as a key in the FRAG_SERIES dict. Typically, fragment keys are one letter codes used to denote fragments - e.g. the standard 'b' and 'y' fragment series for peptides.
+- When building fragment series, the fragment generator will use the following convention: f'{frag}{n}'
+frag = fragment one letter code, n = number of monomers in fragment (e.g. b1, b2, b3, y1, y2, y3 etc...)
+
+
+## __"FRAG_SERIES"__:
+
+- Description: dictionary of fragment series one letter codes and associated properties.
+
+- Format: Each fragment series key = fragment one letter code, value = subdictionary containing all relevant fragment properties.
+
+```
+__"terminus"__:
+
+- Description: end in which fragmentation starts.
+
+- Options: -1 (for end of the sequence) or 0 (for start of the sequence)
+
+__"mass_diff"__:
+
+- Description: the difference in mass between the fragment and corresponding subsequence. This may vary depending on whether cations or anions are being fragmented, therefore separate mass_diffs are specified for positive mode ('pos') and negative mode ('neg') mass spec. Example: the 'y3' fragment of peptide sequence 'AGVS' = the mass of (GVS+H) in positive mode, and (GVS-H) in negative mode.
+
+__"fragmentation_unit"__: 
+
+- Description: the minimum number of monomer units typically added and / or removed at a time when building a fragment series.
+
+- Recommended: Default is ELONGATION_UNIT.
+
+```
+
+## __"MS2_SIGNATURE_IONS"__:
+
+```
+- Description: MS2 fragments which can be used as markers for monomers and / or small subsequences.
+
+- Format: nested dictionary of format {"type": {{"X"}: [signature_mass]}}
+where "type" is the signature ion type, "X" is the monomer and signature_mass is a float which corresponds to the mass of the signature ion for the monomer ("X").
+
+
+
+

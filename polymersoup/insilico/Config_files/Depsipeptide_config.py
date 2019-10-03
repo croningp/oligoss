@@ -90,7 +90,10 @@ MONOMERS = {
     "V": [117.07899, [["amine", 1], ["carboxyl", 1]]],
     "W": [204.08989, [["amine", 1], ["carboxyl", 1]]],
     "Y": [181.07391, [["amine", 1], ["carboxyl", 1]]],
-    "g": [76.01606, [["hydroxyA", 1], ["carboxyl", 1]]]
+    "g": [76.01606, [["hydroxyA", 1], ["carboxyl", 1]]],
+    "j": [73.08915, [["amine", 1], ["carboxyl", 1]]],
+    "e": [237.10011, [["amine", 1], ["carboxyl", 1]]],
+    "k": [243.09510, [["amine", 1], ["carboxyl", 1]]]
 }
 
 """
@@ -98,8 +101,8 @@ A = alanine; C = cysteine; D = aspartic acid; E = glutamic acid;
 F = phenylalanine; G = glycine; H = histidine; I = isoleucine; K = lysine;
 L = leucine; M = methionine; N = asparagine; P = proline; Q = glutamine;
 R = arginine; S = serine; T = threonine; V = valine; W = tryptophan;
-Y = tyrosine
-g = glycolic acid
+Y = tyrosine; g = glycolic acid; e = L-glutamic benzyl ester;  
+k = Nε-Trifluoroacetyl-L-lysine; j = butyl amine
 
 """
 
@@ -149,10 +152,13 @@ LOSS_PRODUCTS = {
     "N" : [NH3, H2O],
     "R": [NH3],
     "K": [NH3],
-    "Q" : [NH3]
+    "Q" : [NH3],
+    "j": [73.08468],
+    "e": [108.05751],
+    "k": [95.9823]
 }
 """
-lOSS_PRODUCTS: Side chains with hydroxyl and carboxylic acid groups can lose
+LOSS_PRODUCTS: Side chains with hydroxyl and carboxylic acid groups can lose
 H2O; amines can lose NH3; carboxamides can lose H2O and NH3
 
 """
@@ -251,6 +257,9 @@ Fragment properties:
             multiply charged in the absence of ionizable or intrinsically
             charged side chains, there are no permissible adducts for this
             series.
+
+MS2_SIGNATURE_IONS = MS2 fragments which can be used as markers for monomers
+            and / or small subsequences.
 """
 
 FRAG_SERIES = {
@@ -367,9 +376,12 @@ IMMONIUM_IONS = MS2_SIGNATURE_IONS = {
         "S": [60.0449], "Y": [136.0762], "V": [72.08133],
         "T": [74.06059], "A": [44.05003], "M": [104.0534, 120.0483],
         "Q": [101.0715], "P": [70.06568], "N": [87.05584], "W": [159.0922],
-        #'dominant' is a list of monomers for which the signature ion is
-        #expected to be present in all MS2 spectra of a sequence containing
-        #the monomer
+        "e": [102.0555, 192.10191], "k": [101.1079, 197.08962],
+
+        # 'dominant' is a list of monomers for which the signature ion is
+        # expected to be present in all MS2 spectra of a sequence containing
+        # the monomer
+        
         "dominant": ["F", "I",  "L", "P", "H", "Y"]
         }
 }

@@ -1,5 +1,4 @@
 *.json
-!*Arg*.json
 .md
 !*read*.md
 __pycache__/
