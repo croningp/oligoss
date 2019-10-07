@@ -84,14 +84,20 @@ def exhaustive_screen(
     # generate compositional silico dict for screening MS1 EICs
     compositional_silico_dict = generate_MS1_compositional_dict(silico_params)
 
-    # filter mass spectra to remove useless data before screening
-    pre_filter_rippers(
-        ripper_folder=ripper_folder,
-        extractor_parameters=extractor_params
-    )
+    if extractor_params["filter"]: 
+        
+        # filter mass spectra to remove useless data before screening
+        pre_filter_rippers(
+            ripper_folder=ripper_folder,
+            extractor_parameters=extractor_params
+        )
 
-    # retrieve file paths to filtered mass spectra
-    filtered_ripper_folder = os.path.join(ripper_folder, 'filtered_rippers')
+        # retrieve file paths to filtered mass spectra
+        filtered_ripper_folder = os.path.join(ripper_folder, 'filtered_rippers')
+
+    else:
+        filtered_ripper_folder = ripper_folder
+        
     filtered_rippers = [
         os.path.join(filtered_ripper_folder, file)
         for file in os.listdir(filtered_ripper_folder)
