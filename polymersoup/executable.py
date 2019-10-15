@@ -20,7 +20,7 @@ def launch_screen(input_parameters_file):
     """
 
     if sys.version_info < (3, 6):
-        print("you are running Python version {0}".format(sys.version))
+        print(f"you are running Python version {sys.version}")
         raise Exception("this package required Python version 3.6 or later")
 
     # load parameters
@@ -55,17 +55,10 @@ def exhaustive_screen(
 
     # load location of mass spec data in mzml_ripper .json file format
     ripper_folder = directories['ripper_folder']
-    # load output folder for saving data, create if it does not exist
-    output_folder = directories['output_folder']
-    if not os.path.exists(output_folder):
-        os.mkdir(output_folder)
-    write_to_json(
-        write_dict=parameters_dict,
-        output_json=os.path.join(output_folder, 'run_parameters.json')
-    )
+
     # load parameters for postprocessing operations
     postprocess_parameters = parameters_dict["postprocessing_parameters"]
-
+    
     # load output folder for saving data, create if it does not exist
     output_folder = directories['output_folder']
     if not os.path.exists(output_folder):
@@ -75,11 +68,6 @@ def exhaustive_screen(
         write_dict=parameters_dict,
         output_json=os.path.join(output_folder, 'run_parameters.json')
     )
-    # load parameters for postprocessing operations
-    postprocess_parameters = parameters_dict["postprocessing_parameters"]
-
-    # load parameters for postprocessing operations
-    postprocess_parameters = parameters_dict["postprocessing_parameters"]
 
     # generate compositional silico dict for screening MS1 EICs
     compositional_silico_dict = generate_MS1_compositional_dict(silico_params)
