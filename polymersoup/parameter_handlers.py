@@ -3,7 +3,7 @@ This file contains functions for extracting info on run parameters for
 in silico fragmentation, data extraction and post-processing.
 
 """
-
+import time
 # import filehandler - the file containing functions that load parameters
 # from files
 from .filehandler import *
@@ -156,8 +156,46 @@ def generate_parameters_dict(
         "extractor_parameters": extractors_dict,
         "postprocessing_parameters": postprocess_dict,
         "directories": directories_dict,
-        "screening_method": read_parameters["screening_method"]
+        "screening_method": read_parameters["screening_method"],
+        "data_extraction": read_parameters["data_extraction"],
+        "postprocess": read_parameters["postprocess"]
     }
+
+    # update parameters dict with timestamp 
+    parameters_dict.update(add_timestamp())
 
     # return all parameters in dict
     return parameters_dict
+
+def add_timestamp(
+    day=True,
+    month=True,
+    year=True
+):
+
+
+    timestamp_dict = {}
+
+    date_string = ''
+
+    if day: 
+        date_string += f'{time.strftime("%d")}/'
+    
+    if month:
+        date_string += f'{time.strftime("%m")}/'
+    
+    if year:
+        date_string += f'{time.strftime("%y")}'
+    
+    timestamp_dict["date"] = date_string
+
+    hour = round(float(time.strftime("%H")), 2)
+    minute = round(float(time.strftime("%M")), 0)
+    second = round(float(time.strftime("%S")), 0)
+    
+
+    timestamp_dict["time"] = f'{hour}h:{minute}m:{second}s'
+
+    return timestamp_dict
+
+    

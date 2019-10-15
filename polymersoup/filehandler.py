@@ -346,36 +346,73 @@ def write_unique_fragment_dict(
 
     print(f"unique fragment dictionary written to {output_file}")
 
-def write_final_retention_time_assignments(
-    input_data_file,
+def write_standard_postprocess_data(
     output_folder,
-    final_Rt_I_dict
+    silico_dict,
+    confirmed_fragdict, 
+    confidence_scores,
+    confidence_limit,
+    subsequence_weight
 ):
-    """
-    Writes final retention time and intensity assignments to output .csv
-    file
-
-    Args:
-        input_data_file (str): full file path to input mzml ripper data file
-        output_folder (str): directory of output folder, where data will be
-            saved
-        final_Rt_I_dict (dict): dictionary of sequences and retention time +
-            intensity assignments
-    """
-    input_file = os.path.basename(input_data_file).replace(".json", "")
-    input_file = input_file + "_final_Rt_I_assignments.csv"
-
-    output_file = os.path.join(output_folder, input_file)
-
-    write_new_csv(
-        csv_file=output_file,
-        headers=['sequence', 'Rt', 'I', 'confidence']
+   
+    write_to_json(
+        write_dict=confidence_scores,
+        output_json=os.path.join(output_folder, 'confidence_scores.json')
     )
 
-    for sequence, Rt_I in final_Rt_I_dict.items():
-        append_csv_row(
-            csv_file=output_file,
-            append_list=[sequence, Rt_I[0], Rt_I[1], Rt_I[2]]
-        )
+    
+    confident_assignments = {
+        seq: {
+            "MS1": silico_dict[seq]["MS1"],
+            "MS2": {
+                frag: masses 
+                for frag, masses in silico_dict[seq]["MS2"].items()
+                if (frag in confirmed_fragdict[seq]
+                and frag != "signatures")
+            },
+            "confirmed_signatures": [
+                frag for frag in confirmed_fragdict[seq]
+                if frag in silico_dict[seq]["MS2"]["signatures"]
+            ],
+            "peak_list": silico_dict[seq]["peak_list"]
+        }
+            for seq in confirmed_fragdict
+            if float(confidence_scores[seq]) >= confidence_limit
+    }
 
-    print(f'retention time assignments written to {output_file}')
+    write_to_json(
+        write_dict=confident_assignments,
+        output_json=os.path.join(
+            output_folder,
+            f"confirmed_frag_dict_confidence_limit_{confidence_limit}%.json"
+        )
+    )
+
+    summary_csv = os.path.join(
+        output_folder, 
+        f"postprocess_summary_confidence_limit_{subsequence_weight}ssw_{confidence_limit}%.csv"
+
+    )
+    write_new_csv(
+        csv_file=summary_csv,
+        headers=[
+            "Sequence", 
+            "Confidence_Score", 
+            "Confirmed_Fragments", 
+            "Confirmed_signatures"
+        ]
+    )
+
+    print(f'confident_assigments={confident_assignments}')
+    for seq in confident_assignments: 
+
+        append_csv_row(
+            csv_file=summary_csv,
+            append_list=[
+                seq,
+                confidence_scores[seq],
+                [frag for frag in confident_assignments[seq]["MS2"]
+                if frag != 'signatures'],
+                confident_assignments[seq]["confirmed_signatures"]
+            ]
+        )
