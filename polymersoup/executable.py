@@ -94,14 +94,19 @@ def exhaustive_screen(
         extracted_data_dirs = [
             os.path.join(output_folder, subdir) 
             for subdir in os.listdir(output_folder)
-            if not (os.path.isfile(subdir) 
-            and subdir.find('run_parameters') == -1)
+            if not os.path.isfile(subdir) 
         ]
 
         extracted_data_dirs = [
             os.path.join(data_dir, 'extracted')
             for data_dir in extracted_data_dirs
         ]
+        extracted_data_dirs = list(
+            filter(
+                lambda x: x.find('run_parameters') == -1, 
+                extracted_data_dirs
+            )
+        )
 
         print(f'extracted data dirs = {extracted_data_dirs}')
     

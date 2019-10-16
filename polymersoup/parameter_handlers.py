@@ -82,6 +82,11 @@ def return_extractor_parameters(
         'pre_screen_filters']['essential_signatures'] = load_essential_signature_ions(
             parameters_file
         )
+
+    extractor_parameters.update({
+    'data_extraction': read_parameters(parameters_file)['data_extraction']}
+    )
+
     return extractor_parameters
 
 def return_postprocess_parameters(
