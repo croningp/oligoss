@@ -361,7 +361,7 @@ def write_standard_postprocess_data(
     )
 
     
-    confident_assignments = {
+    confirmed_fragdict = {
         seq: {
             "MS1": silico_dict[seq]["MS1"],
             "MS2": {
@@ -377,20 +377,21 @@ def write_standard_postprocess_data(
             "peak_list": silico_dict[seq]["peak_list"]
         }
             for seq in confirmed_fragdict
-            if float(confidence_scores[seq]) >= confidence_limit
     }
 
+    print(f'confirmed_fragdict = {confirmed_fragdict}')
+
     write_to_json(
-        write_dict=confident_assignments,
+        write_dict=confirmed_fragdict,
         output_json=os.path.join(
             output_folder,
-            f"confirmed_frag_dict_confidence_limit_{confidence_limit}%.json"
+            f"confirmed_frag_dict.json"
         )
     )
 
     summary_csv = os.path.join(
         output_folder, 
-        f"postprocess_summary_confidence_limit_{subsequence_weight}ssw_{confidence_limit}%.csv"
+        f"postprocess_summary_{subsequence_weight}ssw.csv"
 
     )
     write_new_csv(
@@ -403,16 +404,15 @@ def write_standard_postprocess_data(
         ]
     )
 
-    print(f'confident_assigments={confident_assignments}')
-    for seq in confident_assignments: 
+    for seq in confirmed_fragdict: 
 
         append_csv_row(
             csv_file=summary_csv,
             append_list=[
                 seq,
                 confidence_scores[seq],
-                [frag for frag in confident_assignments[seq]["MS2"]
+                [frag for frag in confirmed_fragdict[seq]["MS2"]
                 if frag != 'signatures'],
-                confident_assignments[seq]["confirmed_signatures"]
+                confirmed_fragdict[seq]["confirmed_signatures"]
             ]
         )
