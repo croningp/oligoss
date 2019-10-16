@@ -90,7 +90,8 @@ def exhaustive_screen(
         )
 
     else:
-
+        print(f'for {output_folder}')
+        print(f'subdirs = {os.listdir(output_folder)}')
         extracted_data_dirs = [
             os.path.join(output_folder, subdir) 
             for subdir in os.listdir(output_folder)
@@ -226,8 +227,6 @@ def standard_extraction(
             for composition in MS1_EICs
         }
 
-        print(f'compositions = {compositional_silico_dict}')
-        
         print(f'generating full MSMS dict for {len(MS1_EICs)} compositions')
 
         # generate full insilico fragmentation MSMS data for all possible
@@ -253,8 +252,6 @@ def standard_extraction(
             ripper_dict=ripper_dict,
             extractor_parameters=extractor_parameters
         )
-
-        print(f'confirmed fragment dict = {confirmed_fragment_dict}')
 
         # write confirmed fragment silico dict to .json file
         write_confirmed_fragment_dict(
