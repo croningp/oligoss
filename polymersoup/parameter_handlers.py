@@ -154,20 +154,22 @@ def generate_parameters_dict(
 
     read_parameters = open_json(parameters_file)
 
+    # add date and time signature to parameters dict 
+    parameters_dict = add_timestamp()
+
     # combine all above into a final parameters_dict that can be read by
     # the executable
-    parameters_dict = {
-        "silico_parameters": silico_dict,
-        "extractor_parameters": extractors_dict,
-        "postprocessing_parameters": postprocess_dict,
-        "directories": directories_dict,
-        "screening_method": read_parameters["screening_method"],
-        "data_extraction": read_parameters["data_extraction"],
-        "postprocess": read_parameters["postprocess"]
-    }
-
-    # update parameters dict with timestamp 
-    parameters_dict.update(add_timestamp())
+    parameters_dict.update(
+        {
+            "silico_parameters": silico_dict,
+            "extractor_parameters": extractors_dict,
+            "postprocessing_parameters": postprocess_dict,
+            "directories": directories_dict,
+            "screening_method": read_parameters["screening_method"],
+            "data_extraction": read_parameters["data_extraction"],
+            "postprocess": read_parameters["postprocess"]
+        }
+    )
 
     # return all parameters in dict
     return parameters_dict
@@ -202,5 +204,3 @@ def add_timestamp(
     timestamp_dict["time"] = f'{hour}h:{minute}m:{second}s'
 
     return timestamp_dict
-
-    

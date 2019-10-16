@@ -106,6 +106,7 @@ def exhaustive_screen(
             os.path.join(data_dir, 'extracted')
             for data_dir in extracted_data_dirs
         ]
+        
         extracted_data_dirs = list(
             filter(
                 lambda x: x.find('run_parameters') == -1, 
