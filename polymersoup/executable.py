@@ -72,6 +72,11 @@ def exhaustive_screen(
     # generate compositional silico dict for screening MS1 EICs
     compositional_silico_dict = generate_MS1_compositional_dict(silico_params)
 
+    # if data extraction set to False, make sure not to accidentally call 
+    # data filters 
+    if not parameters_dict['data_extraction']:
+        extractor_params['pre_run_filter'] = False 
+
     # apply any pre-filtering steps to ripper data 
     filtered_rippers = apply_filters(
         extractor_parameters=extractor_params,
@@ -90,8 +95,7 @@ def exhaustive_screen(
         )
 
     else:
-        print(f'for {output_folder}')
-        print(f'subdirs = {os.listdir(output_folder)}')
+
         extracted_data_dirs = [
             os.path.join(output_folder, subdir) 
             for subdir in os.listdir(output_folder)
