@@ -20,8 +20,8 @@ def launch_screen(input_parameters_file):
     """
 
     if sys.version_info < (3, 6):
-        print("you are running Python version {0}".format(sys.version))
-        raise Exception("this package required Python version 3.6 or later")
+        print(f"you are running Python version {sys.version}")
+        raise Exception("this package requires Python version 3.6 or later")
 
     # load parameters
     parameters_dict = generate_parameters_dict(input_parameters_file)
@@ -55,14 +55,7 @@ def exhaustive_screen(
 
     # load location of mass spec data in mzml_ripper .json file format
     ripper_folder = directories['ripper_folder']
-    # load output folder for saving data, create if it does not exist
-    output_folder = directories['output_folder']
-    if not os.path.exists(output_folder):
-        os.mkdir(output_folder)
-    write_to_json(
-        write_dict=parameters_dict,
-        output_json=os.path.join(output_folder, 'run_parameters.json')
-    )
+
     # load parameters for postprocessing operations
     postprocess_parameters = parameters_dict["postprocessing_parameters"]
 
@@ -75,57 +68,162 @@ def exhaustive_screen(
         write_dict=parameters_dict,
         output_json=os.path.join(output_folder, 'run_parameters.json')
     )
-    # load parameters for postprocessing operations
-    postprocess_parameters = parameters_dict["postprocessing_parameters"]
-
-    # load parameters for postprocessing operations
-    postprocess_parameters = parameters_dict["postprocessing_parameters"]
 
     # generate compositional silico dict for screening MS1 EICs
     compositional_silico_dict = generate_MS1_compositional_dict(silico_params)
 
-    # filter mass spectra to remove useless data before screening
-    pre_filter_rippers(
-        ripper_folder=ripper_folder,
-        extractor_parameters=extractor_params
+    # if data extraction set to False, make sure not to accidentally call 
+    # data filters 
+    if not parameters_dict['data_extraction']:
+        extractor_params['pre_run_filter'] = False 
+
+    # apply any pre-filtering steps to ripper data 
+    filtered_rippers = apply_filters(
+        extractor_parameters=extractor_params,
+        ripper_folder=ripper_folder
     )
 
-    # retrieve file paths to filtered mass spectra
-    filtered_ripper_folder = os.path.join(ripper_folder, 'filtered_rippers')
-    filtered_rippers = [
-        os.path.join(filtered_ripper_folder, file)
-        for file in os.listdir(filtered_ripper_folder)
-    ]
+    # if data_extraction set to True, extract data 
+    if parameters_dict['data_extraction']:
 
-    # iterate through filtered ripper .json files
-    for filtered_ripper in filtered_rippers:
+        extracted_data_dirs = standard_extraction(
+            rippers=filtered_rippers,
+            output_folder=output_folder,
+            silico_parameters=silico_params,
+            compositional_silico_dict=compositional_silico_dict,
+            extractor_parameters=extractor_params
+        )
+
+    else:
+
+        extracted_data_dirs = [
+            os.path.join(output_folder, subdir) 
+            for subdir in os.listdir(output_folder)
+            if not os.path.isfile(subdir) 
+        ]
+
+        extracted_data_dirs = [
+            os.path.join(data_dir, 'extracted')
+            for data_dir in extracted_data_dirs
+        ]
+        
+        extracted_data_dirs = list(
+            filter(
+                lambda x: x.find('run_parameters') == -1, 
+                extracted_data_dirs
+            )
+        )
+
+        print(f'extracted data dirs = {extracted_data_dirs}')
+    
+    if parameters_dict['postprocess']:
+
+        for extracted_data in extracted_data_dirs:
+
+            standard_postprocess(
+                extracted_data_folder=extracted_data,
+                postprocess_parameters=postprocess_parameters
+            )
+
+def apply_filters(
+    extractor_parameters,
+    ripper_folder
+):
+    """
+    Applies any pre-run filters to ripper data and returns list of full 
+    file paths to ripper jsons
+    
+    Args:
+        extractor_parameters (dict): dictionary of extractor parameters, 
+            retrieved from input parameters JSON file
+        ripper_folder (str): full file path to folder containing mzml ripper
+            JSON files
+    
+    Returns:
+        list: list of full file paths to mzml ripper JSON files 
+    """
+    
+    # if filter set to False, return list of full file paths to unfiltered
+    # rippers 
+    if not extractor_parameters["pre_run_filter"]:
+
+        return [
+            os.path.join(ripper_folder, ripper) 
+            for ripper in os.listdir(ripper_folder)
+            if ripper.endswith('.json')
+        ]
+    
+    # if filter set to True, apply filter and return list of full file paths
+    # to newly created filtered JSON files 
+    return pre_filter_rippers(
+        ripper_folder=ripper_folder,
+        extractor_parameters=extractor_parameters
+        )
+
+
+def standard_extraction(
+    rippers,
+    extractor_parameters,
+    silico_parameters,
+    compositional_silico_dict,
+    output_folder
+
+):
+
+    # if rippers data folder directory, convert to list of full file paths 
+    # for ripper jsons
+    if type(rippers) != list: 
+
+        rippers = [
+            os.path.join(rippers, ripper) for ripper in os.listdir(ripper)
+            if ripper.endswith('.json')
+        ]
+
+    # initate list to store paths to directories of output data for each 
+    # data set 
+    write_folders = []
+
+    # iterate through ripper .json files
+    for ripper in rippers:
 
         # create subfolder for this data set 
         write_folder = os.path.join(
             output_folder, 
-            os.path.basename(filtered_ripper)
+            os.path.basename(ripper).replace('.json', '')
         )
+
+        print(f'write folder = {write_folder}')
+
+        write_folder = os.path.join(write_folder, 'extracted')
+
+        # make output folder for extracted data if not there already 
+        if not os.path.exists(write_folder):
+            os.makedirs(write_folder)
+            
+        # add path to directory of write folder to write_folders
+        write_folders.append(write_folder)
 
         if not os.path.exists(write_folder):
             os.mkdir(write_folder)
 
-        # open filtered ripper .json file as dict
-        ripper_dict = open_json(filtered_ripper)
+        # open ripper .json file as dict
+        ripper_dict = open_json(ripper)
 
         print(f'getting MS1 EICs for {len(compositional_silico_dict)} compositions')
        
         # get MS1 EICs for all compositions
         MS1_EICs = extract_MS1(
             silico_dict=compositional_silico_dict,
-            extractor_parameters=extractor_params,
+            extractor_parameters=extractor_parameters,
             ripper_dict=ripper_dict
         )
 
         # save MS1 EICs
-        write_MS1_EIC_file(
-            input_data_file=filtered_ripper,
+        write_EIC_file(
+            input_data_file=ripper,
             output_folder=write_folder,
-            MS1_EICs=MS1_EICs
+            EICs=MS1_EICs,
+            ms_level=1
         )
 
         # remove compositions that are not present at sufficient abundance
@@ -133,22 +231,22 @@ def exhaustive_screen(
         compositional_silico_dict = {
             composition: compositional_silico_dict[composition]
             for composition in MS1_EICs
+            if composition.find('retention') == -1
         }
-        print(f'compositions = {compositional_silico_dict}')
-        
+
         print(f'generating full MSMS dict for {len(MS1_EICs)} compositions')
 
         # generate full insilico fragmentation MSMS data for all possible
         # sequences that match compositions found in MS1 EICs
         full_MSMS_silico_dict = generate_MSMS_insilico_from_compositions(
             composition_dict=compositional_silico_dict,
-            silico_parameters=silico_params,
+            silico_parameters=silico_parameters,
             uniques=False
         )
        
         # write full in silico dict to .json file
         write_pre_fragment_screen_sequence_JSON(
-            input_data_file=filtered_ripper,
+            input_data_file=ripper,
             output_folder=write_folder,
             MSMS_silico_dict=full_MSMS_silico_dict
         )
@@ -159,105 +257,90 @@ def exhaustive_screen(
         confirmed_fragment_dict = confirm_fragments_sequence_dict(
             silico_dict=full_MSMS_silico_dict,
             ripper_dict=ripper_dict,
-            extractor_parameters=extractor_params
+            extractor_parameters=extractor_parameters
         )
-
-        print(f'confirmed fragment dict = {confirmed_fragment_dict}')
 
         # write confirmed fragment silico dict to .json file
         write_confirmed_fragment_dict(
-            input_data_file=filtered_ripper,
+            input_data_file=ripper,
             output_folder=write_folder,
             confirmed_fragment_dict=confirmed_fragment_dict
         )
 
-        # assign final confidence scores to all sequences with confirmed
-        # fragments
-        confidence_scores = assign_confidence_sequences(
-            silico_dict=full_MSMS_silico_dict,
-            confirmed_dict=confirmed_fragment_dict,
-            postprocess_params=postprocess_parameters
-        )
+    # return list of paths to extracted data directories 
+    return write_folders 
 
-        print(f"confidence_scores = {confidence_scores}")
-        
-        # write confidence scores to .json file
-        write_confidence_assignments(
-            input_data_file=filtered_ripper,
-            output_folder=write_folder,
-            confidence_assignments=confidence_scores
-        )
+def standard_postprocess(
+    extracted_data_folder,
+    postprocess_parameters
+):
+    
+    print(f'extracted_data_folder = {extracted_data_folder}')
 
-        # get minimum confidence for identifying unique fragments from
-        # confirmed sequences - SEQUENCES BELOW THIS CONFIDENCE THRESHOLD
-        # NOT BE ASSIGNED RETENTION TIMES OR INTENSITIES
-        min_confidence_threshold = postprocess_parameters[
-            "min_viable_confidence"]
+    # retrieve full silico MSMS dict from extracted data
+    pre_screening_silico_dict = open_json(
+        filepath=[
+            os.path.join(extracted_data_folder, d_file)
+            for d_file in os.listdir(extracted_data_folder)
+            if d_file.find('PRE_fragment_screening') > -1][0]
+    )
 
-        # generate dict of sequence with high enough confidence scores to
-        # assign a retention time and intensity from EICs
-        confident_assignments = {
-            sequence: {
-                "MS1": full_MSMS_silico_dict[sequence]["MS1"],
-                "MS2": {
-                    frag: masses
-                    for frag, masses in full_MSMS_silico_dict[sequence]["MS2"].items()
-                    if frag in confirmed_fragment_dict[sequence]
-                },
-                "peak_list": full_MSMS_silico_dict[sequence]["peak_list"]
-            }
-            for sequence in confirmed_fragment_dict
-            if confidence_scores[sequence] >= min_confidence_threshold
+    # retrieve confirmed fragment dict from extracted data 
+    confirmed_fragment_dict = open_json(
+        filepath=[
+            os.path.join(extracted_data_folder, d_file)
+            for d_file in os.listdir(extracted_data_folder)
+            if d_file.find('confirmed_fragment_dict.json') > -1][0]
+    )
+
+    # retrieve MS1 EICs dict from extracted data 
+    MS1_EICs = open_json(
+        filepath = [
+            os.path.join(extracted_data_folder, d_file)
+            for d_file in os.listdir(extracted_data_folder)
+            if d_file.find('MS1_EIC') > -1][0]
+    )
+
+    ssw = postprocess_parameters['subsequence_weight']
+
+    if type(ssw) != list: 
+
+        ssw = [ssw]
+    
+    for subseq_weight in ssw:
+
+        print(f'postprocessing for {subseq_weight} ssw')
+
+        postprocess_params = {
+            key: postprocess_parameters[key]
+            for key in postprocess_parameters
         }
+        postprocess_params['subsequence_weight'] = subseq_weight
 
-        print(f'{len(confident_assignments)} sequences confirmed with confidence')
-        print(f'of {min_confidence_threshold}% or above.')
-        print(f'These sequences are now being assigned retention times')
-
-        # find any unique fragments from confirmed fragments of confidently
-        # assigned sequences, add these to silico dict of high confidence
-        # sequences
-        unique_fragment_dict = find_unique_fragments_sequence_dict(
-            sequence_dict=confident_assignments
-        )
-
-        # write unique fragment dict to output .json file
-        write_unique_fragment_dict(
-            input_data_file=filtered_ripper,
-            output_folder=write_folder,
-            unique_fragment_dict=unique_fragment_dict
-        )
-
-        # get MS2 EICs for sequences with confirmed unique fragments
-        MS2_EICs = extract_MS2(
-            silico_dict=unique_fragment_dict,
-            extractor_parameters=extractor_params,
-            ripper_dict=ripper_dict,
-            filter_most_intense=True
-        )
-
-        # write MS2 EICs to .json file
-        write_MS2_EIC_file(
-            input_data_file=filtered_ripper,
-            output_folder=write_folder,
-            MS2_EICs=MS2_EICs
-        )
-
-        # return final retention time and intensity assignments for high
-        # confidence sequences
-        final_Rt_Is = find_Rt_I_sequences(
-            MS1_EICs=MS1_EICs,
-            MS2_EICs=MS2_EICs,
-            confident_assignments=confident_assignments,
-            postprocess_parameters=postprocess_parameters,
-            confidence_scores=confidence_scores
+        # workout confidence for confirmed sequences at subsequence weight
+        confidence_scores = assign_confidence_sequences(
+            silico_dict=pre_screening_silico_dict,
+            confirmed_dict=confirmed_fragment_dict,
+            postprocess_params=postprocess_params
         )
         
-        # write retention time and intensity assignments to output .csv file
-        write_final_retention_time_assignments(
-            input_data_file=filtered_ripper,
-            output_folder=write_folder,
-            final_Rt_I_dict=final_Rt_Is
+        # create new folder directory for current subsequence weight
+        confidence_dir = os.path.join(
+            os.path.dirname(extracted_data_folder), 
+            f'confidence_assignments_{subseq_weight}ssw'
+        )
+
+        if not os.path.exists(confidence_dir):
+            os.makedirs(confidence_dir)
+
+        write_standard_postprocess_data(
+            output_folder=confidence_dir,
+            silico_dict=pre_screening_silico_dict,
+            confidence_scores=confidence_scores,
+            confidence_limit=postprocess_parameters['min_viable_confidence'],
+            subsequence_weight=subseq_weight,
+            confirmed_fragdict=confirmed_fragment_dict,
+            MS1_EICs=MS1_EICs
         )
 
 launch_screen(sys.argv[1])

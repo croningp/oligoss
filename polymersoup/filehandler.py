@@ -176,13 +176,14 @@ def generate_insilico_writefile_string(
     write_string = f"{write_string}.json"
     return os.path.join(folder, write_string)
 
-def write_MS1_EIC_file(
+def write_EIC_file(
     input_data_file,
     output_folder,
-    MS1_EICs
+    EICs,
+    ms_level=1
 ):
     """
-    Writes an MS1 EIC dict to a .json file
+    Writes an EIC dict to a .json file
 
     Args:
         input_data_file (str): full file path to mzml ripper data file used to
@@ -191,44 +192,19 @@ def write_MS1_EIC_file(
             be saved
         MS1_EICs (dict): dictionary of sequences and / or compositions and
             their corresponding MS1 EICs
+        ms_level (int, optional): specifies MS level of EIC data. Defaults to
+            1
     """
 
     input_file = os.path.basename(input_data_file).replace(".json", "")
 
-    output_file = os.path.join(output_folder, f'{input_file}_MS1_EICs.json')
+    output_file = os.path.join(output_folder, f'{input_file}_MS{ms_level}_EICs.json')
 
     write_to_json(
-        write_dict=MS1_EICs,
+        write_dict=EICs,
         output_json=output_file
     )
-    print(f'MS1 EICs written to {output_file}')
-
-def write_MS2_EIC_file(
-    input_data_file,
-    output_folder,
-    MS2_EICs
-):
-    """
-    Writes MS2 EICs to a .json file
-
-    Args:
-        input_data_file (str): full file path to mzml ripper data file used to
-            generate MS2 EICs
-        output_folder (str): path to output folder directory, where data will
-            be saved
-        MS2_EICs (dict): dictionary of sequences  and their corresponding
-            MS2 EICs
-    """
-    input_file = os.path.basename(input_data_file).replace(".json", "")
-
-    output_file = os.path.join(output_folder, f'{input_file}_MS2_EICs.json')
-
-    write_to_json(
-        write_dict=MS2_EICs,
-        output_json=output_file
-    )
-
-    print(f'MS2 EICs written to {output_file}')
+    print(f'MS{ms_level} EICs written to {output_file}')
 
 def write_pre_fragment_screen_sequence_JSON(
     input_data_file,
@@ -346,36 +322,85 @@ def write_unique_fragment_dict(
 
     print(f"unique fragment dictionary written to {output_file}")
 
-def write_final_retention_time_assignments(
-    input_data_file,
+def write_standard_postprocess_data(
     output_folder,
-    final_Rt_I_dict
+    silico_dict,
+    confirmed_fragdict, 
+    confidence_scores,
+    confidence_limit,
+    subsequence_weight,
+    MS1_EICs
 ):
-    """
-    Writes final retention time and intensity assignments to output .csv
-    file
-
-    Args:
-        input_data_file (str): full file path to input mzml ripper data file
-        output_folder (str): directory of output folder, where data will be
-            saved
-        final_Rt_I_dict (dict): dictionary of sequences and retention time +
-            intensity assignments
-    """
-    input_file = os.path.basename(input_data_file).replace(".json", "")
-    input_file = input_file + "_final_Rt_I_assignments.csv"
-
-    output_file = os.path.join(output_folder, input_file)
-
-    write_new_csv(
-        csv_file=output_file,
-        headers=['sequence', 'Rt', 'I', 'confidence']
+   
+    write_to_json(
+        write_dict=confidence_scores,
+        output_json=os.path.join(output_folder, 'confidence_scores.json')
     )
 
-    for sequence, Rt_I in final_Rt_I_dict.items():
-        append_csv_row(
-            csv_file=output_file,
-            append_list=[sequence, Rt_I[0], Rt_I[1], Rt_I[2]]
-        )
+    
+    confirmed_fragdict = {
+        seq: {
+            "MS1": silico_dict[seq]["MS1"],
+            "MS2": {
+                frag: masses 
+                for frag, masses in silico_dict[seq]["MS2"].items()
+                if (frag in confirmed_fragdict[seq]
+                and frag != "signatures")
+            },
+            "confirmed_signatures": [
+                frag for frag in confirmed_fragdict[seq]
+                if frag in silico_dict[seq]["MS2"]["signatures"]
+            ],
+            "peak_list": silico_dict[seq]["peak_list"]
+        }
+            for seq in confirmed_fragdict
+    }
 
-    print(f'retention time assignments written to {output_file}')
+    print(f'confirmed_fragdict = {confirmed_fragdict}')
+
+    write_to_json(
+        write_dict=confirmed_fragdict,
+        output_json=os.path.join(
+            output_folder,
+            f"confirmed_frag_dict.json"
+        )
+    )
+
+    summary_csv = os.path.join(
+        output_folder, 
+        f"postprocess_summary_{subsequence_weight}ssw.csv"
+
+    )
+    write_new_csv(
+        csv_file=summary_csv,
+        headers=[
+            "Sequence", 
+            "Confidence_Score", 
+            "Confirmed_Fragments", 
+            "Confirmed_signatures",
+            "Max_Intensity"
+        ]
+    )
+    
+    # get max peak intensity of each sequence from its MS1 EIC
+    max_intensities = {
+        seq: max([Rt_I[1] for Rt_I in MS1_EICs["".join(sorted(seq))]])
+        for seq in confirmed_fragdict
+    }
+
+    # write all data to final csv for each sequence 
+    for seq in confirmed_fragdict: 
+
+        append_csv_row(
+            csv_file=summary_csv,
+            append_list=[
+                seq,
+                confidence_scores[seq],
+                [frag for frag in confirmed_fragdict[seq]["MS2"]
+                if frag != 'signatures'],
+                confirmed_fragdict[seq]["confirmed_signatures"],
+                max_intensities[seq]
+            ]
+        )
+    
+

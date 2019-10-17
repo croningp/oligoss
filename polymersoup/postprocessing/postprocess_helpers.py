@@ -59,18 +59,37 @@ def get_subsequence_coverage(
             core_series=core_series
         )
         
-        # get optional fragments that belong to current core series
-        optional_core_fragments = [
-            frag for frag in silico_core_fragments
-            if frag in optional_fragments
-        ]
+        # if excluded fragments, remove from consideration
+        if excluded_fragments:
+            
+            core_confirmed = sorted(list(
+                filter(
+                    lambda x: x not in excluded_fragments,
+                    core_confirmed
+                )
+            ))
+
+            silico_core_fragments = sorted(list(
+                filter(
+                    lambda x: x not in excluded_fragments,
+                    silico_core_fragments
+                )
+            ))
+        
+
+        if optional_fragments:
+            
+            # get optional fragments that belong to current core series
+            optional_core_fragments = [
+                frag for frag in silico_core_fragments
+                if frag in optional_fragments
+            ]
 
         # get list of core fragment positions from in silico fragments,
         # sorted in ascending order (e.g. ['y1', 'y3'] becomes [1, 3])
         core_indeces = sorted([
             int(frag[1::])
             for frag in silico_core_fragments
-            if frag not in excluded_fragments
         ])
 
         # get list of confirmed fragment positions from confirmed fragments,
@@ -78,7 +97,6 @@ def get_subsequence_coverage(
         confirmed_indeces = sorted([
             int(frag[1::])
             for frag in core_confirmed
-            if frag not in excluded_fragments
         ])
 
         # calculate largest POSSIBLE continuous block of fragments for this

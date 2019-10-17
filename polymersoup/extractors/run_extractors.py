@@ -13,12 +13,17 @@ def pre_filter_rippers(
 ):
     """
     Takes a folder containing mzml_ripper jsons, input parameters file for
-    data extraction and creates new mzml_ripper_jsons of filtered data
+    data extraction and creates new mzml_ripper_jsons of filtered data. Returns
+    list of full file paths to filtered ripper jsons
 
     Args:
         ripper_folder (str): path to folder containing mzml ripper jsons
         extractor_parameters (dict): dictionary of extractor parameters passed
             on from input parameters .json file
+    
+    Returns: 
+        file_dirs (list): list of full file paths to newly created filtered
+            JSON files 
     """
     # create directory for output folder, where filtered ripper_jsons will be
     # saved
@@ -48,6 +53,9 @@ def pre_filter_rippers(
     # get list of mzml ripper jsons in ripper_folder
     ripper_jsons = list_files_by_type(ripper_folder, '.json')
 
+    # initiate list of directories to filtered ripper files 
+    file_dirs = []
+
     # iterate through list of ripper_jsons, reading each as a dictionary
     for ripper_json in ripper_jsons:
         ripper_dict = open_json(ripper_json)
@@ -67,6 +75,11 @@ def pre_filter_rippers(
         # finally, write the filtered dict to file
         print(f'writing ripper_dict to {filtered_json}')
         write_to_json(ripper_dict, filtered_json)
+        
+        # add newly filtered json to list of output file_dirs 
+        file_dirs.append(filtered_json)
+    
+    return file_dirs
 
 def apply_filter_dict_ripper_json(
     ripper_dict,

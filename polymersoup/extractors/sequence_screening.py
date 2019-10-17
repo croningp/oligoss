@@ -581,7 +581,8 @@ def confirm_fragments_sequence_dict(
 def extract_MS1(
     silico_dict,
     extractor_parameters,
-    ripper_dict
+    ripper_dict,
+    return_Rt_list=True
 ):
     """
     Takes an in silico sequence dict, dictionary of extractor parameters
@@ -593,16 +594,21 @@ def extract_MS1(
         silico_dict (dict): dictionary of sequences and corresponding masses
         extractor_parameters (dict): dictionary of extractor parameters in
             standard input parameters format
-        ripper_dict (dict): dictionary of mass spec data in mzml ripper format
+        ripper_dict (dict): dictionary of mass spec data in mzml ripper format#
+        return_Rt_list (bool, optional): specify whether to return a list of 
+            ALL retention times in the ripper dict. Defaults to True. 
 
     Returns:
         EIC_dict (dict): dictionary of sequences and corresponding MS1 EICs
     """
-
+    # check whether file path to input parameters has accidentally been passed
+    # in instead of extractor_parameters dict
     if type(extractor_parameters) == str:
         extractor_parameters = read_parameters(
             extractor_parameters)['extractor_parameters']
 
+    # check whether full input parameters dict has accidentally been passed 
+    # in instead of extractor parameters dict 
     if 'extractor_parameters' in extractor_parameters:
         extractor_parameters = extractor_parameters['extractor_parameters']
 
@@ -640,6 +646,16 @@ def extract_MS1(
         else:
             print(f'{sequence} not present at sufficent abundance for EIC')
 
+    # write list of all retention times in ripper data to output dict 
+    if return_Rt_list: 
+        
+        retention_times = []
+
+        for spectrum_info in ripper_dict['ms1'].values():
+            retention_times.append(float(spectrum_info['retention_time']))
+
+        EIC_dict['retention_time'] = sorted(retention_times)
+
     # return dict of found sequences and their corresponding MS1 EICs
     return EIC_dict
 
@@ -648,7 +664,8 @@ def extract_MS2(
     extractor_parameters,
     ripper_dict,
     filter_most_intense=True,
-    extract_uniques=True
+    extract_uniques=True,
+    return_Rt_list=True
 ):
     """
     This function takes a silico MSMS sequence dict and generates MS2 EICs
