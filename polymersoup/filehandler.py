@@ -176,13 +176,14 @@ def generate_insilico_writefile_string(
     write_string = f"{write_string}.json"
     return os.path.join(folder, write_string)
 
-def write_MS1_EIC_file(
+def write_EIC_file(
     input_data_file,
     output_folder,
-    MS1_EICs
+    EICs,
+    ms_level=1
 ):
     """
-    Writes an MS1 EIC dict to a .json file
+    Writes an EIC dict to a .json file
 
     Args:
         input_data_file (str): full file path to mzml ripper data file used to
@@ -191,44 +192,19 @@ def write_MS1_EIC_file(
             be saved
         MS1_EICs (dict): dictionary of sequences and / or compositions and
             their corresponding MS1 EICs
+        ms_level (int, optional): specifies MS level of EIC data. Defaults to
+            1
     """
 
     input_file = os.path.basename(input_data_file).replace(".json", "")
 
-    output_file = os.path.join(output_folder, f'{input_file}_MS1_EICs.json')
+    output_file = os.path.join(output_folder, f'{input_file}_MS{ms_level}_EICs.json')
 
     write_to_json(
-        write_dict=MS1_EICs,
+        write_dict=EICs,
         output_json=output_file
     )
-    print(f'MS1 EICs written to {output_file}')
-
-def write_MS2_EIC_file(
-    input_data_file,
-    output_folder,
-    MS2_EICs
-):
-    """
-    Writes MS2 EICs to a .json file
-
-    Args:
-        input_data_file (str): full file path to mzml ripper data file used to
-            generate MS2 EICs
-        output_folder (str): path to output folder directory, where data will
-            be saved
-        MS2_EICs (dict): dictionary of sequences  and their corresponding
-            MS2 EICs
-    """
-    input_file = os.path.basename(input_data_file).replace(".json", "")
-
-    output_file = os.path.join(output_folder, f'{input_file}_MS2_EICs.json')
-
-    write_to_json(
-        write_dict=MS2_EICs,
-        output_json=output_file
-    )
-
-    print(f'MS2 EICs written to {output_file}')
+    print(f'MS{ms_level} EICs written to {output_file}')
 
 def write_pre_fragment_screen_sequence_JSON(
     input_data_file,
@@ -352,7 +328,8 @@ def write_standard_postprocess_data(
     confirmed_fragdict, 
     confidence_scores,
     confidence_limit,
-    subsequence_weight
+    subsequence_weight,
+    MS1_EICs
 ):
    
     write_to_json(
@@ -400,10 +377,18 @@ def write_standard_postprocess_data(
             "Sequence", 
             "Confidence_Score", 
             "Confirmed_Fragments", 
-            "Confirmed_signatures"
+            "Confirmed_signatures",
+            "Max_Intensity"
         ]
     )
+    
+    # get max peak intensity of each sequence from its MS1 EIC
+    max_intensities = {
+        seq: max([Rt_I[1] for Rt_I in MS1_EICs["".join(sorted(seq))]])
+        for seq in confirmed_fragdict
+    }
 
+    # write all data to final csv for each sequence 
     for seq in confirmed_fragdict: 
 
         append_csv_row(
@@ -413,6 +398,9 @@ def write_standard_postprocess_data(
                 confidence_scores[seq],
                 [frag for frag in confirmed_fragdict[seq]["MS2"]
                 if frag != 'signatures'],
-                confirmed_fragdict[seq]["confirmed_signatures"]
+                confirmed_fragdict[seq]["confirmed_signatures"],
+                max_intensities[seq]
             ]
         )
+    
+

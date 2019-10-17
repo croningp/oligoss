@@ -219,10 +219,11 @@ def standard_extraction(
         )
 
         # save MS1 EICs
-        write_MS1_EIC_file(
+        write_EIC_file(
             input_data_file=ripper,
             output_folder=write_folder,
-            MS1_EICs=MS1_EICs
+            EICs=MS1_EICs,
+            ms_level=1
         )
 
         # remove compositions that are not present at sufficient abundance
@@ -230,6 +231,7 @@ def standard_extraction(
         compositional_silico_dict = {
             composition: compositional_silico_dict[composition]
             for composition in MS1_EICs
+            if composition.find('retention') == -1
         }
 
         print(f'generating full MSMS dict for {len(MS1_EICs)} compositions')
@@ -291,6 +293,14 @@ def standard_postprocess(
             if d_file.find('confirmed_fragment_dict.json') > -1][0]
     )
 
+    # retrieve MS1 EICs dict from extracted data 
+    MS1_EICs = open_json(
+        filepath = [
+            os.path.join(extracted_data_folder, d_file)
+            for d_file in os.listdir(extracted_data_folder)
+            if d_file.find('MS1_EIC') > -1][0]
+    )
+
     ssw = postprocess_parameters['subsequence_weight']
 
     if type(ssw) != list: 
@@ -329,7 +339,8 @@ def standard_postprocess(
             confidence_scores=confidence_scores,
             confidence_limit=postprocess_parameters['min_viable_confidence'],
             subsequence_weight=subseq_weight,
-            confirmed_fragdict=confirmed_fragment_dict
+            confirmed_fragdict=confirmed_fragment_dict,
+            MS1_EICs=MS1_EICs
         )
 
 launch_screen(sys.argv[1])

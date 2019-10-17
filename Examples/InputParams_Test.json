@@ -1,7 +1,7 @@
 {
 "screening_method": "exhaustive",
 
-"data_extraction": false,
+"data_extraction": true,
 
 "postprocess": true,
 
@@ -32,7 +32,7 @@
             "side_chain_tags": {
             },
             "cyclic_sequences": false,
-            "isobaric_targets": ["FGSN"]
+            "isobaric_targets": null
         },
 
         "MS2": {
@@ -87,8 +87,8 @@
     },
 
 "directories":
-    {   "ripper_folder": "C:/Users/group/Documents/MSAnalysis/temp",
-        "output_folder": "Z:/group/Emma Clarke/Data/SPPS-Mixtures/Sequencing/ECK2-20/5_replicates/UNCAPPED/GSGNQVGS/processed"
+    {   "ripper_folder": "C:/Users/group/Documents/MSAnalysis/temp/FGSN",
+        "output_folder": "C:/Users/group/Documents/MSAnalysis/temp/FGSN/out"
     }
 
 }

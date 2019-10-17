@@ -38,7 +38,17 @@ def return_silico_parameters(
 def load_essential_signature_ions(
     parameters_file
 ):
-
+    """
+    Reads essential, monomer-specific signature ions (denoted by monomer one-
+    letter codes) from input parameters and returns list of m/z values for 
+    essential signature ions. 
+    
+    Args:
+        parameters_file (str): full file path to input paremeters file
+    
+    Returns:
+        list: list of m/z values for signature ions
+    """
     parameters_dict = read_parameters(parameters_file)
 
     extractor_params = parameters_dict['extractor_parameters']
@@ -210,8 +220,17 @@ def add_timestamp(
     month=True,
     year=True
 ):
-
-
+    """
+    Returns date and time dict for saving to run_parameters log files
+    
+    Args:
+        day (bool, optional): specify whether to log day. Defaults to True.
+        month (bool, optional): specify whether to log month. Defaults to True.
+        year (bool, optional): specify whether to log year. Defaults to True.
+    
+    Returns:
+        dict: dict of date and time. s
+    """
     timestamp_dict = {}
 
     date_string = ''
