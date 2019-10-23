@@ -1,10 +1,11 @@
-"""Module for filtering spectra based on a set of criteria
-Criteria are:
-    1.) Retention Time
-    2.) Parent Ion (MS2 only)
-    3.) Signature ions
-    4.) Total intensity
-    5.) Maximum intensity
+"""
+Module for filtering spectra based on the following criteria:
+
+(1) Retention Time
+(2) Parent Ion (MS2 only)
+(3) Signature ions
+(4) Total intensity
+(5) Maximum intensity
 
 .. moduleauthor:: Graham Keenan 2019
 .. moduleauthor:: David Doran 2019
@@ -316,7 +317,7 @@ def filter_max_intensity(
         ms_level: int
     ) -> dict:
     """Filters a spectra collection based on a maximum intensity threshold
-    A spectrum's maximum intensity must exceed the threshold
+    A spectrum's maximum intensity must exceed the threshold.
 
     Args:
         msdata (dict): Spectra collection
@@ -360,18 +361,24 @@ def filter_mass_difference(
         err_abs=True,
         ms_level=2
     ) -> dict:
-    """Filters the spectra based on the mass difference between peaks
+    """Filters the spectra based on the mass difference between peaks.
     Scans through a list of monomer mass differences and check for peaks that
     match the difference.
 
     Args:
-        msdata (dict): Spectrum data
-        monomer_massdiffs (dict): Monomers and the associated mass differences
-        total_comparisons (int): Total number of comparisons to perform
-        target_func (Callable): Find target function
+        msdata (dict): spectrum data
+        monomer_massdiffs (dict): monomers and their associated mass differences
+        total_comparisons (int): total number of comparisons to perform
+        target_func (Callable): find target function
+        err (float): error threshold for screening - either in absolute mass
+            units or ppm
+        err_abs (bool): specifies whether err units are absolute mass units
+            or ppm
+        ms_level(int):specifies ms_level for spectra being screened (default: 2)
+
 
     Returns:
-        dict: Spectra IDs with found monomers
+        dict: Spectra IDs with found monomers.
     """
 
     # Create output map
@@ -463,9 +470,9 @@ def apply_pre_screening_filters(
     err_abs
 ):
     """
-    This function takes an ms dictionary read from an mzml ripper json and
+    Takes an MS dictionary that is read from an mzml ripper json and
     returns a filtered dictionary of spectra within the input ripper_dict that
-    meet the filter criteria specified (described below)
+    meet the filter criteria specified (described below).
 
     Args:
         ripper_dict (dict): mass spec data dict in mzml ripper format
@@ -477,27 +484,31 @@ def apply_pre_screening_filters(
             returned
         signature_ms_level (int): ms level for monomer signature screening
         precursor_ions (list): list of precursor ions. At least one of these
-            must be the precursr for any MSn spectra
+            must be the precursor for any MSn spectra
         precursor_ion_ms_level (int): MS level for screening precursors. This
             MUST be greater than 1, as MS1 spectra have no precursors
-        min_MS1_total_intensity (float): minimum total intensity of MS1 spectra
-            spectra with a total intensity below this value will be filtered
+        min_MS1_total_intensity (float): minimum total intensity of MS1 spectra.
+            Spectra with a total intensity below this value will be filtered
             out
-        min_MS2_total_intensity (float): minimum total intensity of MS2 spectra
-            spectra with a total intensity below this value will be filtered
+        min_MS2_total_intensity (float): minimum total intensity of MS2 spectra.
+            Spectra with a total intensity below this value will be filtered
             out. NOTE: This is either given as an absolute value or a decimal
             fraction of min_MS1_total_intensity; either is acceptable
-        min_MS1_max_intensity (float): minimum maximum intensity of MS1 spectra
-            spectra with a maximum intensity below this value will be filtered
+        min_MS1_max_intensity (float): minimum maximum intensity of MS1 spectra.
+            Spectra with a maximum intensity below this value will be filtered
             out
-        min_MS2_max_intensity (float): minimum maximum intensity of MS2 spectra
-            spectra with a maximum intensity below this value will be filtered
+        min_MS2_max_intensity (float): minimum maximum intensity of MS2 spectra.
+            Spectra with a maximum intensity below this value will be filtered
             out. NOTE: This is either given as an absolute value or a decimal
             fraction of min_MS1_max_intensity; either is acceptable
         err (float): error threshold for screening - either in absolute mass
             units or ppm
         err_abs (bool): specifies whether err units are absolute mass units
             or ppm
+
+    Returns:
+        dict: A filtered dictionary of spectra within the input ripper_dict that 
+        meet the filter criteria specified.
     """
     # check for min, max rt and apply filter
     if not min_rt and not max_rt:

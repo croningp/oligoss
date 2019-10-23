@@ -525,6 +525,7 @@ def confirm_fragments_sequence_dict(
                     }
                 }
             }
+            
         where seq = sequence string; m/z = ion m/z values; "frag" = fragment id
         string; "signature" = fragment id string for monomer-specific
         signature fragment; "peak_list" = list of ALL MS1 AND MS2 ions
