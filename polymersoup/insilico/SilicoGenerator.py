@@ -6,10 +6,7 @@ functions for generating theoretical MS and MSMS sequence data
 
 from .MS1_silico import *
 from .MS2_silico import *
-from ..parameter_handlers import *
 from .silico_helpers.insilico_helpers import *
-
-
 
 def generate_MSMS_sequence_dict(
     parameters_file="C:/Users/group/PolymerMassSpec/Examples/InputParams_Test.json",

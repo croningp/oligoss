@@ -3,7 +3,7 @@ This file contains essential functions which are essential to all
 in silico operations
 """
 from ..Constants.GlobalChemicalConstants import *
-from ..Config_files.Depsipeptide_config import *
+from ...parameter_handlers import *
 import copy
 import time
 import itertools
@@ -27,7 +27,15 @@ def find_sequence_mass(
     # calculate sequence mass by summing the mass of its constituent monomers,
     # subtracting the monomer addition MASS_DIFF for every monomer addition
     sequence_mass = sum([MONOMERS[c][0] for i, c in enumerate(sequence)])
-    sequence_mass -= (len(sequence)-1)*MASS_DIFF
+    if type(MASS_DIFF)==str:
+
+        # check type of MASS_DIFF, if string find corresponding float value
+        # and calculate mass
+        MASS_DIFF_float=FG[MASS_DIFF]
+        sequence_mass -= (len(sequence)-1)*MASS_DIFF_float
+
+    if type(MASS_DIFF)==float:
+        sequence_mass -= (len(sequence)-1)*MASS_DIFF
 
     # check whether sequence mass is to be trimmed to four decimal places
     if four_point_float:
@@ -392,6 +400,10 @@ def add_sidechain_neutral_loss_products_sequence(
         # iterate through associated side chain losses for monomer and subtract
         # from sequence masses
         for loss in loss_monomers[monomer]:
+
+            # check if loss is a string, if so redefine as the corresponding float
+            if type(loss)==str:
+                loss = FG[loss]
             for i in range(1, occurence+1):
                 neutral_loss = loss*i
                 monomer_losses.extend(

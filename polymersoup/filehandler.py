@@ -7,7 +7,6 @@ for de novo peptide polymer soup sequencing
 import os
 import csv
 import json
-from .insilico.Config_files.Depsipeptide_config import *
 
 def __init__():
     pass

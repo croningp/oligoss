@@ -103,7 +103,7 @@ def build_fragment_series_single_sequence(
         # get fragment masses, taking into account any possible exceptions
         fragment_masses = [
             find_sequence_mass(sub_sequence) + mass_diff
-            for mass_diff in mass_diffs
+            for FG[mass_diff] in mass_diffs
         ]
 
         # add fragment masses to fragment dict
