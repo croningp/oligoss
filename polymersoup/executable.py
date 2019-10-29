@@ -69,9 +69,8 @@ def exhaustive_screen(
         output_json=os.path.join(output_folder, 'run_parameters.json')
     )
 
-    if parameters_dict['silico_generator'] == True:
-        # generate compositional silico dict for screening MS1 EICs
-        compositional_silico_dict = generate_MS1_compositional_dict(silico_params)
+    # generate compositional silico dict for screening MS1 EICs
+    compositional_silico_dict = generate_MS1_compositional_dict(silico_params)
 
     # if data extraction set to False, make sure not to accidentally call 
     # data filters 

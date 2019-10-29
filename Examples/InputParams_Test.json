@@ -3,8 +3,6 @@
 
 "data_extraction": true,
 
-"data_extraction": true,
-
 "postprocess": true,
 
 "add_modifications": false,
@@ -18,8 +16,8 @@
 
         "MS1": {
             "monomers": ["F", "G", "S", "N", "Q"],
-            "max_length": 5,
-            "min_length": 5,
+            "max_length": 2,
+            "min_length": 2,
             "ms1_adducts": ["H", "Na"],
             "min_z": 1,
             "max_z": null,
@@ -106,9 +104,9 @@
     },
 
 "directories":
-    {   "ripper_folder": "Y:/Orbitrap Lumos/Emma Clarke/SPPS-Mixtures/24-09-2019/FGSNQ/ripper/MS1_MS2_CAPPED/filtered_rippers",
-        "output_folder": "Z:/group/David Doran/Data/PeptideSequencing/PolymerMassSpec/LinearStandards/SPPS/ECK-20/5_replicates/MS1_MS2_CAPPED/FGSNQ/0.25",
-        "polymer_config": ""
+    {   "ripper_folder": "C:/Users/group/Desktop/config_json_test/input",
+        "output_folder": "C:/Users/group/Desktop/config_json_test/output",
+        "polymer_type": "Depsipeptide"
     }
 
 }
