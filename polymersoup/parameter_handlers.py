@@ -67,10 +67,10 @@ def return_polymer_config(
     and returns the relevant polymer config file as a dictionary.
     
     Arguments:
-        parameters_file {str} -- filepath for the parameters .json
+        parameters_file (str) -- filepath for the parameters .json.
 
     Returns:
-        dict version of polymer configuration file
+        Dict -- dict version of polymer configuration file.
     """
     # read parameters file
     parameters_dict = read_parameters(parameters_file)
@@ -113,14 +113,14 @@ def return_silico_parameters(
 ):
     """
     Takes an input parameters file (.json) and returns dictionary of parameters
-    relevant to in silico functions
+    relevant to in silico functions.
 
     Args:
-        parameters_file (str): full file path to input parameters json fil
+        parameters_file (str): full file path to input parameters json file.
 
     Returns:
         silico_parameters (dict): dictionary of parameters and associated
-                    info for in silico functions
+            info for in silico functions.
     """
 
     silico_parameters = read_parameters(parameters_file)["silico_parameters"]
@@ -136,10 +136,10 @@ def load_essential_signature_ions(
     essential signature ions. 
     
     Args:
-        parameters_file (str): full file path to input paremeters file
+        parameters_file (str): full file path to input paremeters file.
     
     Returns:
-        list: list of m/z values for signature ions
+        list: list of m/z values for signature ions.
     """
     parameters_dict = read_parameters(parameters_file)
 
@@ -170,14 +170,14 @@ def return_extractor_parameters(
 ):
     """
     Takes an input parameters file (.json) and returns dictionary of parameters
-    relevant to data extraction
+    relevant to data extraction.
 
     Args:
-        parameters_file (str): full file path to input parameters json
+        parameters_file (str): full file path to input parameters json.
 
     Returns:
         extractor_parameters (dict): dictionary of parameters and associated
-                    info for data extraction
+                    info for data extraction.
     """
 
     # retrieve extractor parameters from input parameters .json file
@@ -227,14 +227,14 @@ def return_postprocess_parameters(
 ):
     """
     Takes an input parameters file (.json) and returns dictionary of parameters
-    relevant to sequence confirmation and post-processing
+    relevant to sequence confirmation and post-processing.
 
     Args:
-        parameters_file (str): full file path to input parameters json
+        parameters_file (str): full file path to input parameters json.
 
     Returns:
         postprocess_parameters (dict): dictionary of parameters and associated
-                    info for sequence confirmation and postprocessing
+            info for sequence confirmation and postprocessing.
     """
     postprocess_parameters = read_parameters(parameters_file)[
         "postprocessing_parameters"]
@@ -246,14 +246,14 @@ def return_directories(
 ):
     """
     Takes an input parameters file (.json) and returns dictionary of key
-    file directories essential for executing de novo sequencing experiments
+    file directories essential for executing de novo sequencing experiments.
 
     Args:
-        parameters_file (str): full file path to input parameters .json file
+        parameters_file (str): full file path to input parameters .json file.
 
     Returns:
         directories (dict): dictionary of important directories required to
-            run executable
+            run executable.
     """
     directories = read_parameters(parameters_file)["directories"]
 
@@ -265,13 +265,13 @@ def generate_parameters_dict(
     """
     Takes an input parameters .json file and returns a dictionary of all
     relevant parameters contained within the file for successfully running
-    a full de novo sequencing experiment in executable
+    a full de novo sequencing experiment in executable.
 
     Args:
-        parameters_file (str): full file path to input parameters .json file
+        parameters_file (str): full file path to input parameters .json file.
     Returns:
         parameters_dict (dict): dictionary of all parameters relevant for
-            executing de novo sequencing experiments
+            executing de novo sequencing experiments.
     """
     # load parameters relevant for in silico operations
     silico_dict = return_silico_parameters(parameters_file)
@@ -313,7 +313,7 @@ def add_timestamp(
     year=True
 ):
     """
-    Returns date and time dict for saving to run_parameters log files
+    Returns date and time dict for saving to run_parameters log files.
     
     Args:
         day (bool, optional): specify whether to log day. Defaults to True.
@@ -321,7 +321,7 @@ def add_timestamp(
         year (bool, optional): specify whether to log year. Defaults to True.
     
     Returns:
-        dict: dict of date and time. s
+        dict: dict of date and time.
     """
     timestamp_dict = {}
 

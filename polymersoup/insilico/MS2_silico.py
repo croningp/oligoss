@@ -18,28 +18,29 @@ def build_fragment_series_single_sequence(
 ):
     """
     This function takes a sequence and builds an MS2 fragment series,
-    returning a dictionary of fragment ids and corresponding m/z values
+    returning a dictionary of fragment ids and corresponding m/z values.
 
     Arguments:
-        sequence {str} -- sequence string of constituent monomer one letter
-                            codes
-        fragment_series {str} -- fragment string used to denote fragment
+        sequence (str) -- sequence string of constituent monomer one letter
+                            codes.
+        fragment_series (str) -- fragment string used to denote fragment
                                 series
+        adducts (list) -- list of adducts expected to be seen.
 
     Keyword Arguments:
-        mode {str} -- specifies whether fragmented species are cationic or
+        mode (str) -- specifies whether fragmented species are cationic or
                     anionic, use 'pos' for cations and 'neg' for anions
-                    (default: {'pos'})
+                    (default: {'pos'}).
         max_total_losses (int) -- specifies maximum number of side chain
-            neutral loss products permitted per fragment
-        loss_product_adducts (list) -- list of adducts to add to loss products
+            neutral loss products permitted per fragment.
+        loss_product_adducts (list) -- list of adducts to add to loss products.
         check_exceptions (bool) -- specifies whether to check for exceptions
             to standard fragmentation rules based on the monomers present in
-            the sequence
+            the sequence.
 
     Returns:
         fragment_dict -- dictionary of fragments and corresponding m/z
-                            values
+                            values.
     """
     # define frag_info (makes nested dictionary navigation more readable)
     frag_info = FRAG_SERIES[fragment_series]
@@ -160,12 +161,12 @@ def find_ms2_fragment_exceptions(
     functional group / reactivity class of terminating / initiating monomer.
 
     Arguments:
-        frag_info {string} -- location of fragment information
+        frag_info {string} -- location of fragment information.
         sub_sequence -- fragment currently being checked for exceptions
-            (from build_fragment_series_single_sequence)
-        mode {str} -- specifies whether fragmented species are cationic or
-                anionic, use 'pos' for cations and 'neg' for anions
-                (default: {'pos'})
+            (from build_fragment_series_single_sequence).
+        mode (str) -- specifies whether fragmented species are cationic or
+                anionic, use 'pos' for cations and 'neg' for anions.
+                (default: {'pos'}).
 
     Returns:
         'frag_info['exceptions'][mode][exception_groups[0]]' -- list
@@ -222,10 +223,10 @@ def build_multiple_fragment_series_single_sequence(
     """
     Takes a single sequence, list of fragment series (e.g. ['b', 'y'] for
     standard peptide b- and y- fragments) and outputs a dictionary of MS2
-    fragments and corresponding m/z values
+    fragments and corresponding m/z values.
 
     Args:
-        sequence (str): Sequence string comprised of monomer one letter codes
+        sequence (str): Sequence string comprised of monomer one letter codes.
         fragment_series (list, optional): List of fragment one letter codes
                         strings; if None, all fragments in FRAG_SERIES from
                         polymer config file are included in final fragment
@@ -242,7 +243,7 @@ def build_multiple_fragment_series_single_sequence(
                         Defaults to None.
 
     Returns:
-        fragment_dict: dictionary of MS2 fragments and corresponding m/z values
+        fragment_dict: dictionary of MS2 fragments and corresponding m/z values.
     """
     # if no fragment series are specified, all fragment types in FRAG_SERIES
     # dict from polymer config file are to be incorporated into MS2 fragment
@@ -287,34 +288,34 @@ def add_adducts_ms2_fragments(
 ):
     """
     This function takes a dictionary of MS2 fragments and associated m/z
-    values, and adds singly charged adducts
+    values, and adds singly charged adducts.
 
     Arguments:
-        fragment_dict {dict} -- dictionary of fragments and associated m/z
+        fragment_dict (dict) -- dictionary of fragments and associated m/z
                             values. keys = fragment id strings, values = lists
                             of associated masses. See function:
-                            build_fragment_series_single_sequence
-        adducts {list} -- list of adducts to be added to MS2 fragments
+                            build_fragment_series_single_sequence.
+        adducts (list) -- list of adducts to be added to MS2 fragments.
 
     Keyword Arguments:
-        mode {str} -- either 'pos' or 'neg' for positive and negative mode,
-                        respectively (default: {'pos'})
-        fragment_series {list} -- list one character strings denoting fragment
+        mode (str) -- either 'pos' or 'neg' for positive and negative mode,
+                        respectively. (default: {'pos'}).
+        fragment_series (list) -- list one character strings denoting fragment
                         series. If None, adducts will be added to all fragment
-                        series that do not correspond to signature ions
-                        (default: {None})
-        return_base_fragments {bool} -- specific whether to return input
-                        fragment masses in adduct list (default: {True})
+                        series that do not correspond to signature ions.
+                        (default: {None}).
+        return_base_fragments (bool) -- specific whether to return input
+                        fragment masses in adduct list. (default: {True}).
 
     Raises:
         Exception: raised if any of the input adducts do not match the
                     detection mode (i.e. anions in positive mode, cations in
                     positive mode). Functions for complex adducts are yet to
-                    be written
+                    be written.
 
     Returns:
         adduct_fragdict -- dictionary of fragment string codes and associated
-                        m/z value lists with adducts. ALL IN +1 CHARGE STATE
+                        m/z value lists with adducts. ALL IN +1 CHARGE STATE.
     """
     # list fragments, excluding monomer-specific signature ion fragments
     fragments = [key for key in fragment_dict if key != 'signatures']
@@ -406,19 +407,20 @@ def generate_monomer_ms2_signature_ions_sequence(
 ):
     """
     This function generates a dictionary of monomer signature ions for
-    a sequence
+    a sequence.
+
     Arguments:
-        sequence {str} -- sequence string with constituent monomer one letter
-                            codes
+        sequence (str) -- sequence string with constituent monomer one letter
+                            codes.
     Keyword Arguements:
-        signatures {list} -- list of signature fragment codes - e.g. ['Im']
+        signatures (list) -- list of signature fragment codes - e.g. ['Im']
                             for amino acid immonium fragments. If None, all
                             signature ion types will be returned in signature
-                            ion dictionary
-                            (default: {None})
+                            ion dictionary.
+                            (default: {None}).
     Returns:
         MS2_signature_dict -- dictionary of monomer signature fragments
-                            and associated m/z values
+                            and associated m/z values.
     """
     # get list of unique monomers within sequence
     monomers = list(set([c for i, c in enumerate(sequence)]))
@@ -460,15 +462,15 @@ def generate_ms2_mass_dictionary(
     uniques=True
 ):
     """
-    Takes a list of sequences and generates full ms2 fragment dictionary
+    Takes a list of sequences and generates full ms2 fragment dictionary.
 
     Args:
-        sequences (str): sequence string comprised of monomer one letter codes
+        sequences (str): sequence string comprised of monomer one letter codes.
         fragment_series (list): list of fragment types - must be keys in
-                            FRAG_SERIES dict in polymer config file
-        adducts (list): list of adduct strings
+                            FRAG_SERIES dict in polymer config file.
+        adducts (list): list of adduct strings.
         mode (str): either 'pos' or 'neg' for positive and negative mode,
-                    respectively
+                    respectively.
         add_signatures (bool, optional): specifies whether to add
                             monomer-specific MS2 signature ions.
                             Defaults to True.
@@ -495,7 +497,7 @@ def generate_ms2_mass_dictionary(
                                 }
                             }
         where seq = sequence, "frag" = fragment id, masses = MS2 fragment m/z
-        values, "signature_frag" = signature fragment id
+        values, "signature_frag" = signature fragment id.
     """
     print(f'building MS2 fragment series for {len(sequences)} sequences')
     ms2_fragment_dict = {
@@ -532,17 +534,17 @@ def confirm_exceptions_sequence_dict(
     
 def find_unique_fragments_isobaric_set(isobaric_sequencedict):
     """
-    finds unique MS2 fragments from an MS2 fragment mass dictionary in which
+    Finds unique MS2 fragments from an MS2 fragment mass dictionary in which
     all sequences within the dictionary are isobaric (i.e. have the same
-    composition)
+    composition).
 
     Args:
         isobaric_sequencedict (dict): dictionary of isobaric sequences and
-                                    MS2 fragments
+                                    MS2 fragments.
 
     Returns:
         isobaric_sequencedict: input dict, with list of unique fragments added
-                                    to MS2 fragments
+                                    to MS2 fragments.
     """
     # initiate list to store fragment masses, for later use in counting
     # occurence of each fragment mass
@@ -595,7 +597,7 @@ def find_unique_fragments_isobaric_set(isobaric_sequencedict):
 def generate_unique_fragment_ms2_massdict(massdict):
     """
     Takes an MS2 fragment mass dict and identifies unique fragments for each
-    sequence in the dict, adds them as a key-value pair to output dict
+    sequence in the dict, adds them as a key-value pair to output dict.
 
     Args:
         massdict (dict): MS2 mass dict in the format: {
@@ -603,7 +605,7 @@ def generate_unique_fragment_ms2_massdict(massdict):
                 'frag': [masses]
                 }
             }
-        where frag = fragment id, masses = m/z values of fragments
+        where frag = fragment id, masses = m/z values of fragments.
 
     Returns:
         unique_fragment_dict: same as input massdict, but with extra key-value
@@ -615,7 +617,7 @@ def generate_unique_fragment_ms2_massdict(massdict):
                     }
                 }
                 where 'frag_1', 'frag_2' = fragment string ids for fragments
-                that are unique to sequence
+                that are unique to sequence.
     """
 
     # generate dictionary of isobaric sets in format:
@@ -652,15 +654,15 @@ def find_fragments_by_index(
     """
     Takes a list of fragment ids and returns fragments within list whose
     position in the fragment series matches the target_index specified.
-    Fragments must be denoted by ONE LETTER codes and index
+    Fragments must be denoted by ONE LETTER codes and index.
 
     Args:
-        fragments (list): list of fragment ids (strings)
-        target_index (int): target fragment index
+        fragments (list): list of fragment ids (strings).
+        target_index (int): target fragment index.
 
     Returns:
         fragments (list): list of fragments that match target index (e.g.
-                    ['y14', 'b14'] if target_index = 14)
+                    ['y14', 'b14'] if target_index = 14).
     """
 
     # remove one letter code from fragments, leaving only string of fragment
@@ -681,7 +683,27 @@ def add_terminal_modification_sequence_all_fragments(
     modification_terminus,
     universal_shift=False
 ):
-
+    """ This function adds the mass of a terminal modification to 
+        terminally modified fragments.
+        
+    Arguments:
+        sequences (str): sequence string comprised of monomer one letter codes.
+        fragment_dict (dict) -- dictionary of fragments and associated m/z
+                            values. keys = fragment id strings, values = lists
+                            of associated masses. See function:
+                            build_fragment_series_single_sequence.
+        modification_mass (float): full neutral monoisotopic mass of modification.
+        modification_terminus (int): either 0 or -1 for start and end terminus,
+                        respectively; specifies whether terminal modification
+                        is to be added to start or end terminus.
+    
+    Keyword Arguments:
+        universal_shift (bool, optional): specifies whether every fragment mass
+                        must be shifted by modification mass; if True, only
+                        modified masses are returned; if False, masses of
+                        modified + unmodified fragments are returned.
+                        Defaults to False.
+    """
     fragment_series = list(
         set(
             [frag[0] for frag in fragment_dict if frag != 'signature']
@@ -718,20 +740,20 @@ def add_terminal_ms2_modification_sequence_fragment_subsets(
 
     Args:
         sequence (str): full length sequence string comprised of monomer one
-                        letter codes
+                        letter codes.
         fragment_dict (dict): dictionary of MS2 fragments (different fragment
                         types are allowed as long as they have the same
                         terminus and start, end positions) and associated
-                        unmodified masses
+                        unmodified masses.
         frag_terminus (int): 0 or -1 for start and end terminus, respectively;
                         retrieved from FRAG_SERIES['terminus'] in polymer
-                        config file
-        modification_mass (float): full neutral monoisotopic mass of modification
+                        config file.
+        modification_mass (float): full neutral monoisotopic mass of modification.
         modification_massdiff (float): mass lost upon addition of modification
-                        to fragment mass(es)
+                        to fragment mass(es).
         modification_terminus (int): either 0 or -1 for start and end terminus,
                         respectively; specifies whether terminal modification
-                        is to be added to start or end terminus
+                        is to be added to start or end terminus.
         universal_shift (bool, optional): specifies whether every fragment mass
                         must be shifted by modification mass; if True, only
                         modified masses are returned; if False, masses of
@@ -741,7 +763,7 @@ def add_terminal_ms2_modification_sequence_fragment_subsets(
     Returns:
         modified_fragdict: dictionary of fragment_ids and associated masses,
                         with modification masses added to fragments containing
-                        target terminus
+                        target terminus.
     """
     # initiate dictionary to store fragments with modified masses
     modified_fragdict = {}

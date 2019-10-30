@@ -1,6 +1,6 @@
 """
 This file contains functions for passing on silico parameters to insilico
-functions for generating theoretical MS and MSMS sequence data
+functions for generating theoretical MS and MSMS sequence data.
 
 """
 
@@ -32,7 +32,7 @@ def generate_MSMS_sequence_dict(
         MS2 fragment id string, 'signature' = MS2 fragment id string for a
         monomer-specific signature fragment, 'unique_frag' = MS2 fragment id
         string for a fragment with m/z unique to that sequence (i.e. not found
-        in MS2 fragments of other, isobaric sequences)
+        in MS2 fragments of other, isobaric sequences).
 
     Args:
         parameters_file (str, optional): full file path to input parameters
@@ -49,7 +49,7 @@ def generate_MSMS_sequence_dict(
 
     Returns:
         full_MSMS_dict (dict): MSMS sequence dict, the format of which
-            is described in detail above
+            is described in detail above.
     """
     # reads in silico parameters from input parameters json
     silico_params = return_silico_parameters(parameters_file)
@@ -127,15 +127,15 @@ def generate_MS1_compositional_dict(
     """
     This function generates a dictionary of compositions (not sequences) and
     associated MS1 ions for all possible compositions that can arise from
-    constraints specified in input parameters .json file
+    constraints specified in input parameters .json file.
 
     Args:
         silico_parameters (dict): dictionary of in silico parameters passed on
-            from input parameters .json file
+            from input parameters .json file.
 
     Returns:
         MS1_dict (dict): dictionary of compositions and their corresponding
-            MS1 m/z values in format : {composition: [m/z...]...}
+            MS1 m/z values in format : {composition: [m/z...]...}.
     """
 
     # load MS1 in silico parameters
@@ -172,20 +172,22 @@ def generate_MSMS_insilico_from_compositions(
     This function takes a dictionary of product compositions and associated
     MS1 ions, and returns a full_MSMS_sequence dictionary containing in silico
     data for both MS1 ions and MS2 fragments for every possible sequence that
-    matches a composition in the input composition_dict
+    matches a composition in the input composition_dict.
 
     Args:
         composition_dict (dict): dictionary of compositions and corresponding
-            MS1 ion m/z values
+            MS1 ion m/z values.
         silico_parameters (dict): dictionary of in silico parameters passed on
-            from input parameters .json file
+            from input parameters .json file.
         uniques (bool, optional): specifies whether to find unique MS2
             fragmentsfor each sequence and return these in the final sequence
             dict.
             Defaults to False.
 
     Returns:
-        [type]: [description]
+        dictionary: full_MSMS_sequence dictionary containing in silico
+            data for both MS1 ions and MS2 fragments for every possible sequence that
+            matches a composition in the input composition_dict.
     """
     full_MSMS_sequence_dict = {}
 
@@ -257,7 +259,7 @@ def find_unique_fragments_sequence_dict(
     subsets of fragments, not full theoretical MSMS in silico sequence dicts.
     Intended use is for finding unique fragments from fragments that have been
     confirmed as being associated with sequences by functions in extractors
-    and postprocessing
+    and postprocessing.
 
     Args:
         sequence_dict (dict): dictionary of sequences and MS2 fragments in
@@ -272,7 +274,7 @@ def find_unique_fragments_sequence_dict(
 
     Returns:
         unique_fragment_dict (dict): dictionary of sequences and associated
-            fragment ids for fragments that are unique to each sequence
+            fragment ids for fragments that are unique to each sequence.
     """
 
     # group sequences by composition for comparison of isobaric sequences
