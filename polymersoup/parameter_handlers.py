@@ -4,6 +4,9 @@ in silico fragmentation, data extraction and post-processing.
 
 """
 import time
+import json
+import os
+from .insilico.Constants.GlobalChemicalConstants import *
 
 # import filehandler - the file containing functions that load parameters
 # from files
@@ -13,8 +16,97 @@ from .filehandler import *
 # commonly used in experiments
 from .StandardInstrumentParameters.InstrumentStandards import *
 
-def __init__():
-    pass
+def __init__(parameters_file="C:/Users/group/PolymerMassSpec/Examples/InputParams_Test.json"):
+
+    # get full filepath for polymermassspec
+    polymermassspec_path = os.path.dirname(os.path.abspath(__file__))
+
+    # get the filepath for the polymer config jsons
+    config_folder = os.path.join(polymermassspec_path, "insilico", "Config_files")
+
+    input_json = open_json(parameters_file)
+
+    # if a polymer type was defined in the input parameters file, define POLYMER_INFO
+    # as the relevent polymer config file
+    if input_json["directories"]["polymer_type"]:
+        
+        # open config file for inputted polymer type
+        inputted_polymer_config = return_polymer_config(parameters_file)
+
+        # name polymer config dictionary POLYMER_INFO
+        POLYMER_INFO = inputted_polymer_config
+        return POLYMER_INFO
+
+    # if no polymer type was defined, prompt the user to choose an available config file
+    jsons = [
+        os.path.join(config_folder, s_file)
+        for s_file in os.listdir(config_folder)
+        if s_file.endswith('json')
+    ]
+
+    jsons_dict = {
+        str(i): jsons[i]
+        for i in range(0, len(jsons))
+        }
+    
+    print(f'you have {len(jsons)} options for polymer config file:')
+
+    for i in jsons_dict:
+        print(f'{i}: {jsons_dict[i]}')
+
+    json_choice = input(f'please select a json between 0 and {len(jsons)-1}:')
+
+    POLYMER_INFO = jsons_dict[str(json_choice)]
+    return POLYMER_INFO
+
+# import config file for polymer specified in InputParams
+def return_polymer_config(
+    parameters_file
+):
+    """ This function reads the parameters file for the polymer type
+    and returns the relevant polymer config file as a dictionary.
+    
+    Arguments:
+        parameters_file {str} -- filepath for the parameters .json
+
+    Returns:
+        dict version of polymer configuration file
+    """
+    # read parameters file
+    parameters_dict = read_parameters(parameters_file)
+    
+    # get polymer type from the input parameters .json
+    polymer_type = parameters_dict["directories"]["polymer_type"]
+
+    # generate polymer config file name
+    polymer_file = f'{polymer_type}.json' 
+    
+    # get full polymermassspec/polymersoup filepath
+    polymermassspec_path = os.path.dirname(os.path.abspath(__file__))
+
+    # generate the polymer config file path
+    polymer_config_file_path = os.path.join(polymermassspec_path, "insilico", "Config_files", polymer_file)
+
+    # read polymer config file
+    polymer_config_dict = open_json(polymer_config_file_path)
+    
+    return polymer_config_dict
+    
+# Config file variables are defined here (POLYMER_INFO from parameter_handlers.py)
+# Temporarily put in parameter handlers as load_essential_signature_ions requres MS2_SIGNATURE_IONS
+POLYMER_INFO=__init__()
+MONOMERS=POLYMER_INFO["MONOMERS"]
+MASS_DIFF=POLYMER_INFO["MASS_DIFF"]
+ELONGATION=POLYMER_INFO["ELONGATION"]
+REACTIVITY_CLASSES=POLYMER_INFO["REACTIVITY_CLASSES"]
+SYMMETRY=POLYMER_INFO["SYMMETRY"]
+CHAIN_TERMINATORS=POLYMER_INFO["CHAIN_TERMINATORS"]
+LOSS_PRODUCTS=POLYMER_INFO["LOSS_PRODUCTS"]
+IONIZABLE_SIDECHAINS=POLYMER_INFO["IONIZABLE_SIDECHAINS"]
+INTRINSICALLY_CHARGE_MONOMERS=POLYMER_INFO["INTRINSICALLY_CHARGE_MONOMERS"]
+FRAG_SERIES=POLYMER_INFO["FRAG_SERIES"]
+IMMONIUM_IONS=POLYMER_INFO["IMMONIUM_IONS"] 
+MS2_SIGNATURE_IONS=POLYMER_INFO["MS2_SIGNATURE_IONS"] 
 
 def return_silico_parameters(
     parameters_file
@@ -254,3 +346,4 @@ def add_timestamp(
     timestamp_dict["time"] = f'{hour}h:{minute}m:{second}s'
 
     return timestamp_dict
+
