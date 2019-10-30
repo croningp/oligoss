@@ -65,46 +65,49 @@ html_theme_options = {
 'footertextcolor':'Black',
 
 # Background color for the sidebar.
-'sidebarbgcolor':'LightGray',
+'sidebarbgcolor':'#660033',
 
 # Background color for the sidebar collapse button.
 'sidebarbtncolor':'DarkGrey', 
 
 # Text color for the sidebar 
-'sidebartextcolor':'Black', 
+'sidebartextcolor':'WhiteSmoke', 
 
 # Link color for the sidebar
-'sidebarlinkcolor':'Black',
+'sidebarlinkcolor':'WhiteSmoke',
 
 # Background color for the relation bar.
-'relbarbgcolor':'LightBlue',
+'relbarbgcolor':'#212121',
 
 # Text color for the relation bar.
-'relbartextcolor':'White',
+'relbartextcolor':'WhiteSmoke',
+
+# Link color for the relation bar.
+'relbarlinkcolor': 'WhiteSmoke',
 
 # Body background color.
 'bgcolor':'WhiteSmoke',
 
 # Body text color.
-'textcolor':'Black',
+'textcolor':'#212121',
 
 # Body link color
-'linkcolor':'SteelBlue',
+'linkcolor':'#660033',
 
 # Body color for visited links.
-'visitedlinkcolor':'SteelBlue',
+'visitedlinkcolor':'#660033',
 
 # Background color for headings.
 'headbgcolor':'WhiteSmoke',
 
 # Text color for headings
-'headtextcolor':'Black',
+'headtextcolor':'#212121',
 
 # Link color for headings.
-'headlinkcolor':'Black',
+'headlinkcolor':'#212121',
 
 # Background color for code blocks.
-'codebgcolor':'WhiteSmoke',
+'codebgcolor':'#212121',
 
 # Default text color for code blocks, if not set differently by the highlighting style.
 'codetextcolor':'Black',

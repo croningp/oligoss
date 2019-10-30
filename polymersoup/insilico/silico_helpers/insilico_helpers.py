@@ -1,5 +1,5 @@
 """
-This file contains essential functions which are essential to all
+This file contains functions which are essential to all
 in silico operations
 """
 from ..Constants.GlobalChemicalConstants import *
@@ -13,15 +13,15 @@ def find_sequence_mass(
     four_point_float=True
 ):
     """
-    [Takes a sequence string and returns neutral monoisotopic mass for sequence]
+    Takes a sequence string and returns neutral monoisotopic mass for sequence.
 
     Arguments:
-        sequence {str} -- [sequence string made up of constituent monomer one
-                            letter codes]
-        decimal_points {int} -- specifies number of decimal points to be worked
-                            out for sequence mass
+        sequence (str) -- sequence string made up of constituent monomer one
+                            letter codes.
+        decimal_points (int) -- specifies number of decimal points to be worked
+                            out for sequence mass.
     Returns:
-        sequence_mass {float} -- [neutral monoisotopic mass of input sequence]
+        sequence_mass (float) -- neutral monoisotopic mass of input sequence.
     """
 
     # calculate sequence mass by summing the mass of its constituent monomers,
@@ -50,23 +50,23 @@ def add_adducts_sequence_mass(
     mode='pos'
 ):
     """
-    [This functions adds charged adducts to a neutral sequence mass]
+    This functions adds charged adducts to a neutral sequence mass.
 
     Arguments:
-        neutral_mass {float} -- neutral monoisotopic mass of sequence
-        adducts {list} -- list of adduct strings. All adducts must be found
+        neutral_mass (float) -- neutral monoisotopic mass of sequence.
+        adducts (list) -- list of adduct strings. All adducts must be found
                         in either ANIONS or CATIONS dicts in
-                        GlobalChemicalConstants.py
+                        GlobalChemicalConstants.py.
     Keyword Arguments:
-        min_z {int} -- minimum ABSOLUTE charge of adduct (default: {1})
-        max_z {int} -- maximum ABSOLUTE charge of adduct. If this is set to
+        min_z (int) -- minimum ABSOLUTE charge of adduct (default: {1})
+        max_z (int) -- maximum ABSOLUTE charge of adduct. If this is set to
                         None, maximum charge is assumed to be maximum oxidation
-                        state of adduct ions (default: {None})
-        mode {str} -- either 'pos' or 'neg' for positive and negative mode
-                        mass spectrometry, respectively (default: {'pos'})
+                        state of adduct ions (default: {None}).
+        mode (str) -- either 'pos' or 'neg' for positive and negative mode
+                        mass spectrometry, respectively (default: {'pos'}).
     Returns:
-        [charged_sequence_masses] -- list of m/z values for charged sequences
-                        with adducts
+        charged_sequence_masses (list) -- list of m/z values for charged sequences
+                        with adducts.
     """
     #list anions and cations within adducts
     anions = [adduct for adduct in adducts if adduct in ANIONS]
@@ -124,10 +124,10 @@ def add_adducts_sequence_mass(
 def find_functional_groups_monomer(
     monomer
 ):
-    """ This function returns the functional groups present in a monomer
+    """ This function returns the functional groups present in a monomer.
 
     Arguments:
-        monomer {string} -- One letter monomer code that has associated neutral
+        monomer (string) -- One letter monomer code that has associated neutral
         monoisotopic mass, list of functional groups with their associated
         frequency per monomer.
 
@@ -159,12 +159,12 @@ def add_adduct_complexes_sequence_mass(
     ):
     """
     This function will add complex adducts to sequence masses - i.e. multiple
-    metal centres, ions with counterions and associated solvent species etc
+    metal centres, ions with counterions and associated solvent species etc.
 
     Args:
-        sequence (str): sequence string comprised of monomer one letter codes
-        neutral_mass (float): neutral monoisotopic mass of sequence
-        adducts (list): list of adduct strings
+        sequence (str): sequence string comprised of monomer one letter codes.
+        neutral_mass (float): neutral monoisotopic mass of sequence.
+        adducts (list): list of adduct strings.
         min_z (int, optional): minimum absolute charge of OVERALL ION COMPLEX.
                     Defaults to 1.
         max_z ([type], optional): maximum absolute charge of OVERALL ION COMPLEX.
@@ -189,11 +189,8 @@ def add_adduct_complexes_sequence_mass(
                     whose CHARGE STATE IS OPPOSITE TO THE OVERALL CHARGE STATE
                     OF THE ADDUCT. Defaults to None.
 
-    Raises:
-        Exception: [description]
-
     Returns:
-        [type]: [description]
+        masses (list): list of masses of sequences with adducts.
     """
 
     # initialise list of final m/z values of adduct complexes
@@ -219,36 +216,36 @@ def generate_all_sequences(
     end_tags=None,
     isobaric_targets=None):
     """
-    [This function takes a list of input monomers and outputs all possible
+    This function takes a list of input monomers and outputs all possible
     sequences or compositions that could arise within the constraints set,
-    which are described below]
+    which are described below.
 
     Arguments:
-        monomers {list} -- [list of monomer one letter codes]
-        max_length {int} -- [maximum sequence length (in monomer units)]
+        monomers (list) -- list of monomer one letter codes.
+        max_length (int) -- maximum sequence length (in monomer units).
     Keyword Arguments:
-        min_length {int} -- [minimum sequence length (in monomer units)]
-                            (default: {1})
-        sequencing {bool} -- [specifies whether all possible sequences are to
+        min_length (int) -- minimum sequence length (in monomer units).
+                            (default: {1}).
+        sequencing (bool) -- specifies whether all possible sequences are to
                             be enumerated or just compositions. Set to False if
-                            you just need to screen for compositions]
-                            (default: {True})
-        chain_terminators {list} -- [list of monomers which prevent further
-                            elongation] (default: {None})
+                            you just need to screen for compositions.
+                            (default: {True}).
+        chain_terminators (list) -- list of monomers which prevent further
+                            elongation. (default: {None}).
         start_tags {list} -- list of monomers. If this list is input, sequences
                             are tagged at terminus 0 by each of the monomers
                             in start_tags - one tag per sequence, and only
-                            tagged sequences are returned (default: {None})
+                            tagged sequences are returned. (default: {None}).
         end_tags {list} -- list of monomers. If this list is input, sequences
                             are tagged at terminus -1 by each of the monomers
                             in end_tags - one tag per sequence, and only
-                            tagged sequences are returned (default: {None})
+                            tagged sequences are returned. (default: {None}).
         isobaric_targets {list} -- list of sequences and / or compositions that
                             output sequences must be isobaric to. (default: 
-                            {None})
+                            {None}).
     Returns:
-        sequences {list} -- [list of possible sequences that could arise from
-                            input monomers within the constraints set]
+        sequences {list} -- list of possible sequences that could arise from
+                            input monomers within the constraints set.
     """
 
     # copy monomers list for combinatorial addition of monomers to elongating
@@ -327,9 +324,11 @@ def generate_all_sequences(
 
 def generate_all_sequences_rxn_classes(monomers):
     """
-    [This function will be written to build sequence lists in cases where
+    This function will be written to build sequence lists in cases where
     monomers are not universally cross-reactive - i.e. more complicated
-    operations are required]
+    operations are required.
+
+    THIS FUNCTION IS NOT FINISHED
 
     Arguments:
         monomers {[type]} -- [description]
@@ -343,27 +342,27 @@ def add_sidechain_neutral_loss_products_sequence(
     max_total_losses=None
 ):
     """
-    [Takes a sequence, mass and subtracts monomer-specific side chain neutral
+    Takes a sequence, mass and subtracts monomer-specific side chain neutral
     loss products as specified in LOSS_PRODUCTS dictionary found in polymer
-    config file]
+    config file.
 
     Arguments:
-        sequence {str} -- [sequence string comprised of monomer one letter
-                            codes]
-        sequence_masses {float or list} -- [float for a single mass, or list
+        sequence (str) -- sequence string comprised of monomer one letter
+                            codes.
+        sequence_masses (float or list) -- float for a single mass, or list
                                     of floats for multiple associated masses,
-                                    e.g. for various adducts]
+                                    e.g. for various adducts.
 
     Keyword Arguments:
-        max_total_losses {int} -- [specifies the maximum number of loss
+        max_total_losses (int) -- specifies the maximum number of loss
                                 products to be subtracted from a given sequence
                                 if None, all possible loss products will be
-                                incorporated into final mass list]
-                                (default: {None})
+                                incorporated into final mass list.
+                                (default: {None}).
 
     Returns:
-        [final_masses] {list} -- [list of m/z values for sequence +/- side
-                                chain neutral losses]
+        final_masses (list) -- list of m/z values for sequence +/- side
+                                chain neutral losses.
     """
     # make sequence_mass a list if not already
     if type(sequence_masses) != list:
@@ -451,13 +450,13 @@ def generate_reading_frames_sequence(sequence):
     frame shift is carried out by taking the final monomer in the sequence
     and making it the first monomer, shifting the remaining monomers up 1 index
     in the polymer chain. Example: one reading frame shift of sequence 'AAV'
-    produces shifted sequence 'VAA'
+    produces shifted sequence 'VAA'.
 
     Args:
-        sequence (str): sequence string consisting of monomer one letter codes
+        sequence (str): sequence string consisting of monomer one letter codes.
 
     Returns:
-        reading_frames: list of unique reading frames
+        reading_frames: list of unique reading frames.
     """
     # initiate reading frames list with input sequence
     reading_frames = [sequence]
@@ -485,11 +484,13 @@ def generate_reading_frames_sequence(sequence):
 def generate_dict_isobaric_sequences(sequences):
     """
     Takes a list of sequences and groups isobaric sequences in a dictionary.
-    Output = dictionary of isobaric groups (key = sorted sequence, value = list
-    of sequences isobaric to sorted sequence)
 
     Args:
         sequences (list): list of sequence strings
+
+    Returns:
+        dict -- dictionary of isobaric groups (key = sorted sequence, value = list
+            of sequences isobaric to sorted sequence).
     """
     # get list of sequence compositions
     sorted_sequences = list(
@@ -519,13 +520,13 @@ def add_peak_lists_massdict(massdict):
 
     Args:
         massdict (dict): dictionary of sequences and corresponding
-                subdictionaries of MS1 and /or MS2 ions
+                subdictionaries of MS1 and /or MS2 ions.
 
     Returns:
         output_dict: same as input massdict, but with extra key-value pair
                 added to sequence subdictionaries ({"peak_list": [masses]}
                 where masses = list of all MS1 and MS2 ions - including
-                monomer-specific signature ions - associated with sequence)
+                monomer-specific signature ions - associated with sequence).
     """
     # initiate output dict to store dictionary to be returned
     output_dict = {}
@@ -582,23 +583,23 @@ def add_modification_sequence_mass_list(
     """
     Takes a mass (or list of masses) corresponding to a sequence and / or
     sequence fragment and adds the mass of a modification on to the sequence
-    mass(es), returning a list of modified masses
+    mass(es), returning a list of modified masses.
 
     Args:
         mass_list (float or list of floats): mass(es) of unmodified sequences
-                    and / or sequence fragments
+                    and / or sequence fragments.
         modification_mass (float): mass of modification to add to unmodified
-                    mass(es)
+                    mass(es).
         mod_mass_diff (float): mass lost upon addition of modification to
                     sequence and / or fragments (e.g. water is lost when fatty
-                    acids acylate peptides)
+                    acids acylate peptides).
         universal_shift (bool): specifies whether modification shifts ALL
                     unmodified masses; if True, only list of modified masses
                     is returned; if False, returned list includes both
-                    modified and unmodified masses
+                    modified and unmodified masses.
 
     Returns:
-        modified_masses (list): list of masses and / or unmodified masses
+        modified_masses (list): list of masses and / or unmodified masses.
     """
 
     # check if mass_list is a list or single mass; if single mass, make list
@@ -633,16 +634,16 @@ def add_terminal_modification_sequence_string(
 ):
     """
     Adds three letter code for a terminal modification to a standard sequence
-    string
+    string.
 
     Args:
-        sequence (str): sequence string comprised of monomer one letter codes
-        modification (str): three letter code for terminal modification
+        sequence (str): sequence string comprised of monomer one letter codes.
+        modification (str): three letter code for terminal modification.
         terminus (int): specifies terminus to add the sequence; either 0 or -1
-        for start terminus and end terminus, respectively
+        for start terminus and end terminus, respectively.
 
     Returns:
-        str : modified sequence string
+        str : modified sequence string.
     """
     if terminus == 0:
         return f"{modification}={sequence}"

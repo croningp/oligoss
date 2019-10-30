@@ -18,44 +18,44 @@ def generate_mass_dictionary(
     end_tags=None,
     isobaric_targets=None):
     """
-    [This function takes a list of monomers and outputs a dictionary of all
+    This function takes a list of monomers and outputs a dictionary of all
     possible sequences or compositions that could arise from input monomers
     within the constraints set, along with associated NEUTRAL monoisotopic
-    masses]
+    masses.
 
     Arguments:
-        monomers {list} -- [list of monomer one letter codes]
-        max_length {int} -- [maximum sequence length (in monomer units)]
+        monomers (list) -- list of monomer one letter codes.
+        max_length (int) -- maximum sequence length (in monomer units).
 
     Keyword Arguments:
-        min_length {int} -- [minimum sequence length (in monomer units)]
-                            (default: {1})
-        sequencing {bool} -- [specifies whether all possible sequences are to
+        min_length (int) -- minimum sequence length (in monomer units).
+                            (default: {1}).
+        sequencing (bool) -- specifies whether all possible sequences are to
                             be enumerated or just compositions. Set to False if
-                            you just need to screen for compositions]
-                            (default: {True})
-        universal_rxn {bool} -- [specifies whether all monomers are universally
+                            you just need to screen for compositions.
+                            (default: {True}).
+        universal_rxn (bool) -- specifies whether all monomers are universally
                             cross-reactive. If this is set to False, reactivity
                             classes must be read from the polymer config file
                             to ensure that any chemically infeasbile sequences
-                            are not included in the final mass dictionary]
-                            (default: {True})
-        chain_terminators {list} -- [list of monomers which prevent further
-                            elongation] (default: {None})
-        starting_monomers {list} -- [list of monomers. If this list is input,
+                            are not included in the final mass dictionary.
+                            (default: {True}).
+        chain_terminators (list) -- list of monomers which prevent further
+                            elongation. (default: {None}.
+        starting_monomers (list) -- list of monomers. If this list is input,
                             only sequences beginning with a monomer in this
-                            list will be returned] (default: {None})
-        ending_monomers {list} -- [list of monomers. If this is input,
+                            list will be returned. (default: {None}).
+        ending_monomers (list) -- list of monomers. If this is input,
                             only sequences ending with a monomer in this list
-                            will be returned] (default: {None})
-        isobaric_targets {list} -- list of sequences and / or compositions that
+                            will be returned. (default: {None}.
+        isobaric_targets (list) -- list of sequences and / or compositions that
                         output sequences must be isobaric to. (default: 
-                        {None})
+                        {None}).
 
     Returns:
-        [massdict] -- [dictionary of sequences and associated neutral
+        massdict -- dictionary of sequences and associated neutral
                     monoisotopic masses. Keys = sequence strings, values =
-                    masses (float)]
+                    masses (float).
     """
 
     # check to see if input monomers are set as universally cross-reactive
@@ -99,24 +99,24 @@ def add_adducts_ms1_massdict(
     """
     Takes an MS1 mass dictionary of sequences and NEUTRAL MASSES and adds
     charged adducts to sequence masses, giving a list of m/z values for
-    each sequence
+    each sequence.
 
     Args:
         massdict (dict): dictionary of sequence strings and corresponding
-                    neutral masses
-        adducts (list): list of adduct string ids - e.g. ['H', 'Na']
+                    neutral masses.
+        adducts (list): list of adduct string ids - e.g. ['H', 'Na'].
         mode (str, optional): specifies whether ions with be cationic or
                     anionic. Use 'pos' and 'neg' for positive and negative
                     modes, respectively. Defaults to 'pos'.
         min_z (int, optional): minimum charge of adduct species. Defaults to 1.
-        max_z ([type], optional): maximum charge of adduct species; if None,
+        max_z (int, optional): maximum charge of adduct species; if None,
                     max charge is determined by maximum charge of
                     adducts specified in GlobalChemicalConstants.
                     Defaults to None.
 
     Returns:
         adduct_massdict: dictionary of sequences and corresponding m/z values
-                    of charged adduct species
+                    of charged adduct species.
     """
 
     # initiate adduct massdict to be populated with sequences and list of m/z
@@ -144,11 +144,11 @@ def add_loss_products_ms1_massdict(
     """
     This function takes a dictionary of sequences and corresponding NEUTRAL
     MASSES, and incorporates side chain-specific neutral loss products as
-    specified in LOSS_PRODUCTS dict in polymer config file
+    specified in LOSS_PRODUCTS dict in polymer config file.
 
     Args:
         massdict (dict): dictionary of sequences and corresponding neutral
-                        masses
+                        masses.
         max_total_losses (int, optional): maximum number of loss products to
                         incorporate per sequence; if None, all possible loss
                         products for a given sequence are incorporated into
@@ -157,7 +157,7 @@ def add_loss_products_ms1_massdict(
 
     Returns:
         loss_product_dict: dictionary of sequences and neutral mass lists with
-                        associated side chain-specific neutral loss products
+                        associated side chain-specific neutral loss products.
     """
 
     # initiates dictionary to store sequences with associated neutral loss
@@ -188,24 +188,24 @@ def add_terminal_modification_MS1_sequence(
     """
     Takes a sequence, associated masses, modification three letter code and
     associated mass, massdiff, and returns a dict of modified sequence +
-    modified sequence masses
+    modified sequence masses.
 
     Args:
-        sequence (str): sequence string comprised of monomer one letter codes
+        sequence (str): sequence string comprised of monomer one letter codes.
         sequence_masses (list): list of m/z values for unmodified sequence
-                        (floats). SHOULD BE IN +1 CHARGE STATE
+                        (floats). SHOULD BE IN +1 CHARGE STATE.
         modification (str): modification three letter code from
-                        MODIFICATIONS_DICT in modifications config file
-        modification_mass (float): neutral monoisotopic mass of modifier
+                        MODIFICATIONS_DICT in modifications config file.
+        modification_mass (float): neutral monoisotopic mass of modifier.
         modification_massdiff (float): mass lost upon addition of modification
                         to sequence (e.g. H2O for fatty acid acylations of
-                        peptide N-termini)
+                        peptide N-termini).
         modification_terminus (int): either 0 or -1 for start and end terminus,
-                        respectively
+                        respectively.
 
     Returns:
         {mod_seq: [mod_seq_masses]}: dictionary of modified sequence string
-                        and corresponding modified sequence masses
+                        and corresponding modified sequence masses.
     """
     if type(sequence_masses) != list:
         sequence_masses = [sequence_masses]
@@ -233,22 +233,22 @@ def add_terminal_modification_MS1_massdict(
     """
     Takes an MS1 sequence mass dictionary and adds a terminal modification to
     every sequence, returning a dictionary of modified sequence string
-    and corresponding modified masses
+    and corresponding modified masses.
 
     Args:
-        massdict (dict): dictionary of sequences and corresponding MS1 masses
+        massdict (dict): dictionary of sequences and corresponding MS1 masses.
         modification (str): modification three letter code from
-                MODIFICATIONS_DICT in modificatiosn config file
-        modification_mass (float): neutral monoisotopic mass of modifier
+                MODIFICATIONS_DICT in modificatiosn config file.
+        modification_mass (float): neutral monoisotopic mass of modifier.
         modification_massdiff ([type]): mass lost upon addition of modification
                 to sequence (e.g. H2O for fatty acid acylation of peptides
-                as this is a condensation reaction)
+                as this is a condensation reaction).
         modification_terminus (int): either 0 or -1 to specify start and
-                end terminus, respectively
+                end terminus, respectively.
 
     Returns:
         modified_massdict (dict): dictionary of modified sequence strings and
-                masses
+                masses.
     """
     modified_massdict = {}
 
@@ -284,6 +284,42 @@ def generate_ms1_mass_dictionary_adducts_losses(
     sequencing=True,
     isobaric_targets=None
 ):
+    """ This function generates a loss product dictionary and then
+        adds adduct to loss product sequence masses.
+    
+    Arguments:
+        monomers (list) -- list of monomer one letter codes.
+        max_length (int) -- maximum sequence length (in monomer units).
+        adducts (list): list of adduct string ids - e.g. ['H', 'Na'].
+    
+    Keyword Arguments:
+        mode (str, optional): specifies whether ions with be cationic or
+                    anionic. Use 'pos' and 'neg' for positive and negative
+                    modes, respectively. Defaults to 'pos'.
+        min_z (int, optional): minimum charge of adduct species. Defaults to 1.
+        max_z (int, optional): maximum charge of adduct species; if None,
+                    max charge is determined by maximum charge of
+                    adducts specified in GlobalChemicalConstants.
+                    Defaults to None.
+        losses (bool) -- Specify whether their is expected to be loss products
+                    seen for certain sidechains in the experiments. (default: {True})
+        max_total_losses (int) -- maximum number of loss products possible for any given product.
+                    (default: {None}).
+        loss_product_adducts (dict) -- dictionary of adducts associated with specific loss products.
+                    (default: {None}).
+        min_length (int) -- minimum length of the product. (default: {1}).
+        chain_terminators {[type]} -- [description] (default: {None}).
+        universal_rxn (bool) -- [description] (default: {True}).
+        start_tags (list) -- list of tags seen at the start of the sequence. (default: {None}).
+        end_tags (list) -- list of tags seen at the end of the sequence. (default: {None}).
+        sequencing (bool) -- True if you want to attempt to distinguish between different isobarics.
+                    If composition is only necessary, set to false. (default: {True}).
+        isobaric_targets (list) -- list of specific sequences that you want to or expect to find within the
+                    data. (default: {None}).
+    
+    Returns:
+        dict -- dictionary of loss products masses with specified adducts.
+    """
 
     # generate neutral mass dictionary of all possible sequences arising from
     # input monomers and constraints set

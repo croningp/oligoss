@@ -25,6 +25,7 @@ Contents:
    run parameters
    polymer config file
    useful links
+   polymermassspec functions
 
 Indices and Tables
 ==================
