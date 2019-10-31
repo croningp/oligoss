@@ -19,21 +19,21 @@ def get_subsequence_coverage(
     """
     This function calculates the % a sequence that is 'covered' by continuous
     blocks of core fragment series, returning an average % coverage of all
-    core fragment series
+    core fragment series.
 
     Args:
-        confirmed_fragments (list): list of confirmed fragment ids
+        confirmed_fragments (list): list of confirmed fragment ids.
         core_fragment_series (list): list of fragment one letter codes for
-                        series that are to be used in calculation
+                        series that are to be used in calculation.
         optional_fragments (list): list of specific fragment ids to
                         exclude from calculation ONLY IF they are not in the
                         list of confirmed fragments. Include in the calculation
-                        if they are in the list
+                        if they are in the list.
         excluded_fragments (list): list of specific fragment ids to
-                        exclude from subsequence coverage in ALL cases
+                        exclude from subsequence coverage in ALL cases.
     Returns:
         final_sequence_coverage (float): average % sequence coverage for all #
-                        core fragment series
+                        core fragment series.
 
     """
     # initiate dict to store sequence coverages for each core fragment series;
@@ -130,15 +130,15 @@ def calculate_subsequence_coverage(
 ):
     """
     Takes a list of fragment indeces and returns sequence coverage (i.e.
-    number of fragments in longest continuous block of fragments)
+    number of fragments in longest continuous block of fragments).
 
     Args:
         fragment_indeces (list of ints): list of fragment positions in a given
-            series (ints)
+            series (ints).
 
     Returns:
         sequence_coverage (int): number of fragments in longest continuous
-            block of fragments
+            block of fragments.
     """
     # set sequence coverage to 0 before iterating through fragment indeces
     sequence_coverage = 0
@@ -175,16 +175,16 @@ def get_core_fragments(
     """
     Takes a list of fragment ids, target core fragment series (one letter 
     codes) and returns list of target fragments that fall within one or more
-    of the specified core series
+    of the specified core series.
     
     Args:
-        target_fragments (list): list of fragment id strings
+        target_fragments (list): list of fragment id strings.
         core_series (list or str): list of core fragment series one letter 
-            codes OR single one letter code for single core series 
+            codes OR single one letter code for single core series.
     
     Returns:
         list: list of fragments in input target fragments that belong to one
-            or more core series 
+            or more core series.
     """
     # initialise list to store core fragments 
     core_fragments = []
@@ -213,23 +213,23 @@ def get_percent_found_fragments(
     """
     Takes a list of in silico fragments for a sequence, confirmed fragments 
     and one letter codes for core fragments, and returns % core fragments that
-    have been confirmed for sequence 
+    have been confirmed for sequence. 
     
     Args:
         insilico_fragments (list): list of fragment ids for in silico (i.e.
-            theoretical) sequence fragment
+            theoretical) sequence fragment.
         confirmed_fragments (list): list of fragment ids for confirmed (i.e.
-            observed) sequence fragments
+            observed) sequence fragments.
         core_fragment_series (list): list of ONE LETTER CODES for fragment 
-            series that are to be used to calculate percentage found fragments
+            series that are to be used to calculate percentage found fragments.
         optional_fragments (list): list of specific fragment ids to exclude
-            from calculation IF they have not been confirmed
+            from calculation IF they have not been confirmed.
         exclude_fragments (list): list of specific fragment ids to exclude 
             from calculation UNDER ANY CIRCUMSTANCES, including if they have
-            been confirmed 
+            been confirmed. 
     
     Returns:
-        float: % fragments that have been confirmed for a sequence 
+        float: % fragments that have been confirmed for a sequence. 
     """
     # get list of in silico fragments that belong to core fragment series 
     core_silico = get_core_fragments(
@@ -306,35 +306,35 @@ def assign_confidence_sequence(
     """
     This function takes in silico and confirmed fragments for a target
     sequence and assigns a confidence score using the confidence scoring
-    criteria set
+    criteria set.
 
     Args:
         insilico_fragments (list of strings): list of fragment ids that are
-                    theoretically possible for sequence
+                    theoretically possible for sequence.
         confirmed_fragments (list of strings): list of fragment ids for
-                    fragments that have been confirmed from mass spec data
+                    fragments that have been confirmed from mass spec data.
         core_fragment_series (list of strings): list of fragment series one
                     letter codes for fragment series used in calculating %
-                    confirmed fragments and / or fragment sequence coverage
+                    confirmed fragments and / or fragment sequence coverage.
         optional_fragments (list of strings): list of fragment ids for
                     fragments that can be excluded from consideration IF they
-                    are not confirmed
+                    are not confirmed.
         exclude_fragments (list of strings): list of fragment ids for
                     fragments that are to be excludeed from consideration
                     whether confirmed or not. These will never be used in
-                    confidence calculation
+                    confidence calculation.
         essential_fragments (list of strings): list of fragment ids for
                     fragments whose presence is required for confidence
-                    assignment to exceed a threshold (essential_fragment_cap)
+                    assignment to exceed a threshold (essential_fragment_cap).
         essential_fragment_cap (float): upper limit on assigned confidence
                     threshold for a sequence if any essential fragments are
-                    missing
+                    missing.
         sequence_coverage_weight (float): weighting assigned to sequence
                     coverage for confidence calculation (given as a decimal
-                    fraction - i.e. MUST BE BETWEEN 0 AND 1)
+                    fraction - i.e. MUST BE BETWEEN 0 AND 1).
 
     Returns:
-        confidence (float): final confidence assignment (in % )
+        confidence (float): final confidence assignment (in %).
     """
     print(f"in silico fragments = {insilico_fragments}")
     print(f"confirmed fragments = {confirmed_fragments}")
@@ -405,22 +405,22 @@ def trim_EIC(
 ):
     """
     This function trims an EIC, removing data points that violate the
-    thresholds specified
+    thresholds specified.
 
     Args:
         EIC (list): list of retention time + intensity sub_lists in format:
             [[Rt, I]...] where Rt = retention time, I = signal intensity at
-            Rt
-        min_Rt (float): minimum retention time, anything below which is removed
-        max_Rt (float): maximum retention time, anything above which is removed
+            Rt.
+        min_Rt (float): minimum retention time, anything below which is removed.
+        max_Rt (float): maximum retention time, anything above which is removed.
         min_absolute_intensity (float): minimum intensity of data points,
-            anything below which is removed
+            anything below which is removed.
         min_relative_intensity (float): minimum RELATIVE intensity of data
-            points as a decimal fraction of most intense point in the EIC
+            points as a decimal fraction of most intense point in the EIC.
 
 
     Returns:
-        EIC: trimmed EIC in same format as input, but with data trimmed
+        EIC: trimmed EIC in same format as input, but with data trimmed.
     """
 
     # get intensity of most intense peak in the EIC
@@ -466,17 +466,17 @@ def get_Rt_I_binning(
     """
     Takes an EIC, a target retention time and target bin for screening
     retention time, and returns the most intense Rt_I pair within that bin
-    region
+    region.
 
     Args:
-        target_EIC (list of lists): list of Rt_I sublists
-        target_Rt (float): target retention time
+        target_EIC (list of lists): list of Rt_I sublists.
+        target_Rt (float): target retention time.
         Rt_bin (float): bin tolerance for returning most intense Rt_I pair -
             most intense data point within range
-            (target_Rt-Rt_bin, target_Rt+Rt_bin) will be returned
+            (target_Rt-Rt_bin, target_Rt+Rt_bin) will be returned.
 
     Returns:
-        Rt_I: Rt_I pair for most intense data point within Rt_bin
+        Rt_I: Rt_I pair for most intense data point within Rt_bin.
     """
     # remove data points that do not fit within Rt_bin
     working_EIC = list(
@@ -504,22 +504,22 @@ def get_Rt_I_from_ms2_EIC(
 ):
     """
     Takes an MS1 and MS2 EIC for target, and returns Rt_I intensity from MS1
-    by matching MS1 EIC to most intense data point in MS2 EIC
+    by matching MS1 EIC to most intense data point in MS2 EIC.
 
     Args:
-        MS1_EIC (list of lists): list of [Rt, I] sublists for MS1 EIC
-        MS2_EIC (list of lists): list of [Rt, I] sublists for MS2 EIC
+        MS1_EIC (list of lists): list of [Rt, I] sublists for MS1 EIC.
+        MS2_EIC (list of lists): list of [Rt, I] sublists for MS2 EIC.
         ms2_Rt_bin (float): specifies retention time tolerance for matching
-            MS2 retention time to MS2 retention time
+            MS2 retention time to MS2 retention time.
         flexible_ms2_rt (bool, optional): specifies whether to widen ms2_Rt_bin
             until matching MS1 EIC [Rt, I] is found. Defaults to True.
 
     Raises:
-        Exception: raise Exception if MS1 EIC is empty
+        Exception: raise Exception if MS1 EIC is empty.
 
     Returns:
         ms1_Rt_I: MS1 retention time and intensity that most closely matches
-            MS2 data within the constraints set
+            MS2 data within the constraints set.
     """
     if len(MS1_EIC) == 0:
         raise Exception('you have an empty MS1 EIC. This is a very serious problem. It\'s bad, and you should feel bad!')
@@ -567,13 +567,13 @@ def return_peaks_EIC(
     min_relative_intensity=None
 ):
     """
-        EIC (list of lists): list of [Rt, I] sublists
-        n_peaks (int): number of peaks to return
+        EIC (list of lists): list of [Rt, I] sublists.
+        n_peaks (int): number of peaks to return.
         min_relative_intensity (float, optional): minimum intensity of peaks
             as a DECIMCAL FRACTION OF MOST INTENSE PEAK. Defaults to None.
 
     Returns:
-        peaks (list of lists): list of [Rt, I] sublists for matching peaks
+        peaks (list of lists): list of [Rt, I] sublists for matching peaks.
     """
 
     # initiate list to store found peaks
@@ -635,10 +635,10 @@ def get_Rt_I_from_ms1_EIC(
 ):
     """
     Takes an MS1 EIC and returns matching MS1 peaks that match target(s)
-    within constraints set
+    within constraints set.
     Args:
-        EIC (list of lists): list of [Rt, I] sublists
-        Rt_bin (float): minimum gap between peaks (in retention time)
+        EIC (list of lists): list of [Rt, I] sublists.
+        Rt_bin (float): minimum gap between peaks (in retention time).
         backup_Rt_bin (float, optional): backup to Rt_bin: minimum gap between
             peaks if Rt_bin is too stringent for data. Defaults to None.
         n_targets (int, optional): specifies number of target peaks to
@@ -648,7 +648,7 @@ def get_Rt_I_from_ms1_EIC(
             INTENSE PEAK IN THE EIC. Defaults to None.
 
     Returns:
-        found_targets (list of lists): list of [Rt, I] sublists for found peaks
+        found_targets (list of lists): list of [Rt, I] sublists for found peaks.
     """
     # create working copy of EIC and sort by intensity
     working_ms1_EIC = sorted(

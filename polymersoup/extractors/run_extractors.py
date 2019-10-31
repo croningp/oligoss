@@ -14,16 +14,16 @@ def pre_filter_rippers(
     """
     Takes a folder containing mzml_ripper jsons, input parameters file for
     data extraction and creates new mzml_ripper_jsons of filtered data. Returns
-    list of full file paths to filtered ripper jsons
+    list of full file paths to filtered ripper jsons.
 
     Args:
-        ripper_folder (str): path to folder containing mzml ripper jsons
+        ripper_folder (str): path to folder containing mzml ripper jsons.
         extractor_parameters (dict): dictionary of extractor parameters passed
-            on from input parameters .json file
+            on from input parameters .json file.
     
     Returns: 
         file_dirs (list): list of full file paths to newly created filtered
-            JSON files 
+            JSON files.
     """
     # create directory for output folder, where filtered ripper_jsons will be
     # saved
@@ -89,17 +89,17 @@ def apply_filter_dict_ripper_json(
     Takes a dictionary of mass spec data in mzml_ripper format OR a full
     filepath to an mzml_ripper .json file and returns a filtered mass spec
     data dict (also in mzml_ripper format) based on filters specified in
-    filter_dict
+    filter_dict.
 
     Args:
         ripper_dict (dict or str): mzml_ripper dict or full str filepath to
-            mzml_ripper .json file
+            mzml_ripper .json file.
         filter_dict (dict): dictionary of filter parameters, derived from
-            input parameters .json file
+            input parameters .json file.
 
     Returns:
         ripper_dict (dict): dictionary of filtered mass spec data, with filters
-            from filter_dict applied to data
+            from filter_dict applied to data.
     """
 
     # check to see whether ripper_dict is a dictionary or string; if string,
