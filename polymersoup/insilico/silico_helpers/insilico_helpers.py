@@ -8,6 +8,9 @@ import copy
 import time
 import itertools
 
+# redefine config file variables as their corresponding floats
+MASS_DIFF = FG[MASS_DIFF]
+
 def find_sequence_mass(
     sequence,
     four_point_float=True

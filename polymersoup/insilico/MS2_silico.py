@@ -102,10 +102,17 @@ def build_fragment_series_single_sequence(
             mass_diffs = [mass_diff]
 
         # get fragment masses, taking into account any possible exceptions
+        for mass_diff in mass_diffs:
+            if type(mass_diff) == str:
+                if mass_diff[0] == '-':
+                    mass_diff_str = mass_diff[1::]
+                    mass_diff = -FG[mass_diff_str]
+                    
+                else:
+                    mass_diff=FG[mass_diff]
+
         fragment_masses = [
-            find_sequence_mass(sub_sequence) + mass_diff
-            for FG[mass_diff] in mass_diffs
-        ]
+            find_sequence_mass(sub_sequence) + mass_diff]
 
         # add fragment masses to fragment dict
         fragment_dict[fragment] = [
@@ -352,6 +359,8 @@ def add_adducts_ms2_fragments(
         intrinsic_adduct = 0
         if 'intrinsic_adducts' in frag_info:
             intrinsic_adduct = frag_info['intrinsic_adducts'][mode]
+            if type(intrinsic_adduct) == str:
+                intrinsic_adduct = FG[intrinsic_adduct]
 
         # some fragment series have intrinsic charges (not adducts) and are
         # not found with extra adducts in a singly charged state - e.g.
@@ -435,15 +444,16 @@ def generate_monomer_ms2_signature_ions_sequence(
 
     # iterate through signature ion types and add to signature ion dictionary
     for signature in signatures:
-        signature_ions = MS2_SIGNATURE_IONS[signature]
+        if signature != "dominant":
+            signature_ions = MS2_SIGNATURE_IONS[signature]
 
-        MS2_signature_dict.update(
-            {
-                f'{signature}{monomer}': signature_ions[monomer]
-                for monomer in monomers
-                if monomer in signature_ions
-            }
-        )
+            MS2_signature_dict.update(
+                {
+                    f'{signature}{monomer}': signature_ions[monomer]
+                    for monomer in monomers
+                    if monomer in signature_ions
+                }
+            )
 
     # finally, return dictionary of monomer signature ions and associated
     # lists of m/z values

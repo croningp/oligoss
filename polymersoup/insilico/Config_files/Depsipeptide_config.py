@@ -262,7 +262,7 @@ MS2_SIGNATURE_IONS = MS2 fragments which can be used as markers for monomers
             and / or small subsequences.
 """
 
-FRAG_SERIES = {
+FRAG_SERIES_PY = {
 
 # a and x fragments
 

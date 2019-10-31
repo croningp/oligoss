@@ -15,9 +15,9 @@
         "add_modifications": false,
 
         "MS1": {
-            "monomers": ["H", "E", "V", "G", "A", "L"],
-            "max_length": 8,
-            "min_length": 2,
+            "monomers": ["H", "E"],
+            "max_length": 3,
+            "min_length": 3,
             "ms1_adducts": ["H", "Na"],
             "min_z": 1,
             "max_z": null,
