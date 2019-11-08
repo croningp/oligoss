@@ -20,6 +20,7 @@ def launch_screen(input_parameters_file):
     Raises:
         Exception: This package requires Python version 3.6 or later.
     """
+    
     # check version of python
     if sys.version_info < (3, 6):
         print(f"you are running Python version {sys.version}")
@@ -60,7 +61,7 @@ def exhaustive_screen(parameters_dict):
     output_folder = directories['output_folder']
     if not os.path.exists(output_folder):
         os.mkdir(output_folder)
-
+    
     write_to_json(
         write_dict=parameters_dict,
         output_json=os.path.join(output_folder, 'run_parameters.json')

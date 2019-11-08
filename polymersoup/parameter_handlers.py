@@ -16,10 +16,17 @@ from .filehandler import *
 # commonly used in experiments
 from .StandardInstrumentParameters.InstrumentStandards import *
 
-def __init__(parameters_file="C:/Users/group/PolymerMassSpec/Examples/InputParams_Test.json"):
+def __init__():
 
     # get full filepath for polymermassspec
     polymermassspec_path = os.path.dirname(os.path.abspath(__file__))
+
+    # load parameters file
+    parameters_file = os.path.join(
+        os.path.dirname(polymermassspec_path), 
+        "Examples", 
+        "InputParams_Test.json"
+    )
 
     # get the filepath for the polymer config jsons
     config_folder = os.path.join(polymermassspec_path, "insilico", "Config_files")
