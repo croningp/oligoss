@@ -200,6 +200,8 @@ def add_terminal_modification_MS1_sequence(
     if not terminal_modifications_dict: 
         return {}
     
+    mod_sequences = {}
+    
     # iterate through termini in terminal_modifications_dict
     for terminus, terminal_modifications in terminal_modifications_dict.items():
         
@@ -248,6 +250,7 @@ def add_terminal_modification_MS1_sequence(
                 mod_sequences[mod_seq] = modified_sequence_masses
     
     return mod_sequences
+        
 
 def add_terminal_modification_MS1_massdict(
     massdict,

@@ -40,10 +40,11 @@ def assign_confidence_sequences(
 
         print(f"assigning confidence for {sequence}")
         
+
         # assign sequence a confidence score, using constraints specified in
         # input postprocess parameters from input parameters .json file
         confidence_assignment = assign_confidence_sequence(
-            insilico_fragments=list(silico_dict[sequence]["MS2"].keys()),
+            insilico_fragments=silico_dict[sequence]["MS2"],
             confirmed_fragments=confirmed_fragments,
             core_fragment_series=postprocess_params["core_linear_series"],
             optional_fragments=postprocess_params["optional_core_frags"],

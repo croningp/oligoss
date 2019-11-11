@@ -340,12 +340,16 @@ def standard_postprocess(
             if d_file.find('MS1_EIC') > -1][0]
     )
 
+    # retrieve subsequence weight(s) - the relative weighting for 
+    # continuous fragment coverage for confidence assignment
     ssw = postprocess_parameters['subsequence_weight']
 
+    # ensure ssw is handled as a list
     if type(ssw) != list: 
-
         ssw = [ssw]
     
+    # iterate through each subsequence weight and assign a confidence
+    # score
     for subseq_weight in ssw:
 
         print(f'postprocessing for {subseq_weight} ssw')

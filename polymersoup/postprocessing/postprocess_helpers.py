@@ -339,6 +339,21 @@ def assign_confidence_sequence(
     print(f"in silico fragments = {insilico_fragments}")
     print(f"confirmed fragments = {confirmed_fragments}")
     
+    if type(insilico_fragments) == dict:
+        std_silico_frags = [
+            frag for frag in insilico_fragments if frag != 'signatures']
+        
+        try:
+            terminal_mod_frags = [
+                frag for frag in insilico_fragments['signatures']['terminal_modifications']
+            ]
+            if essential_fragments:
+                essential_fragments.extend([terminal_mod_frags])
+            else:
+                essential_fragments = terminal_mod_frags
+        except ValueError:
+            pass 
+
     # work out percentage found fragments from core series 
     percentage_found_fragments = get_percent_found_fragments(
         insilico_fragments=insilico_fragments,
