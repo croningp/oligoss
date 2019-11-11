@@ -171,7 +171,7 @@ __"universal_rxn"__:
 
 - Recommended: true if this true, otherwise you __MUST__ make sure that monomer reactivity classes are defined correctly in the polymer-specific config file
 
-__"terminal_tags"__:
+__"terminal_monomer_tags"__:
 
 - Description: defines list of tags that are present at peptide termini. tags at "0" are for start terminus, "-1" are for end terminus
 

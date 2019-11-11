@@ -7,20 +7,19 @@ for de novo peptide polymer soup sequencing
 import os
 import csv
 import json
-from .insilico.Config_files.Depsipeptide_config import *
 
 def __init__():
     pass
 
 def open_json(filepath):
     """
-    Opens parameters json and returns as dictionary
+    Opens parameters json and returns as dictionary.
 
     Args:
-        filepath (str): full file path to parameters json
+        filepath (str): full file path to parameters json.
 
     Returns:
-        load: parameter dictionary
+        load: parameter dictionary.
     """
     with open(filepath) as f:
         load = json.load(f)
@@ -31,10 +30,11 @@ def write_to_json(
     output_json
 ):
     """
-    Writes a dict to a json
+    Writes a dict to a json.
+
     Args:
-        write_dict (dict): dictionary to be dumped in json
-        filepath (str): full file path to output json
+        write_dict (dict): dictionary to be dumped in json.
+        filepath (str): full file path to output json.
     """
 
     with open(output_json, 'w') as fp:
@@ -48,7 +48,7 @@ def write_new_csv(
     delimitingchar=','
 ):
     """
-    Writes a new .csv file
+    Writes a new .csv file.
 
     Args:
         csv_file (str): full file path to new .csv file to be written
@@ -69,11 +69,11 @@ def append_csv_row(
     delimitchar=','
 ):
     """
-    Appends a new row to existing .csv file
+    Appends a new row to existing .csv file.
 
     Args:
-        csv_file (str): full file path to pre-written .csv file
-        append_list (list): list of strings to write to new .csv row
+        csv_file (str): full file path to pre-written .csv file.
+        append_list (list): list of strings to write to new .csv row.
         delimitchar (str, optional): delimiter for separating columns in
             .csv file. Defaults to ','.
     """
@@ -85,13 +85,13 @@ def append_csv_row(
 def read_parameters(parameters_file):
     """
     Takes parameter json and returns subsets of parameter info that are
-    required for a run
+    required for a run.
 
     Args:
         parameters_file (str): full filepath to parameter json, which should
         specify all parameters needed to conduct a full run of in silico
         fragmentation, data extraction, sequence confirmation and
-        postprocessing, or any combination of these steps - see Readme
+        postprocessing, or any combination of these steps - see Readme.
     """
     # open the parameters json as a dictionary to be read
     params_dict = open_json(parameters_file)
@@ -105,17 +105,17 @@ def list_files_by_type(
     """
     Takes a folder and lists full file paths for all files within that folder
     that match a specified type - either file extension or project-specific
-    files 'sequence_json' or 'ripper' files
+    files 'sequence_json' or 'ripper' files.
 
     Args:
-        folder (str): full path to folder containing target files
+        folder (str): full path to folder containing target files.
         filetype (str): specifies filetype - either file extension such as
                 '.json', '.mzml', '.csv' etc or a project-specific category
-                of files 'sequence_json' or 'ripper'
+                of files 'sequence_json' or 'ripper'.
 
     Returns:
         files (list): list of full file paths for all files in folder that
-                match specified filetype
+                match specified filetype.
     """
     # checks to see if any project-specific filetypes have been specified -
     # 'ripper' = json files produced from mzml_ripper
@@ -150,23 +150,23 @@ def generate_insilico_writefile_string(
     silico_dict
 ):
     """
-    Creates a full filepath for in silico sequence json
+    Creates a full filepath for in silico sequence json.
 
     Args:
-        folder (str): path to folder where in silico json is to be written to
-        silico_dict (dict): MSMS sequence json from SilicoGenerator
+        folder (str): path to folder where in silico json is to be written to.
+        silico_dict (dict): MSMS sequence json from SilicoGenerator.
 
     Returns:
         str: full filepath to in silico sequence json file that is to be
-                written and populated with in silico sequence data
+                written and populated with in silico sequence data.
     """
     monomers = silico_dict["MS1"]["monomers"]
     mode = silico_dict["mode"]
     ms1_adducts = silico_dict["MS1"]["ms1_adducts"]
     max_length = silico_dict["MS1"]["max_length"]
     min_length = silico_dict["MS1"]["min_length"]
-    start_tags = silico_dict["MS1"]["terminal_tags"]["0"]
-    end_tags = silico_dict["MS1"]["terminal_tags"]["-1"]
+    start_tags = silico_dict["MS1"]["terminal_monomer_tags"]["0"]
+    end_tags = silico_dict["MS1"]["terminal_monomer_tags"]["-1"]
 
     write_string = f"monomers={monomers},mode={mode},adducts={ms1_adducts},min_len={min_length},max_len={max_length}"
     if start_tags:
@@ -183,17 +183,17 @@ def write_EIC_file(
     ms_level=1
 ):
     """
-    Writes an EIC dict to a .json file
+    Writes an EIC dict to a .json file.
 
     Args:
         input_data_file (str): full file path to mzml ripper data file used to
-            generate MS1 EICs
+            generate MS1 EICs.
         output_folder (str): path to output folder directory, where data will
-            be saved
+            be saved.
         MS1_EICs (dict): dictionary of sequences and / or compositions and
-            their corresponding MS1 EICs
+            their corresponding MS1 EICs.
         ms_level (int, optional): specifies MS level of EIC data. Defaults to
-            1
+            1.
     """
 
     input_file = os.path.basename(input_data_file).replace(".json", "")
@@ -214,14 +214,14 @@ def write_pre_fragment_screen_sequence_JSON(
     """
     Writes in silico sequence dict for sequences that have been detected by
     MS1 composition - i.e. BEFORE CONFIRMING MS2 FRAGMENTS AND ASSIGNING
-    CONFIDENCE
+    CONFIDENCE.
 
     Args:
-        input_data_file (str): full file path to input mzml ripper data file
+        input_data_file (str): full file path to input mzml ripper data file.
         output_folder (str): directory of output folder, where data will be
-            saved
+            saved.
         MSMS_silico_dict (dict): in silico sequence dict for sequences,
-            potential MS1 precursors and MS2 fragments
+            potential MS1 precursors and MS2 fragments.
     """
     input_file = os.path.basename(input_data_file).replace(".json", "")
     input_file = input_file + "_PRE_fragment_screening_silico_dict.json"
@@ -243,14 +243,14 @@ def write_confidence_assignments(
 ):
     """
     Writes confidence assignments for sequences with confirmed MS1 precursors
-    and MS2 fragments to a .json file
+    and MS2 fragments to a .json file.
 
     Args:
-        input_data_file (str): full file path to input mzml ripper data file
+        input_data_file (str): full file path to input mzml ripper data file.
         output_folder (str): directory of output folder, where data will be
-            saved
+            saved.
         confidence_assignments (dict): dictionary of sequences and their
-            assigned confidence scores
+            assigned confidence scores.
     """
 
     input_file = os.path.basename(input_data_file).replace(".json", "")
@@ -271,14 +271,15 @@ def write_confirmed_fragment_dict(
     confirmed_fragment_dict
 ):
     """
-    [summary]
+    This function writes a confirmed fragment dictionary fir sequences that have
+    any confirmed MS2 fragments.
 
     Args:
-        input_data_file (str): full file path to input mzml ripper data file
+        input_data_file (str): full file path to input mzml ripper data file.
         output_folder (str): directory of output folder, where data will be
-            saved
+            saved.
         confirmed_fragment_dict (dict): dictionary of sequences and confirmed
-            fragments for all sequences that have ANY confirmed MS2 fragments
+            fragments for all sequences that have ANY confirmed MS2 fragments.
     """
     input_file = os.path.basename(input_data_file).replace(".json", "")
     input_file = input_file + "_confirmed_fragment_dict.json"
@@ -300,15 +301,15 @@ def write_unique_fragment_dict(
     """
     Writes a dictionary of confidently assigned sequences and their
     corresponding in silico fragment data for fragments that have been confirmed,
-    including unique fragments
+    including unique fragments.
 
     Args:
-        input_data_file (str): full file path to input mzml ripper data file
+        input_data_file (str): full file path to input mzml ripper data file.
         output_folder (str): directory of output folder, where data will be
-            saved
+            saved.
         unique_fragment_dict (dict): dictionary of confident sequences and
             corresponding in silico data for confirmed fragments, including
-            unique confirmed fragments
+            unique confirmed fragments.
     """
     input_file = os.path.basename(input_data_file).replace(".json", "")
     input_file = input_file + "_confirmed_fragments_with_uniques.json"
@@ -331,7 +332,20 @@ def write_standard_postprocess_data(
     subsequence_weight,
     MS1_EICs
 ):
+    """ This function writes standard postprocessing data including confidence_scores.json,
+        confirmed_fragdict.json, process_summary_(SUBSEQUENCE WEIGHT)ssw.csv.
    
+    Arguments:
+       output_folder (str) -- file path for desired output location.
+            silico_dict (dict): MSMS sequence json from SilicoGenerator.
+       confirmed_fragdict (dict) -- dictionary of confirmed fragments.
+       confidence_scores (dict) -- dictionary of confidence scores for confirmed sequences.
+       confidence_limit (int) -- integer up to 100. Sequences with scores
+            lower than this will not be processed for retention time and / or intensities.
+       subsequence_weight (float) -- subsequence weight.
+       MS1_EICs (dict) -- dictionary of sequences and / or compositions and
+            their corresponding MS1 EICs.
+    """
     write_to_json(
         write_dict=confidence_scores,
         output_json=os.path.join(output_folder, 'confidence_scores.json')
@@ -382,12 +396,20 @@ def write_standard_postprocess_data(
         ]
     )
     
-    # get max peak intensity of each sequence from its MS1 EIC
-    max_intensities = {
-        seq: max([Rt_I[1] for Rt_I in MS1_EICs["".join(sorted(seq))]])
-        for seq in confirmed_fragdict
-    }
+    # init dict to store maximum MS1 EIC intensities of each sequence
+    max_intensities = {}
 
+    # get max peak intensity of each sequence from its MS1 EIC
+    for seq in confirmed_fragdict:
+
+        composition = [
+            hit for hit in MS1_EICs
+            if "".join(sorted(hit)) == "".join(sorted(seq))
+        ][0]
+        
+        max_intensities[seq] = max(
+            [Rt_I[1] for Rt_I in MS1_EICs[composition]])
+   
     # write all data to final csv for each sequence 
     for seq in confirmed_fragdict: 
 

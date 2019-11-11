@@ -127,7 +127,7 @@
                 "neg": "-H",
                 "exceptions": {
                     "pos": {
-                        "hydroxyA": "-OH"
+                        "-1": {"hydroxyA": "-OH"}
                     }
                 }
             },
@@ -187,6 +187,142 @@
 
         "dominant": ["F", "I",  "L", "P", "H", "Y"]
 
-    }
+    },
 
+    "MODIFICATIONS": {
+        "Ole": {
+    
+            "mass": 282.25589,
+    
+            "termini": [0],
+    
+            "side_chains_attachments": ["K", "R"],
+    
+            "free_mod_fragments": {
+                "pos": [265.2532],
+                "neg": [281.2181]
+            },
+    
+           
+            "mass_diff": {
+                "ms1": "H2O",
+                "ms2": "H2O"
+            },
+
+           
+            "universal_ms2_shift": false
+        },
+        "Pal": {
+            "mass": 256.24024,
+            "terminus": [0],
+            "side chain attachments": ["K", "R"],
+            "free_mod_fragments": {
+                "pos": [239.2375],
+                "neg": [255.2324]
+            },
+            "mass_diff": {
+                "ms1": "H2O",
+                "ms2": "H2O"
+            },
+            "universal_ms2_shift": false
+        },
+        "Ace": {
+            "mass": 60.02114,
+            "terminus": [0],
+            "side chain attachments": ["K", "R"],
+            "free_mod_fragmnts": {
+                "pos": [],
+                "neg": []
+            },
+            "mass_diff": {
+                "ms1": "H2O",
+                "ms2": "H2O"
+            },
+            "universal_ms2_shift": false
+        },
+        "Fmc": {
+            "mass": 240.07866,
+            "terminus": [-1],
+            "side chain attachments": ["D", "E"],
+            "free_mod_fragments": {
+                "pos": [],
+                "neg": []
+            },
+            "mass_diff": {
+                "ms1": "H2O",
+                "ms2": "H2O"
+            },
+            "universal_ms2_shift": false
+        },
+        "Tbu": {
+            "mass": 74.07317,
+            "terminus": null,
+            "side chain attachments": [],
+            "free_mod_fragments": {
+                "pos": [],
+                "neg": []
+            },
+            "mass_diff": {
+                "ms1": "H2O",
+                "ms2": "H2O"
+            },
+            "universal_ms2_shift": false
+        },
+        "Trt": {
+            "mass": 260.12012,
+            "terminus": null,
+            "side chain attachments": ["S", "T"],
+            "free_mod_fragments": {
+                "pos": [],
+                "neg": []
+            },
+            "mass_diff": {
+                "ms1": "H2O",
+                "ms2": "H2O"
+            },
+            "universal_ms2_shift": false
+        },
+        "Boc": {
+            "mass": 118.06301,
+            "terminus": [0],
+            "side chain attachments": [],
+            "free_mod_fragments": {
+                "pos": [],
+                "neg": []
+            },
+            "mass_diff": {
+                "ms1": "H2O",
+                "ms2": "H2O"
+            },
+            "universal_ms2_shift": false
+        },
+        "Bnz": {
+            "mass": 108.05752,
+            "terminus": null,
+            "side chain attachments": ["E", "D"],
+            "free_mod_fragments": {
+                "pos": [91.05477],
+                "neg": [107.04969]
+            },
+            "mass_diff": {
+                "ms1": "H2O",
+                "ms2": "H2O"
+            },
+            "universal_ms2_shift": false
+        },
+        "Tfa": {
+            "mass": 113.99287,
+            "terminus": null,
+            "side chain attachments": ["K", "R"],
+            "free_mod_fragments": {
+                "pos": [96.99012],
+                "neg": [112.98504]
+            },
+            "mass_diff": {
+                "ms1": "H2O",
+                "ms2": "H2O"
+            },
+            "universal_ms2_shift": false
+        }
+    }
 }

@@ -11,6 +11,18 @@ def assign_confidence_sequences(
     confirmed_dict,
     postprocess_params
 ):
+    """ This function assigns confidence scores to each sequence in the confirmed dict
+        and returns a dictionary of sequences and their confidence scores.
+
+    Arguments:
+        silico_dict (dict) -- dictionary of all possible sequences (silico dictionary).
+        confirmed_dict (dict) -- dictionary of confirmed sequences.
+        postprocess_params (dict) -- dictionary of postprocessing parameters, 
+            retrieved from input parameters JSON file.
+
+    Returns:
+        dict -- dictionary of sequences and their confidence scores.
+    """
     # remove sequences from in silico dict that do not have any confirmed
     # fragments
     silico_dict = {
@@ -58,53 +70,43 @@ def find_Rt_I_sequences(
 ):
     """
     Takes dicts of MS1 and MS2 EICs, confidently assigned sequences, and fits
-    a retention time and intensity to each confidently assigned sequence
+    a retention time and intensity to each confidently assigned sequence.
 
     Args:
-        MS1_EICs (dict): dictionary of COMPOSITIONS and corresponding MS1 EICs
-        MS2_EICs (dict): dictionary of SEQUENCES and corresponding MS2 EICs
+        MS1_EICs (dict): dictionary of COMPOSITIONS and corresponding MS1 EICs.
+        MS2_EICs (dict): dictionary of SEQUENCES and corresponding MS2 EICs.
         confident_assignments (dict): dictionary of sequences and their
             in silico MS1 and MS2 data for sequences that have been confirmed
-            with high confidence
+            with high confidence.
         postprocess_parameters (dict): dictionary of postprocess parameters
-            passed on from input parameters .json file
+            passed on from input parameters .json file.
         confidence_scores (dict): dictionary of confirmed sequences and 
-            assigned confidence scores 
+            assigned confidence scores.
     Kewyword Args:
         return_confidence (bool): specifies whether to return sequences' 
-            confidence score in output. Defaults to True 
-
-    Raises:
-        Exception: [description]
+            confidence score in output. Defaults to True.
 
     Returns:
-        [type]: [description]
+        dict: dictionary of final intensities and retention times.
     """
+    # init dict to store compositions of hit sequences
     compositions = {}
 
+    # iterate through sequences assigned with high confidence
+    # and identify their composition in MS1_EICs
     for sequence in confident_assignments:
-        composition = "".join(sorted(sequence))
+        sorted_seq = "".join(sorted(sequence))
 
-        if composition not in compositions:
-            compositions[composition] = [sequence]
+        composition = [
+            seq for seq in MS1_EICs
+            if "".join(sorted(seq)) == sorted_seq
+        ][0]
 
-        else:
+        if composition in compositions:
             compositions[composition].append(sequence)
-
-        if composition not in MS1_EICs:
-            raise Exception(f'something has gone wrong with {sequence}')
-
-
+        else:
+            compositions[composition] = [sequence]
     final_Rt_Is = {}
-
-    for seq in MS2_EICs:
-        seq_Rt_I = get_Rt_I_from_ms2_EIC(
-            MS1_EIC = MS1_EICs["".join(sorted(seq))],
-            MS2_EIC=MS2_EICs[seq],
-            ms2_Rt_bin=postprocess_parameters["ms2_Rt_bin"],
-            flexible_ms2_rt=postprocess_parameters["ms2_Rt_flexible"]
-        )
-        final_Rt_Is[seq] = seq_Rt_I
 
     for composition in compositions:
 
@@ -113,7 +115,6 @@ def find_Rt_I_sequences(
             if (seq not in MS2_EICs
                 and seq in confident_assignments)
         ]
-
 
         seq_Rt_Is = get_Rt_I_from_ms1_EIC(
             EIC=MS1_EICs[composition],
@@ -140,7 +141,7 @@ def find_Rt_I_sequences(
     if return_confidence:
          
         for seq, Rt_I in final_Rt_Is.items():
-            print(f"confidenc score for {seq} = {confidence_scores[seq]}")
+            print(f"confidence score for {seq} = {confidence_scores[seq]}")
             write_list = [elem for elem in Rt_I]
             write_list.append(confidence_scores[seq])
             print(f"write_list = {write_list}")
