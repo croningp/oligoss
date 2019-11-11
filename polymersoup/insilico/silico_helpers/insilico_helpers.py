@@ -13,37 +13,422 @@ MASS_DIFF = FG[MASS_DIFF]
 
 def find_sequence_mass(
     sequence,
-    four_point_float=True
+    mod_markers={
+        '(' : ')'
+        ,
+        'terminal': ['[', ']']
+    },
+    ms_level=1,
+    n_rounded=4
 ):
     """
-    Takes a sequence string and returns neutral monoisotopic mass for sequence.
+    Takes a sequence string and returns neutral monoisotopic mass for sequence
 
     Arguments:
-        sequence (str) -- sequence string made up of constituent monomer one
-                            letter codes.
-        decimal_points (int) -- specifies number of decimal points to be worked
-                            out for sequence mass.
+        sequence {str} -- sequence string made up of constituent monomer one
+            letter codes
+        mod_markers (dict, optional): dict specifying characters that initiate
+            sidechain and terminal modifications. 'sidechain' subdict keys
+            mark start of sidechain modification substrings, 'sidechain' subdict
+            values mark end of sidechain modifications. 'terminal' subdict
+            value = two element list, with element 0 marking start of terminal
+            modification substring and element 1 marking end of terminal
+            modification. Defaults to {
+                'sidechain': {
+                    '(': ')
+                },
+                'terminal': ['[', ']']
+            }
+        ms_level (int, optional): specifies ms level for calculating. NOTE:
+            this will be irrelevant for the vast majority of cases, but has 
+            been included in case of future edge cases. Defaults to 1. 
+        n_rounded (int, optional): specified number of decimal places to round
+            output sequence mass to. Defaults to 4. 
+
     Returns:
-        sequence_mass (float) -- neutral monoisotopic mass of input sequence.
+        float: neutral monoisotopic mass of input sequence
+    """
+    # retrieve list of monomers
+    monomers = return_monomers_sequence(
+        sequence=sequence,
+        mod_markers=mod_markers,
+        return_modified=True,
+        return_set=False
+    )
+
+    print(f'monomers for {sequence} = {monomers}')
+
+    # retrieve any terminal modifications from sequence string
+    terminal_modifications = remove_substrings_sequence(
+        sequence=sequence,
+        substring_markers={
+            mod_markers['terminal'][0]: mod_markers['terminal'][1]
+        },
+        return_substrings=True
+    )
+
+    # set mass of any terminal modifications to 0; this will be updated 
+    # if terminal modifications are found
+    terminal_mod_mass = 0
+
+    # check whether terminal modifications have been found; if so, work out
+    # neutral mass of all terminal modifications in input sequence 
+    if terminal_modifications: 
+        
+        # sum the neutral masses of all terminal modifications in sequence
+        terminal_mod_mass = sum(
+            [
+                MODIFICATIONS[mod]['mass']
+                for mod in terminal_modifications
+            ]
+        )
+
+        # substract the appropriate ms_level mass diffs for each modification
+        # to get the final mass of terminal modifications in the sequence
+        terminal_mod_mass -= sum(
+            [
+                MODIFICATIONS[mod]['mass_diff'][f'ms{ms_level}']
+                for mod in terminal_modifications
+            ]
+        )
+    
+    # init sequence mass as 0 
+    sequence_mass = 0
+
+    for i in range(0, len(monomers)):
+
+        if i == 0: 
+            subtract_massdiff = False 
+        else:
+            subtract_massdiff = True 
+        
+        sequence_mass += find_monomer_mass(
+            monomer=monomers[i],
+            subtract_massdiff=subtract_massdiff,
+            mod_markers=mod_markers
+        )
+    
+    # return sequence mass, rounded to specified number of decimal places
+    return round(sequence_mass, int(n_rounded))
+
+def find_monomer_mass(
+    monomer,
+    mod_markers={
+        '(': ')',
+        'trim_chars': ['~[', ']']
+    },
+    subtract_massdiff=True,
+    ms_level=1
+):
+
+    # if monomer string is only 1 character, no mods are present - return
+    # unmodified monomer mass 
+    if len(monomer) == 1:
+
+        # retrieve full neutral monoisotopic mass for monomer from polymer-
+        # specific config file
+        monomer_mass = MONOMERS[monomer][0]
+
+        # check whether to subtract massdiff for monomers
+        if subtract_massdiff:
+            monomer_mass -= MASS_DIFF
+        
+        return monomer_mass
+
+    # remove extra characters from monomer string that do not directly 
+    # affect monomer mass (e.g. substrings to denote crosslinks with other
+    # monomers in full sequence string)
+    monomer = "".join([
+        c for i, c in enumerate(monomer)
+        if c not in mod_markers['trim_chars']
+    ])
+
+    # get list of monomer modifications from input monomer string
+    monomer_mods = [
+        monomer[monomer.find(key)+1:monomer.find(value)]
+        for key, value in mod_markers.items()
+        if key != 'trim_chars'
+    ]
+
+    # work out neutral mass of monomer sidechain modifications by summing their
+    # neutral masses and subtracting mass_diffs. Info on modifications is 
+    # defined in MODIFICATIONS dict found in polymer-specific config file
+    monomer_mod_mass = sum(
+        [
+            MODIFICATIONS[mod]['mass'] - MODIFICATIONS[mod]['mass_diff'][f'ms{ms_level}']
+            for mod in monomer_mods
+        ]
+    )
+
+    # work out final monomer mass by adding mass of unmodified monomer (found
+    # by retrieving monomer one-letter code from first char in monomer string)
+    # and mass of modifications
+    monomer_mass = MONOMERS[monomer[0]][0] + monomer_mod_mass
+
+    return monomer_mass
+
+def return_sequence_terminal_modifications(
+    sequence
+):
+
+    terminal_mods = {}
+
+    if sequence[0] == '[':
+
+        terminal_mods["0"] = sequence[1:sequence.find(']')]
+    
+    if sequence[-1] == ']':
+
+        mod_start = max([i for i,c in enumerate(sequence) if c == '['])
+        terminal_mods["-1"] = sequence[mod_start+1:len(sequence)-1]
+    
+    return terminal_mods 
+    
+def remove_substrings_sequence(
+    sequence,
+    substring_markers={
+        '(': ')',
+        '~[': ']',
+        '[': ']'
+    },
+    return_substrings=False
+):
+    """
+    Takes a sequence and removes substrings corresponding to modifications. 
+    
+    Args:
+        sequence (str): sequence string comprised of monomers one letter codes
+            and / or modification substrings 
+        substring_markers (dict, optional): dictionary of chars marking the start of 
+            substrings and chars marking their end. Defaults to {
+                '(': ')', 
+                '~[': ']',
+                '[' : ']'
+            }
+        return_substrings (bool, optional): specify whether to return substrings
+            or sequence with substrings removed. if False, sequence is returned;
+            if True, list of substrings are returned
+    
+    Returns:
+        str: sequence string with substrings removed
+    """
+    # init list to store indices in string that are within modificiation
+    # substrings
+    mod_indices = []
+
+    # init list to store substrings
+    substrings = []
+
+    # iterate through sequence, identifying modification substrings and adding
+    # their indices to mod_indices
+    for i, c in enumerate(sequence):
+
+        if c in substring_markers: 
+            
+            mod_end = min([
+                j for j, d in enumerate(sequence)
+                if d == substring_markers[c] and j > i
+            ])
+
+            mod_indices.extend([x for x in range(i, mod_end+1)])
+            substrings.append(sequence[mod_indices[0]:mod_indices[-1]+1])
+            
+    # check whether substrings are to be returned
+    if return_substrings:
+        return substrings
+
+    # create new, trimmed sequence from indices that are NOT within modification
+    # substrings
+    sequence = "".join([
+        c for i, c in enumerate(sequence)
+        if i not in mod_indices
+    ])
+
+    return sequence 
+
+def return_monomers_sequence(
+    sequence, 
+    mod_markers={
+        '(': ')',
+        '~[': ']',
+        'terminal': ['[', ']']
+    },
+    return_modified=True,
+    return_set=True
+):
+    """
+    Takes a sequence comprised of monomer one-letter codes + / - side chain
+    and terminal modification strings, and returns list of monomers in the
+    sequence. NOTE: monomers returned can either be exclusively one letter codes
+    or include any sidechain modifications (see Args: return_modified).
+    
+    Args:
+        sequence (str): sequence string comprised of monomer one-letter codes
+            and / or sidechain and terminal modifications
+        mod_markers (dict, optional): dict of characters marking the start 
+            of modifications and their corresponding termination characters. 
+            All substrings inbetween these characters are assumed to correspond
+            to modifications. NOTE: terminal modifications are stored in format:
+            {'terminal': [x, y]} where x, y = characters opening and closing
+            terminal modification string, respectively. 
+             Defaults to {
+                 '(': ')',
+                 '~[': ']',
+                 'terminal': ['[', ']']
+            }.
+        return_modified (bool, optional): specifies whether to return monomers
+            with associated sidechain modification strings. Defaults to True.
+        return_set (bool, optional): specifies whether to return list of 
+            unique monomers (i.e. list of a set) or not. Defaults to True.
+    
+    Returns:
+        list: list of monomers within input sequence string. 
+    """
+    # check whether to include sidechain modifications in returned monomer 
+    # list. if not, return only 'core' unmodified monomers 
+    if not return_modified:
+        core_sequence = return_core_sequence(
+            sequence=sequence,
+            mod_markers=mod_markers
+        )
+        return list(set([c for i,c in enumerate(core_sequence)]))
+
+    # init list to store monomers
+    monomers = []
+
+    # init list to store indices in sequence which are part of modification
+    # substrings
+    mod_indices = []
+
+    try:
+        # check whether sequence has 0 terminal modification; if so, remove 
+        if sequence[0] == mod_markers['terminal'][0]: 
+
+            mod_end = min([
+                i for i,c in enumerate(sequence)
+                if c == mod_markers['terminal'][1]
+            ])
+
+            sequence = sequence[mod_end+1::]
+        
+        # check whether sequence has -1 terminal modification; if so, remove
+        if sequence[-1] == mod_markers['terminal'][-1]:
+
+            mod_start = max(
+                i for i,c in enumerate(sequence)
+                if c == mod_markers['terminal'][0]
+            )
+
+            sequence = sequence[0:mod_start]
+    except KeyError:
+        pass
+    
+    # iterate through sequence, retrieving sidechain-modified monomers and 
+    # adding them to list of monomers
+    for i, c in enumerate(sequence):
+
+        if c in mod_markers: 
+            
+            mod_end = min([
+                j for j, d in enumerate(sequence)
+                if d == mod_markers[c] and j > i
+            ])
+
+            monomers.append(sequence[i-1:mod_end+1])
+            mod_indices.extend([
+                x for x in range(i-1, mod_end+1)
+            ])
+    
+    # add non-sidechain-modified monomers to monomers list 
+    monomers.extend(
+        [c for i,c in enumerate(sequence)
+         if i not in mod_indices]
+    )
+    
+    # sort monomers by order they appear in sequence string
+    monomers = sorted(
+        monomers, 
+        key=lambda monomer: sequence.find(monomer)
+    )
+    
+    # return list of unique monomers if return_set is set to True
+    if return_set:
+        return list(set(monomers))
+    
+    return monomers
+
+def return_core_sequence(
+    sequence,
+    mod_markers={
+        '(': ')',
+        '~[': ']',
+        'terminal': ['[', ']']
+    }
+):
+    """
+    Takes a sequence modified with sidechain and/or terminal modifications
+    and returns core sequence, with ALL extra characters corresponding to 
+    modifications removed. Example: '[Ole]S(Trt)AA' -> 'SAA'
+    
+    Args:
+        sequence (str): sequence string comprised of monomer one letter codes 
+            and / or modification strings 
+        mod_markers (dict, optional): dictionary of characters marking start
+            and end of modification substrings, including terminal modifications. #
+            Defaults to {'(': ')','~[': ']','terminal': ['[', ']']}.
+    
+    Returns:
+        str: sequence string comprised solely of monomer one-letter codes, with
+            modification substrings removed. 
     """
 
-    # calculate sequence mass by summing the mass of its constituent monomers,
-    # subtracting the monomer addition MASS_DIFF for every monomer addition
-    sequence_mass = sum([MONOMERS[c][0] for i, c in enumerate(sequence)])
-    if type(MASS_DIFF)==str:
+    # init core sequence string
+    core_sequence = ''
 
-        # check type of MASS_DIFF, if string find corresponding float value
-        # and calculate mass
-        MASS_DIFF_float=FG[MASS_DIFF]
-        sequence_mass -= (len(sequence)-1)*MASS_DIFF_float
+    # check whether sequence opens with a 0 terminal modification, remove
+    if sequence[0] == mod_markers['terminal'][0]: 
 
-    if type(MASS_DIFF)==float:
-        sequence_mass -= (len(sequence)-1)*MASS_DIFF
+        mod_end = min(
+            [
+                j for j, d in enumerate(sequence)
+                if d == mod_markers['terminal'][1]
+            ]
+        )
+        sequence = sequence[mod_end+1::]
+    
+    # check whether sequence ends with a -1 terminal modification, remove 
+    if sequence[-1] == mod_markers['terminal'][1]:
 
-    # check whether sequence mass is to be trimmed to four decimal places
-    if four_point_float:
-        sequence_mass = round(sequence_mass, 4)
-    return sequence_mass
+        mod_start = max(
+            [
+                j for j,d in enumerate(sequence)
+                if d == mod_markers['terminal'][1]
+            ]
+        )
+        sequence = sequence[0:mod_start]
+
+    mod_indices = []
+    
+    for i, c in enumerate(sequence):
+
+        if c in mod_markers: 
+
+            mod_end = min(
+                [
+                    j for j,d in enumerate(sequence)
+                    if d == mod_markers[c] and j > i
+                ]
+            )
+            mod_indices.extend([j for j in range(i, mod_end+1)])
+    
+    core_sequence = "".join(
+        [
+            c for i,c in enumerate(sequence)
+            if i not in mod_indices
+        ]
+    )
+
+    return core_sequence
 
 def add_adducts_sequence_mass(
     neutral_mass,
@@ -71,16 +456,16 @@ def add_adducts_sequence_mass(
         charged_sequence_masses (list) -- list of m/z values for charged sequences
                         with adducts.
     """
-    #list anions and cations within adducts
+    # list anions and cations within adducts
     anions = [adduct for adduct in adducts if adduct in ANIONS]
     cations = [adduct for adduct in adducts if adduct in CATIONS]
 
     if type(neutral_mass) != list:
         neutral_mass = [neutral_mass]
 
-    #check whether counterions need to be considered for adducts which have the
-    #opposite charge from mode. If so, return charged adducts from adduct_complex
-    #function
+    # check whether counterions need to be considered for adducts which have the
+    # opposite charge from mode. If so, return charged adducts from adduct_complex
+    # function
     if (mode == 'pos' and len(anions) > 0) or (mode == 'neg' and len(cations) > 0):
         charged_sequence_masses = add_adduct_complexes_sequence_mass(
             sequence,
@@ -90,18 +475,18 @@ def add_adducts_sequence_mass(
             max_z)
         return charged_sequence_masses
 
-    #retrieve adduct masses and charges from GlobalChemicalConstants
+    # retrieve adduct masses and charges from GlobalChemicalConstants
     if mode == 'pos':
         ions = CATIONS
     elif mode == 'neg':
         ions = ANIONS
 
-    #initiate list to add charged adduct m/z values
+    # initiate list to add charged adduct m/z values
     charged_sequence_masses = []
 
-    #iterate through adducts and return m/z values of charged species
-    #include multiply charged species that fit within constrains of min_z, max_z
-    #and ion oxidation states given in GlobalChemicalConstants
+    # iterate through adducts and return m/z values of charged species
+    # include multiply charged species that fit within constrains of min_z, max_z
+    # and ion oxidation states given in GlobalChemicalConstants
     for adduct in adducts:
         adduct_mass = ions[adduct][0]
         min_charge = ions[adduct][1]
@@ -140,9 +525,106 @@ def find_functional_groups_monomer(
 
     monomer_info = MONOMERS[monomer]
 
-    func_groups = [lambda x: x[0] for x in monomer_info[1]]
+    func_groups = [x[0] for x in monomer_info[1]]
 
     return func_groups
+
+def reverse_sequence(
+    sequence,
+    mod_markers={
+        '(': ')',
+        'terminal': ['[', ']']
+    }
+):
+    """
+    Takes a sequence comrpised of monomer one-letter codes and / or any 
+    terminal and sidechain modification substrings and outputs the reverse 
+    of that sequence. 
+    Example: 
+        '[Ole]S(Trt)GAVS(Trt)' -> 'S(Trt)VAGS(Trt)[Ole]'
+    
+    Args:
+        sequence (str): sequence string comprised of monomer one letter codes 
+            and / or modification substrings 
+        mod_markers (dict, optional): dict to specify which characters mark
+            beginning and end of sidechain and terminal modification substrings. 
+            Defaults to {'(': ')','terminal': ['[', ']']}.
+    
+    Returns:
+        str: reverse of input sequence
+    """
+    reversed_sequence = sequence[::-1]
+
+    print(f'for {sequence}, standard reversed = {reversed_sequence}')
+
+    # reverse NON-TERMINAL mod markers to deal with reversed sequence
+    r_mod_markers = {
+        v : k
+        for k, v in mod_markers.items()
+        if k != 'terminal'
+    }
+
+    # if terminal mod markers have been specified in mod_markers, reverse these
+    # also
+    try:
+        terminal_mod_markers = mod_markers['terminal']
+        r_terminal_markers = {
+            terminal_mod_markers[1]: terminal_mod_markers[0]
+        }
+    except KeyError:
+        r_terminal_markers = {}
+
+    # generate list of reversed modification strings from reversed sequence
+    # this list will only contain reversed NON-TERMINAL mods
+    reversed_mods = remove_substrings_sequence(
+        sequence=reversed_sequence,
+        substring_markers=r_mod_markers,
+        return_substrings=True
+    )
+
+    # generate list of reversed terminal mods from reversed sequence
+    reversed_terminal_mods = remove_substrings_sequence(
+        sequence=reversed_sequence,
+        substring_markers=r_terminal_markers,
+        return_substrings=True
+    )
+    
+    mod_monomers = {}
+    
+    # check whether any reversed mods have been found in reversed sequence
+    # if so, switch them back to regular non-reversed substrings
+    if reversed_mods: 
+        
+        # iterate through each reversed side chain modification and ensure 
+        # the now-reversed modification substring is replaced with the original
+        # non-reversed string
+        for r_mod in reversed_mods:
+            reversed_sequence = reversed_sequence.replace(r_mod, r_mod[::-1])
+            
+            # find positons of side chain modification substrings in reversed
+            # sequence along with their associated monomers
+            for i, c in enumerate(sequence):
+                if c == r_mod[::-1][0]:
+                    
+                    if sequence[i:i+len(r_mod)] == r_mod[::-1]:
+                        r_mod_monomer = sequence[i-1:i+len(r_mod)]
+                        non_r_mod_monomer = f'{r_mod_monomer[1::]}{r_mod_monomer[0]}'
+                        mod_monomers[r_mod_monomer] = non_r_mod_monomer
+
+    # move position of sidechain modification substrings in reversed sequence
+    # to ensure they remain associated with correct monomers
+    if mod_monomers: 
+        for monomer, non_r_monomer in mod_monomers.items(): 
+            reversed_sequence = reversed_sequence.replace(non_r_monomer, monomer)
+   
+    # check whether any terminal mods have been found in reversed sequence
+    # if so, switch them back to regular non-reversed substrings
+    if reversed_terminal_mods: 
+
+        for r_t_mod in reversed_terminal_mods:
+            reversed_sequence = reversed_sequence.replace(r_t_mod, r_t_mod[::-1])
+    
+    return reversed_sequence
 
 def add_adduct_complexes_sequence_mass(
     sequence,
@@ -214,7 +696,6 @@ def generate_all_sequences(
     max_length,
     min_length=1,
     sequencing=True,
-    chain_terminators=None,
     start_tags=None,
     end_tags=None,
     isobaric_targets=None):
@@ -231,10 +712,8 @@ def generate_all_sequences(
                             (default: {1}).
         sequencing (bool) -- specifies whether all possible sequences are to
                             be enumerated or just compositions. Set to False if
-                            you just need to screen for compositions.
-                            (default: {True}).
-        chain_terminators (list) -- list of monomers which prevent further
-                            elongation. (default: {None}).
+                            you just need to screen for compositions]
+                            (default: {True})
         start_tags {list} -- list of monomers. If this list is input, sequences
                             are tagged at terminus 0 by each of the monomers
                             in start_tags - one tag per sequence, and only
@@ -276,24 +755,15 @@ def generate_all_sequences(
     # remove sequences and / or compositions that do not exceed minimum
     # sequence length threshold specified
     sequences = [seq for seq in sequences if len(seq) >= min_length]
-    
-    # check for chain terminating monomers; if present, remove sequences that
-    # can only be produced by elongating past position of terminating monomers
-    if chain_terminators:
-        sequences = [
-            seq for seq in sequences
-            if (seq[0] in chain_terminators
-            or seq[-1] in chain_terminators)
-        ]
 
     # check for 0 terminal tags to add to sequences; add if specified
     if start_tags:
         tagged_seqs = []
         for start_tag in start_tags:
             if start_tag in MONOMERS:
-                tagged_seqs.extend(
-                    [start_tag + sequence for sequence in sequences]
-                )
+                tagged_seqs.extend([
+                    start_tag + sequence for sequence in sequences])
+                
         sequences = tagged_seqs
 
     # check for -1 terminal tags to add to sequences; add if specified
@@ -302,8 +772,7 @@ def generate_all_sequences(
         for end_tag in end_tags:
             if end_tag in MONOMERS:
                 tagged_seqs.extend(
-                    [sequence + end_tag for sequence in sequences]
-                )
+                    [sequence + end_tag for sequence in sequences])
 
         sequences = tagged_seqs
 
@@ -315,12 +784,11 @@ def generate_all_sequences(
     # that are isobaric to one or more of those targets 
     if isobaric_targets:
         isobaric_targets = [
-            sorted(target) for target in isobaric_targets
-        ]
+            sorted(target) for target in isobaric_targets]
 
         sequences = [
-            seq for seq in sequences if sorted(seq) in isobaric_targets
-        ]
+            seq for seq in sequences if sorted(seq) in isobaric_targets]
+
     # return list of sequences and / or compositions
     return sequences
 
@@ -370,9 +838,12 @@ def add_sidechain_neutral_loss_products_sequence(
     # make sequence_mass a list if not already
     if type(sequence_masses) != list:
         sequence_masses = [sequence_masses]
+    
+    if max_total_losses == 0:
+        return None
 
     # get dictionary of loss-product prone monomers and associated loss products
-    monomers = list(set([c for i, c in enumerate(sequence)]))
+    monomers = return_monomers_sequence(sequence=sequence)
     loss_monomers = {
         monomer: LOSS_PRODUCTS[monomer]
         for monomer in monomers
@@ -408,12 +879,9 @@ def add_sidechain_neutral_loss_products_sequence(
                 loss = FG[loss]
             for i in range(1, occurence+1):
                 neutral_loss = loss*i
-                monomer_losses.extend(
-                    [
-                        mass-neutral_loss
-                        for mass in final_masses
-                    ]
-            )
+                monomer_losses.extend([
+                    mass-neutral_loss for mass in final_masses])
+
                 # keep count of total losses subtracted. if this reaches the
                 # limit specified by max_total_losses (if specified), stop
                 # adding loss products and return final masses list as is
@@ -426,27 +894,24 @@ def add_sidechain_neutral_loss_products_sequence(
                         mass for mass in final_masses]
 
                     # return sorted list of loss products, removing duplicates
-                    return sorted(
-                        list(
-                            set(
-                                [float(f'{mass:.4f}') for mass in final_masses]
-                                )
-                            )
-                        )
-
+                    return sorted(list(set(
+                        [round(float(mass), 4) for mass in final_masses])))
+                               
         # add monomer-specific loss products to final sequence masses,
         # remove duplicate final masses
         # make masses four point floats
         final_masses.extend(monomer_losses)
-        final_masses = sorted(
-            list(
-                set(
-                    [float(f"{mass:0.4f}") for mass in final_masses])))
+        final_masses = sorted(list(set(
+            [round(float(mass), 4) for mass in final_masses])))
 
     return final_masses
 
-
-def generate_reading_frames_sequence(sequence):
+def generate_reading_frames_sequence(
+    sequence,
+    mod_markers={
+        '(':')',
+        '~[': ']'}
+    ):
     """
     Takes a linear sequence and outputs a list of reading frame shifts for
     later use in generating proposed fragments for cyclic sequences. A reading
@@ -461,27 +926,39 @@ def generate_reading_frames_sequence(sequence):
     Returns:
         reading_frames: list of unique reading frames.
     """
-    # initiate reading frames list with input sequence
+    
+    # get list of monomers, sorted by order they appear in sequence
+    monomers = return_monomers_sequence(
+        sequence=sequence,
+        mod_markers=mod_markers,
+        return_modified=True,
+        return_set=False
+    )
+
+    # return no reading frames if there is only one type of monomer
+    if sorted(list(set(monomers))) == sorted(monomers):
+        return []
+    
+    # init list to store unique reading frames 
     reading_frames = [sequence]
 
-    # get list of unique monomers within sequence; if only one kind of monomer
-    # is present, there can only be one reading frame for the sequence.
-    # Therefore, sequence is returned
-    unique_monomers = list(set([c for i, c in enumerate(sequence)]))
-    if len(unique_monomers) == 1:
-        return reading_frames
+    for i in range(0, len(monomers)):
+        
+        # generate new reading frame by making last monomer first monomer
+        # in sequence
+        r_frame = f"{''.join(monomers[0:len(monomers)-1])}{monomers[-1]}"
 
-    # one by one, generate reading frames and check if they are unique (i.e.
-    # not yet in reading_frames list); if so, add to list of reading frames
-    for i in range(0, len(sequence)+1):
+        monomers = return_monomers_sequence(
+            sequence=r_frame,
+            mod_markers=mod_markers,
+            return_modified=True,
+            return_set=False
+        )
 
-        # take last monomer in sequence (sequence[-1]) and make it the first
-        # monomer
-        sequence = sequence[-1] + sequence[0:len(sequence)-1]
-        if sequence not in reading_frames:
-            reading_frames.append(sequence)
+        # add reading frame to list of reading frames if it is unique
+        if r_frame not in reading_frames:
+            reading_frames.append(r_frame)
 
-    # return list of unique reading frames
     return reading_frames
 
 def generate_dict_isobaric_sequences(sequences):
@@ -496,11 +973,9 @@ def generate_dict_isobaric_sequences(sequences):
             of sequences isobaric to sorted sequence).
     """
     # get list of sequence compositions
-    sorted_sequences = list(
-        set(
-            ["".join(sorted(sequence)) for sequence in sequences]
-        )
-    )
+    sorted_sequences = list(set(
+        ["".join(sorted(sequence)) for sequence in sequences]))
+
     print(f'organising {len(sequences)} sequences into {len(sorted_sequences)} isobaric groups')
 
     # generate dictionary of sequence compositions (key = sorted sequences)
@@ -549,8 +1024,12 @@ def add_peak_lists_massdict(massdict):
             frag_dict = {
                 frag: masses
                 for frag, masses in subdict["MS2"].items()
-                if frag != "signatures" and frag != "unique_fragments"
+                if (frag != "signatures" 
+                and frag.find("mod") == -1 
+                and frag != "unique_fragments")
             }
+
+            print(f'frag_dict = {frag_dict}')
             for masses in frag_dict.values():
                 peak_list.extend(masses)
 
@@ -562,8 +1041,13 @@ def add_peak_lists_massdict(massdict):
                     for frag, masses in subdict["MS2"]["signatures"].items()
                     if frag != "unique_fragments"
                 }
-                for masses in signature_fragdict.values():
-                    peak_list.extend(masses)
+                for sig, masses in signature_fragdict.items():
+                    if sig != 'terminal_modifications':
+                        peak_list.extend(masses)
+                    else:
+                        for t_masses in masses.values():
+                            peak_list.extend(t_masses)
+                
 
         # remove any duplicate m/z values from peak_list
         peak_list = sorted(list(set(peak_list)))
@@ -604,7 +1088,6 @@ def add_modification_sequence_mass_list(
     Returns:
         modified_masses (list): list of masses and / or unmodified masses.
     """
-
     # check if mass_list is a list or single mass; if single mass, make list
     if type(mass_list) != list:
         mass_list = [mass_list]
@@ -632,23 +1115,41 @@ def add_modification_sequence_mass_list(
 
 def add_terminal_modification_sequence_string(
     sequence,
-    modification,
+    terminal_modification,
     terminus
 ):
     """
     Adds three letter code for a terminal modification to a standard sequence
-    string.
+    string to return a single modified sequence string OR returns a list of
+    terminally modified sequences if more than one terminal_modification 
+    is given (see Args: terminal_modification)
 
     Args:
-        sequence (str): sequence string comprised of monomer one letter codes.
-        modification (str): three letter code for terminal modification.
-        terminus (int): specifies terminus to add the sequence; either 0 or -1
-        for start terminus and end terminus, respectively.
+        sequence (str): sequence string comprised of monomer one letter codes
+        terminal_modification (str or list): single string corresponding to
+            a single terminal modification or a list of terminal modification
+            strings
+        terminus (int or str): specifies terminus to add the sequence; either 
+        0/"0" or -1/"-1" for start terminus and end terminus, respectively
 
     Returns:
-        str : modified sequence string.
+        str or list: modified sequence string or list of modified sequence
+            strings 
     """
-    if terminus == 0:
-        return f"{modification}={sequence}"
-    elif terminus == -1:
-        return f"{sequence}={modification}"
+
+    if str(terminus) == "0":
+        
+        modified_sequences = [
+            f"[{mod}]{sequence}"
+            for mod in terminal_modification
+        ]
+
+        print(f'modified sequences = {modified_sequences}')
+        
+    elif str(terminus) == "-1":        
+        modified_sequences = [
+            f"{sequence}[{mod}]"
+            for mod in terminal_modification
+        ]
+    
+    return list(set(modified_sequences))
