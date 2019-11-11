@@ -84,6 +84,10 @@ def find_multiple_targets(
 
     # initiate list to store candidate masses that match target(s)
     matches = []
+    
+    # convert targets to list if not already
+    if type(targets) != list:
+        targets = [targets]
 
     # iterate through targets and return candidate masses that match target
     # masses within specified error threshold
@@ -352,6 +356,52 @@ def filter_max_intensity(
 
     # Return spectra
     return msdata
+
+def find_ms2_dominant_signature_ions(monomer_list, spectrum, error, error_abs, signature_ion_dict):
+    """ This function searches an MS2 spectrum and looks for signature ions
+    from the monomer list. If a dominant signature ion is found, the monomer is confirmed.
+
+    Arguments:
+        monomer_list {list} -- list of monomers within the sample.
+
+    Returns:
+        dict - dictionary of monomers and confirmed fragment types
+    """
+    # initiate confirmed monomer dict
+    confirmed_monomers = {}
+
+    # initiate list on unconfirmed monomers
+    unconfirmed_monomers = monomer_list
+    
+    # list signature ion dict types
+    signature_ion_types = list(signature_ion_dict.keys())
+    signature_ion_type = signature_ion_types[0]
+
+    # REORDER THIS TO SEARCH FOR ALL IMMONIUM FRAGMENTS THEN REMOVE IF DOMINANT AND NOT FOUND
+    for monomer in monomer_list:
+
+            # check if any monomers have dominant signature ions
+            if monomer in signature_ion_dict['dominant']:
+
+                # get mass for dominant signature ion
+                for signature_ions in signature_ion_dict[signature_ion_type]:
+                    if signature_ions[0] == monomer:
+                        dominant_frag_mass = signature_ions[1]
+                        
+                        # check if dominant fragment mass is in the spectrum
+                        # if so, add to dictionary
+                        dominant_frag_search = find_multiple_targets(dominant_frag_mass, candidates=spectrum.keys(), err=error, err_abs=error_abs)
+
+                        if dominant_frag_search:
+                            confirmed_monomers[monomer] = [signature_ions, dominant_frag_mass]
+
+                        # if can't find the dominant signature ion for the monomer, stop looking for it
+                        else:
+                            unconfirmed_monomers=unconfirmed_monomers.remove(monomer)
+
+    # return dictionary of confirmed monomers, their confirmed fragment type and mass of confirmed fragment
+    return confirmed_monomers
+
 
 def filter_mass_difference(
         msdata: dict,

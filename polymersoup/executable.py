@@ -32,6 +32,9 @@ def launch_screen(input_parameters_file):
     if parameters_dict['screening_method'] == 'exhaustive':
         exhaustive_screen(parameters_dict)
 
+    if parameters_dict['screening_method'] == 'mass_difference':
+        mass_difference_screen(parameters_dict)
+
 def exhaustive_screen(parameters_dict): 
     """ This function performs an exhaustive or 'brute force' screen for all
     possible sequences arising from input monomers and constraints set, read
@@ -121,6 +124,85 @@ def exhaustive_screen(parameters_dict):
                 extracted_data_folder=extracted_data,
                 postprocess_parameters=postprocess_parameters
             )
+
+def mass_difference_screen(parameters_dict): 
+    """ This function screens for mass differences based on input monomers and
+    constraints set, read directly from input parameters .json file. Useful for
+    identifying monomers present in the data.
+    
+    Args:
+        parameters_dict (dict) -- input parameters dictionary in standard
+            input parameters format.
+    """
+    # load parameters for in silico operations
+    silico_params = parameters_dict['silico_parameters']
+
+    # load parameters for data extraction operations
+    extractor_params = parameters_dict['extractor_parameters']
+
+    # load important file paths from parameters_dict
+    directories = parameters_dict['directories']
+
+    # load location of mass spec data in mzml_ripper .json file format
+    ripper_folder = directories['ripper_folder']
+
+    # load output folder for saving data, create if it does not exist
+    output_folder = directories['output_folder']
+    if not os.path.exists(output_folder):
+        os.mkdir(output_folder)
+
+    # write run parameters to .json
+    write_to_json(
+        write_dict=parameters_dict,
+        output_json=os.path.join(output_folder, 'run_parameters.json')
+    )
+
+    # apply any pre-filtering steps to ripper data 
+    filtered_rippers = apply_filters(
+        extractor_parameters=extractor_params,
+        ripper_folder=ripper_folder
+    )
+
+    # generate dictionary of MS2 signature ion masses for each monomer
+    monomer_list = silico_params["MS1"]["monomers"]
+
+    for ripper_json in filtered_rippers:
+
+        ripper_dict = open_json(ripper_json)
+
+        # extract base peak chromatogram (bpc) from each ms1 spectrum
+        bpc_dict = {}
+
+        for ms1_spectrum_id, ms1_spectrum in ripper_dict["ms1"].items():
+
+            # find highest peak and it's mass in each spectrum, save to bpc dict
+            highest_peak = max([intensity for intensity in ms1_spectrum.values()])
+            highest_peak_mass = [mass for mass, intensity in ms1_spectrum.items() if intensity==highest_peak]
+            bpc_dict[ms1_spectrum_id] = [highest_peak_mass[0], highest_peak]
+
+            # initiate confirmed monomer dict
+            confirmed_monomer = {}
+
+            # find ms2 spectra that precursors match the highest peak
+            for ms2_spectrum_id, ms2_spectrum in ripper_dict["ms2"].items():
+                if ms2_spectrum["parent"]==highest_peak_mass[0]:
+
+                    # in the ms2 spectrum look for the signature ion of the specified monomers
+                    confirmed_dominant_signature_ions = find_ms2_dominant_signature_ions(
+                                                            monomer_list=monomer_list,
+                                                            spectrum=ms2_spectrum,
+                                                            error=extractor_params["error"],
+                                                            error_abs=extractor_params["err_abs"],
+                                                            signature_ion_dict)  
+
+        # if found add the spectrum id dict: key = spectrum id, values = mass difference list and signatures list
+
+        # if signature not found search for mass differences (loss products etc + adducts) between peaks above ms2 peak level
+
+        # if found mass difference peak does not reach min ms2 peak abundance, keep looking
+
+        # return json containing dictionary of spectra IDs and found mass diffs / signatures
+
 
 def apply_filters(
     extractor_parameters,

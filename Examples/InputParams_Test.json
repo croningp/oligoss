@@ -1,5 +1,5 @@
 {
-"screening_method": "exhaustive",
+"screening_method": "mass_difference",
 
 "data_extraction": true,
 
@@ -15,9 +15,9 @@
         "add_modifications": false,
 
         "MS1": {
-            "monomers": ["H", "E"],
-            "max_length": 3,
-            "min_length": 3,
+            "monomers": ["G", "S", "N", "Q"],
+            "max_length": 5,
+            "min_length": 5,
             "ms1_adducts": ["H", "Na"],
             "min_z": 1,
             "max_z": null,
@@ -53,7 +53,7 @@
     {   "error": 0.01,
         "err_abs": true,
         "min_ms2_peak_abundance": 90,
-        "pre_run_filter": false,
+        "pre_run_filter": true,
         
         "min_MS1_total_intensity": null,
         "min_MS2_total_intensity": null,
@@ -71,7 +71,7 @@
             "ms2_precursors": null,
             "min_MS1_total_intensity": null,
             "min_MS2_total_intensity": null,
-            "min_MS1_max_intensity": null,
+            "min_MS1_max_intensity": 1E7,
             "min_MS2_max_intensity": null
         }
 
@@ -104,8 +104,8 @@
     },
 
 "directories":
-    {   "ripper_folder": "Z:/group/Emma Clarke/Data/SPPS-Mixtures/Sequencing/ECK2-26/ripper",
-        "output_folder": "Z:/group/Emma Clarke/Data/SPPS-Mixtures/Sequencing/ECK2-26/output",
+    {   "ripper_folder": "Z:/group/Emma Clarke/Data/SPPS-Mixtures/Sequencing/mass_difference_screening_tests/GSGNQ/ripper_jsons",
+        "output_folder": "Z:/group/Emma Clarke/Data/SPPS-Mixtures/Sequencing/mass_difference_screening_tests/GSGNQ/output",
         "polymer_type": "Depsipeptide"
     }
 
