@@ -396,12 +396,20 @@ def write_standard_postprocess_data(
         ]
     )
     
-    # get max peak intensity of each sequence from its MS1 EIC
-    max_intensities = {
-        seq: max([Rt_I[1] for Rt_I in MS1_EICs["".join(sorted(seq))]])
-        for seq in confirmed_fragdict
-    }
+    # init dict to store maximum MS1 EIC intensities of each sequence
+    max_intensities = {}
 
+    # get max peak intensity of each sequence from its MS1 EIC
+    for seq in confirmed_fragdict:
+
+        composition = [
+            hit for hit in MS1_EICs
+            if "".join(sorted(hit)) == "".join(sorted(seq))
+        ][0]
+        
+        max_intensities[seq] = max(
+            [Rt_I[1] for Rt_I in MS1_EICs[composition]])
+   
     # write all data to final csv for each sequence 
     for seq in confirmed_fragdict: 
 

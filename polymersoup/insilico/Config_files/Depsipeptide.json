@@ -127,7 +127,7 @@
                 "neg": "-H",
                 "exceptions": {
                     "pos": {
-                        "hydroxyA": "-OH"
+                        "-1": {"hydroxyA": "-OH"}
                     }
                 }
             },

@@ -131,6 +131,14 @@ def build_fragment_series_single_sequence(
         else:
             frag_massdiff = frag_mass_exception
         
+        try:
+            frag_massdiff = float(frag_massdiff)
+        except ValueError:
+            if frag_massdiff[0] == '-':
+                frag_massdiff = -FG[frag_massdiff[1::]]
+            else:
+                frag_massdiff = FG[frag_massdiff]
+        
         # apply massdiff to all fragments, creating charged fragment species
         neutral_fragment_masses = [
             mass + frag_massdiff
@@ -320,15 +328,23 @@ def apply_fragmentation_exceptions(
         return None
 
     for pos in exception_positions:
-        
+        print(f'exception_positions = {exception_positions}')
         monomer = monomers[int(pos)][0]
 
         rxn_classes = exception_positions[pos].keys()
         
         for rxn_class in rxn_classes:
             if monomer in REACTIVITY_CLASSES[rxn_class][1]:
-                return float(exception_positions[pos][rxn_class])
-               
+                try:
+                    exception_mass = float(exception_positions[pos][rxn_class])
+                except ValueError:
+                    exception_key = exception_positions[pos][rxn_class]
+                if exception_key[0] == "-":
+                    exception_mass = -FG[exception_key[1::]]
+                else:
+                    exception_mass = FG[exception_key]
+                return exception_mass
+
     return None
 
 def add_adducts_ms2_fragments(

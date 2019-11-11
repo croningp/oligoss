@@ -117,7 +117,7 @@
 "directories":
     {   "ripper_folder": "C:/Users/group/Documents/MSAnalysis/mass_spec_jsons",
         "output_folder": "C:/Users/group/Documents/MSAnalysis/VgNOle-test",
-        "polymer_config": ""
+        "polymer_type": "Depsipeptide"
     }
 
 }
