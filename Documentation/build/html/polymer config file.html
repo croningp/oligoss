@@ -1,0 +1,253 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Polymer Config File &#8212; polymermassspec 0.0.1 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Useful Links" href="useful links.html" />
+    <link rel="prev" title="Run Parameters" href="run parameters.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="useful links.html" title="Useful Links"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="run parameters.html" title="Run Parameters"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">polymermassspec 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="polymer-config-file">
+<h1>Polymer Config File<a class="headerlink" href="#polymer-config-file" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="section-1-general-ms1-and-chemistry-rules">
+<h2>Section 1: General MS1 and Chemistry Rules<a class="headerlink" href="#section-1-general-ms1-and-chemistry-rules" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p>“MONOMERS” :</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>Description:</strong> dictionary of monomer one letter codes, along with associated neutral monoisotopic masses and reactivity classes (functional groups). This dictionary should specify the neutral monoisotopic mass for each monomer, its reactive functional groups, and the number of each reactive functional group. This information is essential to ensure that all theoretical sequences generated are chemically feasible.</p></li>
+<li><dl class="simple">
+<dt><strong>Format:</strong>  {‘X’: [mass, [[rxn_class1, n], [rxn_class2, y]]}</dt><dd><p>where X = monomer one letter code; mass = neutral monoisotopic mass; rxn_class1 and rxn_class2 = reactivity classes (functional groups - e.g. amine, aldehyde); n = number of rxn_class1 functional groups; y = number of rxn_class2 functional groups.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>“MASS_DIFF” :</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>Description:</strong> the mass difference when adding an additional monomer on to a polymer chain.</p></li>
+<li><p><strong>Format:</strong> float.</p></li>
+<li><p><strong>Options:</strong> For condensation polymer = H2O.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>“ELONGATION_UNIT” :</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>Description:</strong> the number of additional monomer units typically added when elongating a polymer.</p></li>
+<li><p><strong>Format:</strong> integer.</p></li>
+<li><p><strong>Options:</strong> This will typically be 1 for most polymers.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>“REACTIVITY_CLASSES” :</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>Description:</strong> dictionary of reactivity classes with associated compatible classes and monomers.</p></li>
+<li><dl class="simple">
+<dt><strong>Format:</strong> {‘classA’<span class="classifier">[[‘classX’, ‘classY’], [‘A’, ‘B’]}</span></dt><dd><p>where classA = reaction class, classX and classY = classes that are cross-reactive with classA, and A and B are monomers within reaction class classA.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>“SYMMETRY” :</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>Description:</strong> bool to define whether polymer is identical at both ends.</p></li>
+<li><p><strong>Options:</strong> true or false.</p></li>
+<li><p><strong>Recommended:</strong> Set to false for polymers with different termini (e.g. N- and C- termini for peptides), true for polymers with identical functional groups at both termini in linear chains.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>“CHAIN_TERMINATORS” :</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>Description:</strong> list of monomers that terminate chain elongation.</p></li>
+<li><p><strong>Options:</strong> null unless you are certain a certain monomer will stop elongation of the chain in your reactions.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>“LOSS_PRODUCTS” :</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>Description:</strong> dictionary of monomer one letter codes and associated side chain neutral loss products, i.e. masses that can be lost from the monomer side chain.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>“IONIZABLE_SIDECHAINS” :</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>Description:</strong> dictionary of monomers that can be ionised with extra adducts at the SIDE CHAIN, with associated adducts, minimum and maximum absolute charge states in both positive and negative mode.</p></li>
+<li><dl class="simple">
+<dt><strong>Format:</strong> {“X”: {“pos”: (adduct, a, b), “neg”: (adduct, a, b)}}</dt><dd><p>where “X” = monomer one letter code, adduct = adduct string (must be found in either CATIONS OR ANIONS in GlobalChemicalConstantss), a = min side chain charge, b = max side chain charge for ionized form.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>“INTRINSICALLY_CHARGED_MONOMERS” :</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>Description:</strong> dictionary of monomers that have an intrinsic charge (i.e. charged without addition of adducts), with associated lists of permissible adducts.</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div>
+<div class="section" id="section-2-ms2-fragmentation">
+<h2>Section 2: MS2 Fragmentation<a class="headerlink" href="#section-2-ms2-fragmentation" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p><strong>Description:</strong> This section should contain all the information required to construct a basic MS2 fragment series for linear polymers. Each fragment type is defined as a key in the FRAG_SERIES dict. Typically, fragment keys are one letter codes used to denote fragments - e.g. the standard ‘b’ and ‘y’ fragment series for peptides.</p></li>
+<li><p><strong>Output:</strong> When building fragment series, the fragment generator will use the following convention: f’{frag}{n}’ where frag = fragment one letter code, n = number of monomers in fragment (e.g. b1, b2, b3, y1, y2, y3 etc…).</p></li>
+<li><p>“FRAG_SERIES” :</p>
+<blockquote>
+<div><ul>
+<li><p><strong>Description:</strong> dictionary of fragment series one letter codes and associated properties.</p></li>
+<li><p><strong>Format:</strong> Each fragment series key = fragment one letter code, value = subdictionary containing all relevant fragment properties.</p></li>
+<li><p>“terminus” :</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>Description:</strong> end in which fragmentation starts.</p></li>
+<li><p><strong>Options:</strong> -1 (for end of the sequence) or 0 (for start of the sequence).</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>“mass_diff” :</p>
+<blockquote>
+<div><p>between the fragment and corresponding subsequence. This may vary depending on whether cations or anions are being fragmented, therefore separate mass_diffs are specified for positive mode (‘pos’) and negative mode (‘neg’) mass spec. Example: the ‘y3’ fragment of peptide sequence ‘AGVS’ = the mass of (GVS+H) in positive mode, and (GVS-H) in negative mode.</p>
+</div></blockquote>
+</li>
+<li><p>“fragmentation_unit” :</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>Description:</strong> the minimum number of monomer units typically added and / or removed at a time when building a fragment series.</p></li>
+<li><p><strong>Recommended:</strong> Default is ELONGATION_UNIT.</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>“MS2_SIGNATURE_IONS” :</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>Description:</strong> MS2 fragments which can be used as markers for monomers and / or small subsequences.</p></li>
+<li><dl class="simple">
+<dt><strong>Format:</strong> nested dictionary of format {“type”: {{“X”}: [signature_mass]}}</dt><dd><p>where “type” is the signature ion type, “X” is the monomer and signature_mass is a float which corresponds to the mass of the signature ion for the monomer (“X”).</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Polymer Config File</a><ul>
+<li><a class="reference internal" href="#section-1-general-ms1-and-chemistry-rules">Section 1: General MS1 and Chemistry Rules</a></li>
+<li><a class="reference internal" href="#section-2-ms2-fragmentation">Section 2: MS2 Fragmentation</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="run parameters.html"
+                        title="previous chapter">Run Parameters</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="useful links.html"
+                        title="next chapter">Useful Links</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/polymer config file.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="useful links.html" title="Useful Links"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="run parameters.html" title="Run Parameters"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">polymermassspec 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019, David Doran, Graham Keenan, Emma Clarke, Cole Mathis and Leroy Cronin.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,2722 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>PolymerMassSpec Code &#8212; polymermassspec 0.0.1 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Useful Links" href="useful links.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="useful links.html" title="Useful Links"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">polymermassspec 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="polymermassspec-code">
+<h1>PolymerMassSpec Code<a class="headerlink" href="#polymermassspec-code" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="core-scripts">
+<h2>Core Scripts<a class="headerlink" href="#core-scripts" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="executable">
+<h3>executable<a class="headerlink" href="#executable" title="Permalink to this headline">¶</a></h3>
+<p>TO BE FILLED IN</p>
+</div>
+<div class="section" id="module-polymersoup.filehandler">
+<span id="filehandler"></span><h3>filehandler<a class="headerlink" href="#module-polymersoup.filehandler" title="Permalink to this headline">¶</a></h3>
+<p>This file contains functions for reading and passing on run parameters
+for de novo peptide polymer soup sequencing</p>
+<dl class="function">
+<dt id="polymersoup.filehandler.append_csv_row">
+<code class="sig-prename descclassname">polymersoup.filehandler.</code><code class="sig-name descname">append_csv_row</code><span class="sig-paren">(</span><em class="sig-param">csv_file</em>, <em class="sig-param">append_list</em>, <em class="sig-param">delimitchar='</em>, <em class="sig-param">'</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.filehandler.append_csv_row" title="Permalink to this definition">¶</a></dt>
+<dd><p>Appends a new row to existing .csv file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>csv_file</strong> (<em>str</em>) – full file path to pre-written .csv file.</p></li>
+<li><p><strong>append_list</strong> (<em>list</em>) – list of strings to write to new .csv row.</p></li>
+<li><p><strong>delimitchar</strong> (<em>str</em><em>, </em><em>optional</em>) – delimiter for separating columns in
+.csv file. Defaults to ‘,’.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.filehandler.generate_insilico_writefile_string">
+<code class="sig-prename descclassname">polymersoup.filehandler.</code><code class="sig-name descname">generate_insilico_writefile_string</code><span class="sig-paren">(</span><em class="sig-param">folder</em>, <em class="sig-param">silico_dict</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.filehandler.generate_insilico_writefile_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a full filepath for in silico sequence json.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>folder</strong> (<em>str</em>) – path to folder where in silico json is to be written to.</p></li>
+<li><p><strong>silico_dict</strong> (<em>dict</em>) – MSMS sequence json from SilicoGenerator.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>full filepath to in silico sequence json file that is to be</dt><dd><p>written and populated with in silico sequence data.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.filehandler.list_files_by_type">
+<code class="sig-prename descclassname">polymersoup.filehandler.</code><code class="sig-name descname">list_files_by_type</code><span class="sig-paren">(</span><em class="sig-param">folder</em>, <em class="sig-param">filetype</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.filehandler.list_files_by_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a folder and lists full file paths for all files within that folder
+that match a specified type - either file extension or project-specific
+files ‘sequence_json’ or ‘ripper’ files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>folder</strong> (<em>str</em>) – full path to folder containing target files.</p></li>
+<li><p><strong>filetype</strong> (<em>str</em>) – specifies filetype - either file extension such as
+‘.json’, ‘.mzml’, ‘.csv’ etc or a project-specific category
+of files ‘sequence_json’ or ‘ripper’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>list of full file paths for all files in folder that</dt><dd><p>match specified filetype.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>files (list)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.filehandler.open_json">
+<code class="sig-prename descclassname">polymersoup.filehandler.</code><code class="sig-name descname">open_json</code><span class="sig-paren">(</span><em class="sig-param">filepath</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.filehandler.open_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Opens parameters json and returns as dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filepath</strong> (<em>str</em>) – full file path to parameters json.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>parameter dictionary.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>load</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.filehandler.read_parameters">
+<code class="sig-prename descclassname">polymersoup.filehandler.</code><code class="sig-name descname">read_parameters</code><span class="sig-paren">(</span><em class="sig-param">parameters_file</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.filehandler.read_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes parameter json and returns subsets of parameter info that are
+required for a run.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parameters_file</strong> (<em>str</em>) – full filepath to parameter json, which should</p></li>
+<li><p><strong>all parameters needed to conduct a full run of in silico</strong> (<em>specify</em>) – </p></li>
+<li><p><strong>data extraction</strong><strong>, </strong><strong>sequence confirmation and</strong> (<em>fragmentation</em><em>,</em>) – </p></li>
+<li><p><strong>or any combination of these steps - see Readme.</strong> (<em>postprocessing</em><em>,</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.filehandler.write_EIC_file">
+<code class="sig-prename descclassname">polymersoup.filehandler.</code><code class="sig-name descname">write_EIC_file</code><span class="sig-paren">(</span><em class="sig-param">input_data_file</em>, <em class="sig-param">output_folder</em>, <em class="sig-param">EICs</em>, <em class="sig-param">ms_level=1</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.filehandler.write_EIC_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes an EIC dict to a .json file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_data_file</strong> (<em>str</em>) – full file path to mzml ripper data file used to
+generate MS1 EICs.</p></li>
+<li><p><strong>output_folder</strong> (<em>str</em>) – path to output folder directory, where data will
+be saved.</p></li>
+<li><p><strong>MS1_EICs</strong> (<em>dict</em>) – dictionary of sequences and / or compositions and
+their corresponding MS1 EICs.</p></li>
+<li><p><strong>ms_level</strong> (<em>int</em><em>, </em><em>optional</em>) – specifies MS level of EIC data. Defaults to
+1.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.filehandler.write_confidence_assignments">
+<code class="sig-prename descclassname">polymersoup.filehandler.</code><code class="sig-name descname">write_confidence_assignments</code><span class="sig-paren">(</span><em class="sig-param">input_data_file</em>, <em class="sig-param">output_folder</em>, <em class="sig-param">confidence_assignments</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.filehandler.write_confidence_assignments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes confidence assignments for sequences with confirmed MS1 precursors
+and MS2 fragments to a .json file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_data_file</strong> (<em>str</em>) – full file path to input mzml ripper data file.</p></li>
+<li><p><strong>output_folder</strong> (<em>str</em>) – directory of output folder, where data will be
+saved.</p></li>
+<li><p><strong>confidence_assignments</strong> (<em>dict</em>) – dictionary of sequences and their
+assigned confidence scores.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.filehandler.write_confirmed_fragment_dict">
+<code class="sig-prename descclassname">polymersoup.filehandler.</code><code class="sig-name descname">write_confirmed_fragment_dict</code><span class="sig-paren">(</span><em class="sig-param">input_data_file</em>, <em class="sig-param">output_folder</em>, <em class="sig-param">confirmed_fragment_dict</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.filehandler.write_confirmed_fragment_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function writes a confirmed fragment dictionary fir sequences that have
+any confirmed MS2 fragments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_data_file</strong> (<em>str</em>) – full file path to input mzml ripper data file.</p></li>
+<li><p><strong>output_folder</strong> (<em>str</em>) – directory of output folder, where data will be
+saved.</p></li>
+<li><p><strong>confirmed_fragment_dict</strong> (<em>dict</em>) – dictionary of sequences and confirmed
+fragments for all sequences that have ANY confirmed MS2 fragments.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.filehandler.write_new_csv">
+<code class="sig-prename descclassname">polymersoup.filehandler.</code><code class="sig-name descname">write_new_csv</code><span class="sig-paren">(</span><em class="sig-param">csv_file</em>, <em class="sig-param">headers=None</em>, <em class="sig-param">delimitingchar='</em>, <em class="sig-param">'</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.filehandler.write_new_csv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes a new .csv file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>csv_file</strong> (<em>str</em>) – full file path to new .csv file to be written</p></li>
+<li><p><strong>headers</strong> (<em>list</em><em>, </em><em>optional</em>) – list of headers to be written to first
+row of .csv file. Defaults to None.</p></li>
+<li><p><strong>delimitingchar</strong> (<em>str</em><em>, </em><em>optional</em>) – delimiter for separating columns in
+output .csv file. Defaults to ‘,’.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.filehandler.write_pre_fragment_screen_sequence_JSON">
+<code class="sig-prename descclassname">polymersoup.filehandler.</code><code class="sig-name descname">write_pre_fragment_screen_sequence_JSON</code><span class="sig-paren">(</span><em class="sig-param">input_data_file</em>, <em class="sig-param">output_folder</em>, <em class="sig-param">MSMS_silico_dict</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.filehandler.write_pre_fragment_screen_sequence_JSON" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes in silico sequence dict for sequences that have been detected by
+MS1 composition - i.e. BEFORE CONFIRMING MS2 FRAGMENTS AND ASSIGNING
+CONFIDENCE.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_data_file</strong> (<em>str</em>) – full file path to input mzml ripper data file.</p></li>
+<li><p><strong>output_folder</strong> (<em>str</em>) – directory of output folder, where data will be
+saved.</p></li>
+<li><p><strong>MSMS_silico_dict</strong> (<em>dict</em>) – in silico sequence dict for sequences,
+potential MS1 precursors and MS2 fragments.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.filehandler.write_standard_postprocess_data">
+<code class="sig-prename descclassname">polymersoup.filehandler.</code><code class="sig-name descname">write_standard_postprocess_data</code><span class="sig-paren">(</span><em class="sig-param">output_folder</em>, <em class="sig-param">silico_dict</em>, <em class="sig-param">confirmed_fragdict</em>, <em class="sig-param">confidence_scores</em>, <em class="sig-param">confidence_limit</em>, <em class="sig-param">subsequence_weight</em>, <em class="sig-param">MS1_EICs</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.filehandler.write_standard_postprocess_data" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>This function writes standard postprocessing data including confidence_scores.json,</dt><dd><p>confirmed_fragdict.json, process_summary_(SUBSEQUENCE WEIGHT)ssw.csv.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_folder</strong> (<em>str</em>) – silico_dict (dict): MSMS sequence json from SilicoGenerator.</p></li>
+<li><p><strong>confirmed_fragdict</strong> (<em>dict</em>) – </p></li>
+<li><p><strong>confidence_scores</strong> (<em>dict</em>) – </p></li>
+<li><p><strong>confidence_limit</strong> (<em>int</em>) – lower than this will not be processed for retention time and / or intensities.</p></li>
+<li><p><strong>subsequence_weight</strong> (<em>float</em>) – </p></li>
+<li><p><strong>MS1_EICs</strong> (<em>dict</em>) – their corresponding MS1 EICs.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.filehandler.write_to_json">
+<code class="sig-prename descclassname">polymersoup.filehandler.</code><code class="sig-name descname">write_to_json</code><span class="sig-paren">(</span><em class="sig-param">write_dict</em>, <em class="sig-param">output_json</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.filehandler.write_to_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes a dict to a json.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>write_dict</strong> (<em>dict</em>) – dictionary to be dumped in json.</p></li>
+<li><p><strong>filepath</strong> (<em>str</em>) – full file path to output json.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.filehandler.write_unique_fragment_dict">
+<code class="sig-prename descclassname">polymersoup.filehandler.</code><code class="sig-name descname">write_unique_fragment_dict</code><span class="sig-paren">(</span><em class="sig-param">input_data_file</em>, <em class="sig-param">output_folder</em>, <em class="sig-param">unique_fragment_dict</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.filehandler.write_unique_fragment_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes a dictionary of confidently assigned sequences and their
+corresponding in silico fragment data for fragments that have been confirmed,
+including unique fragments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_data_file</strong> (<em>str</em>) – full file path to input mzml ripper data file.</p></li>
+<li><p><strong>output_folder</strong> (<em>str</em>) – directory of output folder, where data will be
+saved.</p></li>
+<li><p><strong>unique_fragment_dict</strong> (<em>dict</em>) – dictionary of confident sequences and
+corresponding in silico data for confirmed fragments, including
+unique confirmed fragments.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-polymersoup.parameter_handlers">
+<span id="parameter-handlers"></span><h3>parameter_handlers<a class="headerlink" href="#module-polymersoup.parameter_handlers" title="Permalink to this headline">¶</a></h3>
+<p>This file contains functions for extracting info on run parameters for
+in silico fragmentation, data extraction and post-processing.</p>
+<dl class="function">
+<dt id="polymersoup.parameter_handlers.add_timestamp">
+<code class="sig-prename descclassname">polymersoup.parameter_handlers.</code><code class="sig-name descname">add_timestamp</code><span class="sig-paren">(</span><em class="sig-param">day=True</em>, <em class="sig-param">month=True</em>, <em class="sig-param">year=True</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.parameter_handlers.add_timestamp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns date and time dict for saving to run_parameters log files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>day</strong> (<em>bool</em><em>, </em><em>optional</em>) – specify whether to log day. Defaults to True.</p></li>
+<li><p><strong>month</strong> (<em>bool</em><em>, </em><em>optional</em>) – specify whether to log month. Defaults to True.</p></li>
+<li><p><strong>year</strong> (<em>bool</em><em>, </em><em>optional</em>) – specify whether to log year. Defaults to True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>dict of date and time.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.parameter_handlers.generate_parameters_dict">
+<code class="sig-prename descclassname">polymersoup.parameter_handlers.</code><code class="sig-name descname">generate_parameters_dict</code><span class="sig-paren">(</span><em class="sig-param">parameters_file</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.parameter_handlers.generate_parameters_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes an input parameters .json file and returns a dictionary of all
+relevant parameters contained within the file for successfully running
+a full de novo sequencing experiment in executable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>parameters_file</strong> (<em>str</em>) – full file path to input parameters .json file.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>dictionary of all parameters relevant for</dt><dd><p>executing de novo sequencing experiments.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>parameters_dict (dict)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.parameter_handlers.load_essential_signature_ions">
+<code class="sig-prename descclassname">polymersoup.parameter_handlers.</code><code class="sig-name descname">load_essential_signature_ions</code><span class="sig-paren">(</span><em class="sig-param">parameters_file</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.parameter_handlers.load_essential_signature_ions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads essential, monomer-specific signature ions (denoted by monomer one-
+letter codes) from input parameters and returns list of m/z values for
+essential signature ions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>parameters_file</strong> (<em>str</em>) – full file path to input paremeters file.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of m/z values for signature ions.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.parameter_handlers.return_directories">
+<code class="sig-prename descclassname">polymersoup.parameter_handlers.</code><code class="sig-name descname">return_directories</code><span class="sig-paren">(</span><em class="sig-param">parameters_file</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.parameter_handlers.return_directories" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes an input parameters file (.json) and returns dictionary of key
+file directories essential for executing de novo sequencing experiments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>parameters_file</strong> (<em>str</em>) – full file path to input parameters .json file.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>dictionary of important directories required to</dt><dd><p>run executable.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>directories (dict)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.parameter_handlers.return_extractor_parameters">
+<code class="sig-prename descclassname">polymersoup.parameter_handlers.</code><code class="sig-name descname">return_extractor_parameters</code><span class="sig-paren">(</span><em class="sig-param">parameters_file</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.parameter_handlers.return_extractor_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes an input parameters file (.json) and returns dictionary of parameters
+relevant to data extraction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>parameters_file</strong> (<em>str</em>) – full file path to input parameters json.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>dictionary of parameters and associated</dt><dd><p>info for data extraction.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>extractor_parameters (dict)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.parameter_handlers.return_polymer_config">
+<code class="sig-prename descclassname">polymersoup.parameter_handlers.</code><code class="sig-name descname">return_polymer_config</code><span class="sig-paren">(</span><em class="sig-param">parameters_file</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.parameter_handlers.return_polymer_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reads the parameters file for the polymer type
+and returns the relevant polymer config file as a dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>parameters_file</strong> (<em>str</em>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dict – dict version of polymer configuration file.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.parameter_handlers.return_postprocess_parameters">
+<code class="sig-prename descclassname">polymersoup.parameter_handlers.</code><code class="sig-name descname">return_postprocess_parameters</code><span class="sig-paren">(</span><em class="sig-param">parameters_file</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.parameter_handlers.return_postprocess_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes an input parameters file (.json) and returns dictionary of parameters
+relevant to sequence confirmation and post-processing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>parameters_file</strong> (<em>str</em>) – full file path to input parameters json.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>dictionary of parameters and associated</dt><dd><p>info for sequence confirmation and postprocessing.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>postprocess_parameters (dict)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.parameter_handlers.return_silico_parameters">
+<code class="sig-prename descclassname">polymersoup.parameter_handlers.</code><code class="sig-name descname">return_silico_parameters</code><span class="sig-paren">(</span><em class="sig-param">parameters_file</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.parameter_handlers.return_silico_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes an input parameters file (.json) and returns dictionary of parameters
+relevant to in silico functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>parameters_file</strong> (<em>str</em>) – full file path to input parameters json file.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>dictionary of parameters and associated</dt><dd><p>info for in silico functions.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>silico_parameters (dict)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="insilico">
+<h2>Insilico<a class="headerlink" href="#insilico" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-polymersoup.insilico.silico_helpers.insilico_helpers">
+<span id="insilico-helpers"></span><h3>Insilico Helpers<a class="headerlink" href="#module-polymersoup.insilico.silico_helpers.insilico_helpers" title="Permalink to this headline">¶</a></h3>
+<p>This file contains functions which are essential to all
+in silico operations</p>
+<dl class="function">
+<dt id="polymersoup.insilico.silico_helpers.insilico_helpers.add_adduct_complexes_sequence_mass">
+<code class="sig-prename descclassname">polymersoup.insilico.silico_helpers.insilico_helpers.</code><code class="sig-name descname">add_adduct_complexes_sequence_mass</code><span class="sig-paren">(</span><em class="sig-param">sequence</em>, <em class="sig-param">neutral_mass</em>, <em class="sig-param">adducts</em>, <em class="sig-param">min_z=1</em>, <em class="sig-param">max_z=None</em>, <em class="sig-param">mode='pos'</em>, <em class="sig-param">max_total_ions=None</em>, <em class="sig-param">min_total_ions=None</em>, <em class="sig-param">max_mode_matching_ions=None</em>, <em class="sig-param">min_mode_matching_ions=None</em>, <em class="sig-param">max_opposite_charged_ions=None</em>, <em class="sig-param">min_opposite_charged_ions=None</em>, <em class="sig-param">max_mz_overall_adduct=0</em>, <em class="sig-param">min_mz_overall_adduct=None</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.insilico.silico_helpers.insilico_helpers.add_adduct_complexes_sequence_mass" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function will add complex adducts to sequence masses - i.e. multiple
+metal centres, ions with counterions and associated solvent species etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sequence</strong> (<em>str</em>) – sequence string comprised of monomer one letter codes.</p></li>
+<li><p><strong>neutral_mass</strong> (<em>float</em>) – neutral monoisotopic mass of sequence.</p></li>
+<li><p><strong>adducts</strong> (<em>list</em>) – list of adduct strings.</p></li>
+<li><p><strong>min_z</strong> (<em>int</em><em>, </em><em>optional</em>) – minimum absolute charge of OVERALL ION COMPLEX.
+Defaults to 1.</p></li>
+<li><p><strong>max_z</strong> (<em>[</em><em>type</em><em>]</em><em>, </em><em>optional</em>) – maximum absolute charge of OVERALL ION COMPLEX.
+Defaults to None.</p></li>
+<li><p><strong>mode</strong> (<em>str</em><em>, </em><em>optional</em>) – specifies whether OVERALL ION COMPLEX is positive
+or negative; either ‘pos’ or ‘neg’ for positive and
+negative mode, respectively. Defaults to ‘pos’.</p></li>
+<li><p><strong>max_total_ions</strong> (<em>int</em><em>, </em><em>optional</em>) – maximum number of total ions of
+ANY CHARGE STATE IN OVERALL ION COMPLEX. Defaults to None.</p></li>
+<li><p><strong>min_total_ions</strong> (<em>int</em><em>, </em><em>optional</em>) – minimum number of total ions of
+ANY CHARGE STATE IN OVERALL ION COMPLEX. Defaults to None.</p></li>
+<li><p><strong>max_mode_matching_ions</strong> (<em>int</em><em>, </em><em>optional</em>) – maximum number of ions whose
+CHARGE STATE MATCHES THE OVERALL CHARGE STATE OF THE
+ADDUCT. Defaults to None.</p></li>
+<li><p><strong>min_mode_matching_ions</strong> (<em>int</em><em>, </em><em>optional</em>) – minimum number of ions whose
+CHARGE STATE MATCHES THE OVERALL CHARGE STATE OF THE
+ADDUCT. Defaults to None.</p></li>
+<li><p><strong>max_opposite_charged_ions</strong> (<em>int</em><em>, </em><em>optional</em>) – maximum number of ions
+whose CHARGE STATE IS OPPOSITE TO THE OVERALL CHARGE STATE
+OF THE ADDUCT. Defaults to None.</p></li>
+<li><p><strong>min_opposite_charged_ions</strong> (<em>[</em><em>type</em><em>]</em><em>, </em><em>optional</em>) – minimum number of ions
+whose CHARGE STATE IS OPPOSITE TO THE OVERALL CHARGE STATE
+OF THE ADDUCT. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of masses of sequences with adducts.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>masses (list)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.insilico.silico_helpers.insilico_helpers.add_adducts_sequence_mass">
+<code class="sig-prename descclassname">polymersoup.insilico.silico_helpers.insilico_helpers.</code><code class="sig-name descname">add_adducts_sequence_mass</code><span class="sig-paren">(</span><em class="sig-param">neutral_mass</em>, <em class="sig-param">adducts</em>, <em class="sig-param">min_z=1</em>, <em class="sig-param">max_z=None</em>, <em class="sig-param">mode='pos'</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.insilico.silico_helpers.insilico_helpers.add_adducts_sequence_mass" title="Permalink to this definition">¶</a></dt>
+<dd><p>This functions adds charged adducts to a neutral sequence mass.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>neutral_mass</strong> (<em>float</em>) – </p></li>
+<li><p><strong>adducts</strong> (<em>list</em>) – in either ANIONS or CATIONS dicts in
+GlobalChemicalConstants.py.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Keyword Arguments</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>min_z</strong> (<em>int</em>) – {1})</p></li>
+<li><p><strong>max_z</strong> (<em>int</em>) – None, maximum charge is assumed to be maximum oxidation
+state of adduct ions (default: {None}).</p></li>
+<li><p><strong>mode</strong> (<em>str</em>) – mass spectrometry, respectively (default: {‘pos’}).</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>charged_sequence_masses (list) – list of m/z values for charged sequences</dt><dd><p>with adducts.</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.insilico.silico_helpers.insilico_helpers.add_modification_sequence_mass_list">
+<code class="sig-prename descclassname">polymersoup.insilico.silico_helpers.insilico_helpers.</code><code class="sig-name descname">add_modification_sequence_mass_list</code><span class="sig-paren">(</span><em class="sig-param">mass_list</em>, <em class="sig-param">modification_mass</em>, <em class="sig-param">mod_mass_diff</em>, <em class="sig-param">universal_shift</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.insilico.silico_helpers.insilico_helpers.add_modification_sequence_mass_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a mass (or list of masses) corresponding to a sequence and / or
+sequence fragment and adds the mass of a modification on to the sequence
+mass(es), returning a list of modified masses.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mass_list</strong> (<em>float</em><em> or </em><em>list of floats</em>) – mass(es) of unmodified sequences
+and / or sequence fragments.</p></li>
+<li><p><strong>modification_mass</strong> (<em>float</em>) – mass of modification to add to unmodified
+mass(es).</p></li>
+<li><p><strong>mod_mass_diff</strong> (<em>float</em>) – mass lost upon addition of modification to
+sequence and / or fragments (e.g. water is lost when fatty
+acids acylate peptides).</p></li>
+<li><p><strong>universal_shift</strong> (<em>bool</em>) – specifies whether modification shifts ALL
+unmodified masses; if True, only list of modified masses
+is returned; if False, returned list includes both
+modified and unmodified masses.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of masses and / or unmodified masses.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>modified_masses (list)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.insilico.silico_helpers.insilico_helpers.add_peak_lists_massdict">
+<code class="sig-prename descclassname">polymersoup.insilico.silico_helpers.insilico_helpers.</code><code class="sig-name descname">add_peak_lists_massdict</code><span class="sig-paren">(</span><em class="sig-param">massdict</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.insilico.silico_helpers.insilico_helpers.add_peak_lists_massdict" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function takes an MS1, MS2 or full MSn mass dictionary and generates
+a list of all MS1 and MS2 ions for each sequence in the massdict, adding
+ion masses to a list (“peak_list”) which is then used for screening
+spectra.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>massdict</strong> (<em>dict</em>) – dictionary of sequences and corresponding
+subdictionaries of MS1 and /or MS2 ions.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>same as input massdict, but with extra key-value pair</dt><dd><p>added to sequence subdictionaries ({“peak_list”: [masses]}
+where masses = list of all MS1 and MS2 ions - including
+monomer-specific signature ions - associated with sequence).</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>output_dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.insilico.silico_helpers.insilico_helpers.add_sidechain_neutral_loss_products_sequence">
+<code class="sig-prename descclassname">polymersoup.insilico.silico_helpers.insilico_helpers.</code><code class="sig-name descname">add_sidechain_neutral_loss_products_sequence</code><span class="sig-paren">(</span><em class="sig-param">sequence</em>, <em class="sig-param">sequence_masses</em>, <em class="sig-param">max_total_losses=None</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.insilico.silico_helpers.insilico_helpers.add_sidechain_neutral_loss_products_sequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a sequence, mass and subtracts monomer-specific side chain neutral
+loss products as specified in LOSS_PRODUCTS dictionary found in polymer
+config file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sequence</strong> (<em>str</em>) – codes.</p></li>
+<li><p><strong>sequence_masses</strong> (<em>float</em><em> or </em><em>list</em>) – of floats for multiple associated masses,
+e.g. for various adducts.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Keyword Arguments</dt>
+<dd class="field-even"><p><strong>max_total_losses</strong> (<em>int</em>) – products to be subtracted from a given sequence
+if None, all possible loss products will be
+incorporated into final mass list.
+(default: {None}).</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>final_masses (list) – list of m/z values for sequence +/- side</dt><dd><p>chain neutral losses.</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.insilico.silico_helpers.insilico_helpers.add_terminal_modification_sequence_string">
+<code class="sig-prename descclassname">polymersoup.insilico.silico_helpers.insilico_helpers.</code><code class="sig-name descname">add_terminal_modification_sequence_string</code><span class="sig-paren">(</span><em class="sig-param">sequence</em>, <em class="sig-param">modification</em>, <em class="sig-param">terminus</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.insilico.silico_helpers.insilico_helpers.add_terminal_modification_sequence_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds three letter code for a terminal modification to a standard sequence
+string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sequence</strong> (<em>str</em>) – sequence string comprised of monomer one letter codes.</p></li>
+<li><p><strong>modification</strong> (<em>str</em>) – three letter code for terminal modification.</p></li>
+<li><p><strong>terminus</strong> (<em>int</em>) – specifies terminus to add the sequence; either 0 or -1</p></li>
+<li><p><strong>start terminus and end terminus</strong><strong>, </strong><strong>respectively.</strong> (<em>for</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>modified sequence string.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.insilico.silico_helpers.insilico_helpers.find_functional_groups_monomer">
+<code class="sig-prename descclassname">polymersoup.insilico.silico_helpers.insilico_helpers.</code><code class="sig-name descname">find_functional_groups_monomer</code><span class="sig-paren">(</span><em class="sig-param">monomer</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.insilico.silico_helpers.insilico_helpers.find_functional_groups_monomer" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function returns the functional groups present in a monomer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>monomer</strong> (<em>string</em>) – </p></li>
+<li><p><strong>mass</strong><strong>, </strong><strong>list of functional groups with their associated</strong> (<em>monoisotopic</em>) – </p></li>
+<li><p><strong>per monomer.</strong> (<em>frequency</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>func_groups – List of functional groups present in the monomer.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.insilico.silico_helpers.insilico_helpers.find_sequence_mass">
+<code class="sig-prename descclassname">polymersoup.insilico.silico_helpers.insilico_helpers.</code><code class="sig-name descname">find_sequence_mass</code><span class="sig-paren">(</span><em class="sig-param">sequence</em>, <em class="sig-param">four_point_float=True</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.insilico.silico_helpers.insilico_helpers.find_sequence_mass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a sequence string and returns neutral monoisotopic mass for sequence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sequence</strong> (<em>str</em>) – letter codes.</p></li>
+<li><p><strong>decimal_points</strong> (<em>int</em>) – out for sequence mass.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sequence_mass (float) – neutral monoisotopic mass of input sequence.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.insilico.silico_helpers.insilico_helpers.generate_all_sequences">
+<code class="sig-prename descclassname">polymersoup.insilico.silico_helpers.insilico_helpers.</code><code class="sig-name descname">generate_all_sequences</code><span class="sig-paren">(</span><em class="sig-param">monomers</em>, <em class="sig-param">max_length</em>, <em class="sig-param">min_length=1</em>, <em class="sig-param">sequencing=True</em>, <em class="sig-param">chain_terminators=None</em>, <em class="sig-param">start_tags=None</em>, <em class="sig-param">end_tags=None</em>, <em class="sig-param">isobaric_targets=None</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.insilico.silico_helpers.insilico_helpers.generate_all_sequences" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function takes a list of input monomers and outputs all possible
+sequences or compositions that could arise within the constraints set,
+which are described below.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>monomers</strong> (<em>list</em>) – </p></li>
+<li><p><strong>max_length</strong> (<em>int</em><em>) </em><em>-- maximum sequence length</em><em> (</em><em>in monomer units</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Keyword Arguments</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>min_length</strong> (<em>int</em><em>) </em><em>-- minimum sequence length</em><em> (</em><em>in monomer units</em>) – (default: {1}).</p></li>
+<li><p><strong>sequencing</strong> (<em>bool</em>) – be enumerated or just compositions. Set to False if
+you just need to screen for compositions.
+(default: {True}).</p></li>
+<li><p><strong>chain_terminators</strong> (<em>list</em>) – elongation. (default: {None}).</p></li>
+<li><p><strong>{list} -- list of monomers. If this list is input</strong><strong>, </strong><strong>sequences</strong> (<em>end_tags</em>) – are tagged at terminus 0 by each of the monomers
+in start_tags - one tag per sequence, and only
+tagged sequences are returned. (default: {None}).</p></li>
+<li><p><strong>{list} -- list of monomers. If this list is input</strong><strong>, </strong><strong>sequences</strong> – are tagged at terminus -1 by each of the monomers
+in end_tags - one tag per sequence, and only
+tagged sequences are returned. (default: {None}).</p></li>
+<li><p><strong>{list} -- list of sequences and /</strong><strong> or </strong><strong>compositions that</strong> (<em>isobaric_targets</em>) – output sequences must be isobaric to. (default:
+{None}).</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>sequences {list} – list of possible sequences that could arise from</dt><dd><p>input monomers within the constraints set.</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.insilico.silico_helpers.insilico_helpers.generate_all_sequences_rxn_classes">
+<code class="sig-prename descclassname">polymersoup.insilico.silico_helpers.insilico_helpers.</code><code class="sig-name descname">generate_all_sequences_rxn_classes</code><span class="sig-paren">(</span><em class="sig-param">monomers</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.insilico.silico_helpers.insilico_helpers.generate_all_sequences_rxn_classes" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function will be written to build sequence lists in cases where
+monomers are not universally cross-reactive - i.e. more complicated
+operations are required.</p>
+<p>THIS FUNCTION IS NOT FINISHED</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>{</strong><strong>[</strong><strong>type</strong><strong>]</strong><strong>} --</strong><strong> [</strong><strong>description</strong><strong>]</strong> (<em>monomers</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.insilico.silico_helpers.insilico_helpers.generate_dict_isobaric_sequences">
+<code class="sig-prename descclassname">polymersoup.insilico.silico_helpers.insilico_helpers.</code><code class="sig-name descname">generate_dict_isobaric_sequences</code><span class="sig-paren">(</span><em class="sig-param">sequences</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.insilico.silico_helpers.insilico_helpers.generate_dict_isobaric_sequences" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a list of sequences and groups isobaric sequences in a dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sequences</strong> (<em>list</em>) – list of sequence strings</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>dict – dictionary of isobaric groups (key = sorted sequence, value = list</dt><dd><p>of sequences isobaric to sorted sequence).</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.insilico.silico_helpers.insilico_helpers.generate_reading_frames_sequence">
+<code class="sig-prename descclassname">polymersoup.insilico.silico_helpers.insilico_helpers.</code><code class="sig-name descname">generate_reading_frames_sequence</code><span class="sig-paren">(</span><em class="sig-param">sequence</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.insilico.silico_helpers.insilico_helpers.generate_reading_frames_sequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a linear sequence and outputs a list of reading frame shifts for
+later use in generating proposed fragments for cyclic sequences. A reading
+frame shift is carried out by taking the final monomer in the sequence
+and making it the first monomer, shifting the remaining monomers up 1 index
+in the polymer chain. Example: one reading frame shift of sequence ‘AAV’
+produces shifted sequence ‘VAA’.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sequence</strong> (<em>str</em>) – sequence string consisting of monomer one letter codes.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of unique reading frames.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>reading_frames</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-polymersoup.insilico.MS1_silico">
+<span id="ms1-silico"></span><h3>MS1_silico<a class="headerlink" href="#module-polymersoup.insilico.MS1_silico" title="Permalink to this headline">¶</a></h3>
+<p>This file contains functions for generating theoretical MS1 data for ALife
+Polymer Data</p>
+<dl class="function">
+<dt id="polymersoup.insilico.MS1_silico.add_adducts_ms1_massdict">
+<code class="sig-prename descclassname">polymersoup.insilico.MS1_silico.</code><code class="sig-name descname">add_adducts_ms1_massdict</code><span class="sig-paren">(</span><em class="sig-param">massdict</em>, <em class="sig-param">adducts</em>, <em class="sig-param">mode='pos'</em>, <em class="sig-param">min_z=1</em>, <em class="sig-param">max_z=None</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.insilico.MS1_silico.add_adducts_ms1_massdict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes an MS1 mass dictionary of sequences and NEUTRAL MASSES and adds
+charged adducts to sequence masses, giving a list of m/z values for
+each sequence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>massdict</strong> (<em>dict</em>) – dictionary of sequence strings and corresponding
+neutral masses.</p></li>
+<li><p><strong>adducts</strong> (<em>list</em>) – list of adduct string ids - e.g. [‘H’, ‘Na’].</p></li>
+<li><p><strong>mode</strong> (<em>str</em><em>, </em><em>optional</em>) – specifies whether ions with be cationic or
+anionic. Use ‘pos’ and ‘neg’ for positive and negative
+modes, respectively. Defaults to ‘pos’.</p></li>
+<li><p><strong>min_z</strong> (<em>int</em><em>, </em><em>optional</em>) – minimum charge of adduct species. Defaults to 1.</p></li>
+<li><p><strong>max_z</strong> (<em>int</em><em>, </em><em>optional</em>) – maximum charge of adduct species; if None,
+max charge is determined by maximum charge of
+adducts specified in GlobalChemicalConstants.
+Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>dictionary of sequences and corresponding m/z values</dt><dd><p>of charged adduct species.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>adduct_massdict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.insilico.MS1_silico.add_loss_products_ms1_massdict">
+<code class="sig-prename descclassname">polymersoup.insilico.MS1_silico.</code><code class="sig-name descname">add_loss_products_ms1_massdict</code><span class="sig-paren">(</span><em class="sig-param">massdict</em>, <em class="sig-param">max_total_losses=None</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.insilico.MS1_silico.add_loss_products_ms1_massdict" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function takes a dictionary of sequences and corresponding NEUTRAL
+MASSES, and incorporates side chain-specific neutral loss products as
+specified in LOSS_PRODUCTS dict in polymer config file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>massdict</strong> (<em>dict</em>) – dictionary of sequences and corresponding neutral
+masses.</p></li>
+<li><p><strong>max_total_losses</strong> (<em>int</em><em>, </em><em>optional</em>) – maximum number of loss products to
+incorporate per sequence; if None, all possible loss
+products for a given sequence are incorporated into
+output loss_product_dict MS1 mass dictionary.
+Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>dictionary of sequences and neutral mass lists with</dt><dd><p>associated side chain-specific neutral loss products.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>loss_product_dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.insilico.MS1_silico.add_terminal_modification_MS1_massdict">
+<code class="sig-prename descclassname">polymersoup.insilico.MS1_silico.</code><code class="sig-name descname">add_terminal_modification_MS1_massdict</code><span class="sig-paren">(</span><em class="sig-param">massdict</em>, <em class="sig-param">modification</em>, <em class="sig-param">modification_mass</em>, <em class="sig-param">modification_massdiff</em>, <em class="sig-param">modification_terminus</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.insilico.MS1_silico.add_terminal_modification_MS1_massdict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes an MS1 sequence mass dictionary and adds a terminal modification to
+every sequence, returning a dictionary of modified sequence string
+and corresponding modified masses.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>massdict</strong> (<em>dict</em>) – dictionary of sequences and corresponding MS1 masses.</p></li>
+<li><p><strong>modification</strong> (<em>str</em>) – modification three letter code from
+MODIFICATIONS_DICT in modificatiosn config file.</p></li>
+<li><p><strong>modification_mass</strong> (<em>float</em>) – neutral monoisotopic mass of modifier.</p></li>
+<li><p><strong>modification_massdiff</strong> (<em>[</em><em>type</em><em>]</em>) – mass lost upon addition of modification
+to sequence (e.g. H2O for fatty acid acylation of peptides
+as this is a condensation reaction).</p></li>
+<li><p><strong>modification_terminus</strong> (<em>int</em>) – either 0 or -1 to specify start and
+end terminus, respectively.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>dictionary of modified sequence strings and</dt><dd><p>masses.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>modified_massdict (dict)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.insilico.MS1_silico.add_terminal_modification_MS1_sequence">
+<code class="sig-prename descclassname">polymersoup.insilico.MS1_silico.</code><code class="sig-name descname">add_terminal_modification_MS1_sequence</code><span class="sig-paren">(</span><em class="sig-param">sequence</em>, <em class="sig-param">sequence_masses</em>, <em class="sig-param">modification</em>, <em class="sig-param">modification_mass</em>, <em class="sig-param">modification_massdiff</em>, <em class="sig-param">modification_terminus</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.insilico.MS1_silico.add_terminal_modification_MS1_sequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a sequence, associated masses, modification three letter code and
+associated mass, massdiff, and returns a dict of modified sequence +
+modified sequence masses.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sequence</strong> (<em>str</em>) – sequence string comprised of monomer one letter codes.</p></li>
+<li><p><strong>sequence_masses</strong> (<em>list</em>) – list of m/z values for unmodified sequence
+(floats). SHOULD BE IN +1 CHARGE STATE.</p></li>
+<li><p><strong>modification</strong> (<em>str</em>) – modification three letter code from
+MODIFICATIONS_DICT in modifications config file.</p></li>
+<li><p><strong>modification_mass</strong> (<em>float</em>) – neutral monoisotopic mass of modifier.</p></li>
+<li><p><strong>modification_massdiff</strong> (<em>float</em>) – mass lost upon addition of modification
+to sequence (e.g. H2O for fatty acid acylations of
+peptide N-termini).</p></li>
+<li><p><strong>modification_terminus</strong> (<em>int</em>) – either 0 or -1 for start and end terminus,
+respectively.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>[mod_seq_masses]}: dictionary of modified sequence string</dt><dd><p>and corresponding modified sequence masses.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>{mod_seq</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.insilico.MS1_silico.generate_mass_dictionary">
+<code class="sig-prename descclassname">polymersoup.insilico.MS1_silico.</code><code class="sig-name descname">generate_mass_dictionary</code><span class="sig-paren">(</span><em class="sig-param">monomers</em>, <em class="sig-param">max_length</em>, <em class="sig-param">min_length=1</em>, <em class="sig-param">sequencing=True</em>, <em class="sig-param">universal_rxn=True</em>, <em class="sig-param">chain_terminators=None</em>, <em class="sig-param">start_tags=None</em>, <em class="sig-param">end_tags=None</em>, <em class="sig-param">isobaric_targets=None</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.insilico.MS1_silico.generate_mass_dictionary" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function takes a list of monomers and outputs a dictionary of all
+possible sequences or compositions that could arise from input monomers
+within the constraints set, along with associated NEUTRAL monoisotopic
+masses.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>monomers</strong> (<em>list</em>) – </p></li>
+<li><p><strong>max_length</strong> (<em>int</em><em>) </em><em>-- maximum sequence length</em><em> (</em><em>in monomer units</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Keyword Arguments</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>min_length</strong> (<em>int</em><em>) </em><em>-- minimum sequence length</em><em> (</em><em>in monomer units</em>) – (default: {1}).</p></li>
+<li><p><strong>sequencing</strong> (<em>bool</em>) – be enumerated or just compositions. Set to False if
+you just need to screen for compositions.
+(default: {True}).</p></li>
+<li><p><strong>universal_rxn</strong> (<em>bool</em>) – cross-reactive. If this is set to False, reactivity
+classes must be read from the polymer config file
+to ensure that any chemically infeasbile sequences
+are not included in the final mass dictionary.
+(default: {True}).</p></li>
+<li><p><strong>chain_terminators</strong> (<em>list</em>) – elongation. (default: {None}.</p></li>
+<li><p><strong>starting_monomers</strong> (<em>list</em>) – only sequences beginning with a monomer in this
+list will be returned. (default: {None}).</p></li>
+<li><p><strong>ending_monomers</strong> (<em>list</em>) – only sequences ending with a monomer in this list
+will be returned. (default: {None}.</p></li>
+<li><p><strong>isobaric_targets</strong> (<em>list</em>) – output sequences must be isobaric to. (default:
+{None}).</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>massdict – dictionary of sequences and associated neutral</dt><dd><p>monoisotopic masses. Keys = sequence strings, values =
+masses (float).</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.insilico.MS1_silico.generate_ms1_mass_dictionary_adducts_losses">
+<code class="sig-prename descclassname">polymersoup.insilico.MS1_silico.</code><code class="sig-name descname">generate_ms1_mass_dictionary_adducts_losses</code><span class="sig-paren">(</span><em class="sig-param">monomers</em>, <em class="sig-param">max_length</em>, <em class="sig-param">adducts</em>, <em class="sig-param">mode='pos'</em>, <em class="sig-param">min_z=1</em>, <em class="sig-param">max_z=None</em>, <em class="sig-param">losses=True</em>, <em class="sig-param">max_total_losses=None</em>, <em class="sig-param">loss_product_adducts=None</em>, <em class="sig-param">min_length=1</em>, <em class="sig-param">chain_terminators=None</em>, <em class="sig-param">universal_rxn=True</em>, <em class="sig-param">start_tags=None</em>, <em class="sig-param">end_tags=None</em>, <em class="sig-param">sequencing=True</em>, <em class="sig-param">isobaric_targets=None</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.insilico.MS1_silico.generate_ms1_mass_dictionary_adducts_losses" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>This function generates a loss product dictionary and then</dt><dd><p>adds adduct to loss product sequence masses.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>monomers</strong> (<em>list</em>) – </p></li>
+<li><p><strong>max_length</strong> (<em>int</em><em>) </em><em>-- maximum sequence length</em><em> (</em><em>in monomer units</em>) – </p></li>
+<li><p><strong>adducts</strong> (<em>list</em>) – list of adduct string ids - e.g. [‘H’, ‘Na’].</p></li>
+</ul>
+</dd>
+<dt class="field-even">Keyword Arguments</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>mode</strong> (<em>str</em><em>, </em><em>optional</em>) – specifies whether ions with be cationic or
+anionic. Use ‘pos’ and ‘neg’ for positive and negative
+modes, respectively. Defaults to ‘pos’.</p></li>
+<li><p><strong>min_z</strong> (<em>int</em><em>, </em><em>optional</em>) – minimum charge of adduct species. Defaults to 1.</p></li>
+<li><p><strong>max_z</strong> (<em>int</em><em>, </em><em>optional</em>) – maximum charge of adduct species; if None,
+max charge is determined by maximum charge of
+adducts specified in GlobalChemicalConstants.
+Defaults to None.</p></li>
+<li><p><strong>losses</strong> (<em>bool</em>) – seen for certain sidechains in the experiments. (default: {True})</p></li>
+<li><p><strong>max_total_losses</strong> (<em>int</em>) – (default: {None}).</p></li>
+<li><p><strong>loss_product_adducts</strong> (<em>dict</em>) – (default: {None}).</p></li>
+<li><p><strong>min_length</strong> (<em>int</em>) – {1}).</p></li>
+<li><p><strong>{</strong><strong>[</strong><strong>type</strong><strong>]</strong><strong>} --</strong><strong> [</strong><strong>description</strong><strong>] </strong><strong>(</strong><strong>default</strong> (<em>chain_terminators</em>) – {None}).</p></li>
+<li><p><strong>universal_rxn</strong> (<em>bool</em>) – {True}).</p></li>
+<li><p><strong>start_tags</strong> (<em>list</em>) – {None}).</p></li>
+<li><p><strong>end_tags</strong> (<em>list</em>) – {None}).</p></li>
+<li><p><strong>sequencing</strong> (<em>bool</em>) – If composition is only necessary, set to false. (default: {True}).</p></li>
+<li><p><strong>isobaric_targets</strong> (<em>list</em>) – data. (default: {None}).</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>dict – dictionary of loss products masses with specified adducts.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-polymersoup.insilico.MS2_silico">
+<span id="ms2-silico"></span><h3>MS2_silico<a class="headerlink" href="#module-polymersoup.insilico.MS2_silico" title="Permalink to this headline">¶</a></h3>
+<p>This file contains functions for generating theoretical MS2 data for ALife
+Polymer Data</p>
+<dl class="function">
+<dt id="polymersoup.insilico.MS2_silico.add_adducts_ms2_fragments">
+<code class="sig-prename descclassname">polymersoup.insilico.MS2_silico.</code><code class="sig-name descname">add_adducts_ms2_fragments</code><span class="sig-paren">(</span><em class="sig-param">fragment_dict</em>, <em class="sig-param">adducts</em>, <em class="sig-param">mode='pos'</em>, <em class="sig-param">fragment_series=None</em>, <em class="sig-param">return_base_fragments=True</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.insilico.MS2_silico.add_adducts_ms2_fragments" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function takes a dictionary of MS2 fragments and associated m/z
+values, and adds singly charged adducts.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fragment_dict</strong> (<em>dict</em>) – values. keys = fragment id strings, values = lists
+of associated masses. See function:
+build_fragment_series_single_sequence.</p></li>
+<li><p><strong>adducts</strong> (<em>list</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Keyword Arguments</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>mode</strong> (<em>str</em>) – respectively. (default: {‘pos’}).</p></li>
+<li><p><strong>fragment_series</strong> (<em>list</em>) – series. If None, adducts will be added to all fragment
+series that do not correspond to signature ions.
+(default: {None}).</p></li>
+<li><p><strong>return_base_fragments</strong> (<em>bool</em>) – fragment masses in adduct list. (default: {True}).</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><strong>Exception</strong> – raised if any of the input adducts do not match the
+    detection mode (i.e. anions in positive mode, cations in
+    positive mode). Functions for complex adducts are yet to
+    be written.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>adduct_fragdict – dictionary of fragment string codes and associated</dt><dd><p>m/z value lists with adducts. ALL IN +1 CHARGE STATE.</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.insilico.MS2_silico.add_terminal_modification_sequence_all_fragments">
+<code class="sig-prename descclassname">polymersoup.insilico.MS2_silico.</code><code class="sig-name descname">add_terminal_modification_sequence_all_fragments</code><span class="sig-paren">(</span><em class="sig-param">sequence</em>, <em class="sig-param">fragment_dict</em>, <em class="sig-param">modification_mass</em>, <em class="sig-param">modification_terminus</em>, <em class="sig-param">universal_shift=False</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.insilico.MS2_silico.add_terminal_modification_sequence_all_fragments" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>This function adds the mass of a terminal modification to</dt><dd><p>terminally modified fragments.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sequences</strong> (<em>str</em>) – sequence string comprised of monomer one letter codes.</p></li>
+<li><p><strong>fragment_dict</strong> (<em>dict</em>) – values. keys = fragment id strings, values = lists
+of associated masses. See function:
+build_fragment_series_single_sequence.</p></li>
+<li><p><strong>modification_mass</strong> (<em>float</em>) – full neutral monoisotopic mass of modification.</p></li>
+<li><p><strong>modification_terminus</strong> (<em>int</em>) – either 0 or -1 for start and end terminus,
+respectively; specifies whether terminal modification
+is to be added to start or end terminus.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Keyword Arguments</dt>
+<dd class="field-even"><p><strong>universal_shift</strong> (<em>bool</em><em>, </em><em>optional</em>) – specifies whether every fragment mass
+must be shifted by modification mass; if True, only
+modified masses are returned; if False, masses of
+modified + unmodified fragments are returned.
+Defaults to False.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.insilico.MS2_silico.add_terminal_ms2_modification_sequence_fragment_subsets">
+<code class="sig-prename descclassname">polymersoup.insilico.MS2_silico.</code><code class="sig-name descname">add_terminal_ms2_modification_sequence_fragment_subsets</code><span class="sig-paren">(</span><em class="sig-param">sequence</em>, <em class="sig-param">fragment_dict</em>, <em class="sig-param">frag_terminus</em>, <em class="sig-param">modification_mass</em>, <em class="sig-param">modification_massdiff</em>, <em class="sig-param">modification_terminus</em>, <em class="sig-param">universal_shift=False</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.insilico.MS2_silico.add_terminal_ms2_modification_sequence_fragment_subsets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a sequence, associated subset of MS2 fragments, and adds terminal
+modification on to MS2 fragment masses. IMPORTANT: ALL FRAGMENT TYPES IN
+fragment_dict MUST HAVE THE SAME TERMINUS, START AND END POSITION.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sequence</strong> (<em>str</em>) – full length sequence string comprised of monomer one
+letter codes.</p></li>
+<li><p><strong>fragment_dict</strong> (<em>dict</em>) – dictionary of MS2 fragments (different fragment
+types are allowed as long as they have the same
+terminus and start, end positions) and associated
+unmodified masses.</p></li>
+<li><p><strong>frag_terminus</strong> (<em>int</em>) – 0 or -1 for start and end terminus, respectively;
+retrieved from FRAG_SERIES[‘terminus’] in polymer
+config file.</p></li>
+<li><p><strong>modification_mass</strong> (<em>float</em>) – full neutral monoisotopic mass of modification.</p></li>
+<li><p><strong>modification_massdiff</strong> (<em>float</em>) – mass lost upon addition of modification
+to fragment mass(es).</p></li>
+<li><p><strong>modification_terminus</strong> (<em>int</em>) – either 0 or -1 for start and end terminus,
+respectively; specifies whether terminal modification
+is to be added to start or end terminus.</p></li>
+<li><p><strong>universal_shift</strong> (<em>bool</em><em>, </em><em>optional</em>) – specifies whether every fragment mass
+must be shifted by modification mass; if True, only
+modified masses are returned; if False, masses of
+modified + unmodified fragments are returned.
+Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>dictionary of fragment_ids and associated masses,</dt><dd><p>with modification masses added to fragments containing
+target terminus.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>modified_fragdict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.insilico.MS2_silico.build_fragment_series_single_sequence">
+<code class="sig-prename descclassname">polymersoup.insilico.MS2_silico.</code><code class="sig-name descname">build_fragment_series_single_sequence</code><span class="sig-paren">(</span><em class="sig-param">sequence</em>, <em class="sig-param">fragment_series</em>, <em class="sig-param">adducts</em>, <em class="sig-param">mode='pos'</em>, <em class="sig-param">losses=True</em>, <em class="sig-param">max_total_losses=None</em>, <em class="sig-param">loss_product_adducts=None</em>, <em class="sig-param">check_exceptions=False</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.insilico.MS2_silico.build_fragment_series_single_sequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function takes a sequence and builds an MS2 fragment series,
+returning a dictionary of fragment ids and corresponding m/z values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sequence</strong> (<em>str</em>) – codes.</p></li>
+<li><p><strong>fragment_series</strong> (<em>str</em>) – series</p></li>
+<li><p><strong>adducts</strong> (<em>list</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Keyword Arguments</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>mode</strong> (<em>str</em>) – anionic, use ‘pos’ for cations and ‘neg’ for anions
+(default: {‘pos’}).</p></li>
+<li><p><strong>max_total_losses</strong> (<em>int</em>) – neutral loss products permitted per fragment.</p></li>
+<li><p><strong>loss_product_adducts</strong> (<em>list</em>) – </p></li>
+<li><p><strong>check_exceptions</strong> (<em>bool</em>) – to standard fragmentation rules based on the monomers present in
+the sequence.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>fragment_dict – dictionary of fragments and corresponding m/z</dt><dd><p>values.</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.insilico.MS2_silico.build_multiple_fragment_series_single_sequence">
+<code class="sig-prename descclassname">polymersoup.insilico.MS2_silico.</code><code class="sig-name descname">build_multiple_fragment_series_single_sequence</code><span class="sig-paren">(</span><em class="sig-param">sequence</em>, <em class="sig-param">fragment_series</em>, <em class="sig-param">adducts</em>, <em class="sig-param">mode='pos'</em>, <em class="sig-param">add_signatures=True</em>, <em class="sig-param">signatures=None</em>, <em class="sig-param">losses=True</em>, <em class="sig-param">max_total_losses=None</em>, <em class="sig-param">loss_product_adducts=None</em>, <em class="sig-param">check_exceptions=False</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.insilico.MS2_silico.build_multiple_fragment_series_single_sequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a single sequence, list of fragment series (e.g. [‘b’, ‘y’] for
+standard peptide b- and y- fragments) and outputs a dictionary of MS2
+fragments and corresponding m/z values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sequence</strong> (<em>str</em>) – Sequence string comprised of monomer one letter codes.</p></li>
+<li><p><strong>fragment_series</strong> (<em>list</em><em>, </em><em>optional</em>) – List of fragment one letter codes
+strings; if None, all fragments in FRAG_SERIES from
+polymer config file are included in final fragment
+dictionary. Defaults to None.</p></li>
+<li><p><strong>mode</strong> (<em>str</em><em>, </em><em>optional</em>) – Either ‘pos’ or ‘neg’ to specificy positive or
+negative mode, respectively. Defaults to ‘pos’.</p></li>
+<li><p><strong>add_signatures</strong> (<em>bool</em><em>, </em><em>optional</em>) – Specifies whether to add
+monomer-specific MS2 signature ions to fragment_dict.
+Defaults to True.</p></li>
+<li><p><strong>signatures</strong> (<em>[</em><em>type</em><em>]</em><em>, </em><em>optional</em>) – List of signature ion strings, to be
+added to fragment_dict if add_signatures=True. If None,
+all MS2 signature ions in polymer config file
+MS2_SIGNATURE_IONS dict are added to fragment_dict.
+Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>dictionary of MS2 fragments and corresponding m/z values.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>fragment_dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.insilico.MS2_silico.find_fragments_by_index">
+<code class="sig-prename descclassname">polymersoup.insilico.MS2_silico.</code><code class="sig-name descname">find_fragments_by_index</code><span class="sig-paren">(</span><em class="sig-param">fragments</em>, <em class="sig-param">target_index</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.insilico.MS2_silico.find_fragments_by_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a list of fragment ids and returns fragments within list whose
+position in the fragment series matches the target_index specified.
+Fragments must be denoted by ONE LETTER codes and index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fragments</strong> (<em>list</em>) – list of fragment ids (strings).</p></li>
+<li><p><strong>target_index</strong> (<em>int</em>) – target fragment index.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>list of fragments that match target index (e.g.</dt><dd><p>[‘y14’, ‘b14’] if target_index = 14).</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>fragments (list)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.insilico.MS2_silico.find_ms2_fragment_exceptions">
+<code class="sig-prename descclassname">polymersoup.insilico.MS2_silico.</code><code class="sig-name descname">find_ms2_fragment_exceptions</code><span class="sig-paren">(</span><em class="sig-param">frag_info</em>, <em class="sig-param">sub_sequence</em>, <em class="sig-param">mode</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.insilico.MS2_silico.find_ms2_fragment_exceptions" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function checks if there are any monomers in the sub_sequence
+that require ‘exceptions’ to standard fragmentation and / or ionisation
+rules during the MS2 fragment building.</p>
+<p>Required for some fragment series e.g. peptide y-series for hydroxy acids
+that change sub_sequence mass_diff and / or intrinsic ion depending on
+functional group / reactivity class of terminating / initiating monomer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>{string} -- location of fragment information.</strong> (<em>frag_info</em>) – </p></li>
+<li><p><strong>-- fragment currently being checked for exceptions</strong> (<em>sub_sequence</em>) – (from build_fragment_series_single_sequence).</p></li>
+<li><p><strong>mode</strong> (<em>str</em>) – anionic, use ‘pos’ for cations and ‘neg’ for anions.
+(default: {‘pos’}).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>‘frag_info[‘exceptions’][mode][exception_groups[0]]’ – list
+of groups that require different MS2 fragment building (exceptions).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.insilico.MS2_silico.find_unique_fragments_isobaric_set">
+<code class="sig-prename descclassname">polymersoup.insilico.MS2_silico.</code><code class="sig-name descname">find_unique_fragments_isobaric_set</code><span class="sig-paren">(</span><em class="sig-param">isobaric_sequencedict</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.insilico.MS2_silico.find_unique_fragments_isobaric_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds unique MS2 fragments from an MS2 fragment mass dictionary in which
+all sequences within the dictionary are isobaric (i.e. have the same
+composition).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>isobaric_sequencedict</strong> (<em>dict</em>) – dictionary of isobaric sequences and
+MS2 fragments.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>input dict, with list of unique fragments added</dt><dd><p>to MS2 fragments.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>isobaric_sequencedict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.insilico.MS2_silico.generate_monomer_ms2_signature_ions_sequence">
+<code class="sig-prename descclassname">polymersoup.insilico.MS2_silico.</code><code class="sig-name descname">generate_monomer_ms2_signature_ions_sequence</code><span class="sig-paren">(</span><em class="sig-param">sequence</em>, <em class="sig-param">signatures=None</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.insilico.MS2_silico.generate_monomer_ms2_signature_ions_sequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function generates a dictionary of monomer signature ions for
+a sequence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sequence</strong> (<em>str</em>) – codes.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Keyword Arguements:</dt><dd><dl class="simple">
+<dt>signatures (list) – list of signature fragment codes - e.g. [‘Im’]</dt><dd><p>for amino acid immonium fragments. If None, all
+signature ion types will be returned in signature
+ion dictionary.
+(default: {None}).</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>MS2_signature_dict – dictionary of monomer signature fragments</dt><dd><p>and associated m/z values.</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.insilico.MS2_silico.generate_ms2_mass_dictionary">
+<code class="sig-prename descclassname">polymersoup.insilico.MS2_silico.</code><code class="sig-name descname">generate_ms2_mass_dictionary</code><span class="sig-paren">(</span><em class="sig-param">sequences</em>, <em class="sig-param">fragment_series</em>, <em class="sig-param">adducts</em>, <em class="sig-param">mode</em>, <em class="sig-param">add_signatures=True</em>, <em class="sig-param">signatures=None</em>, <em class="sig-param">losses=True</em>, <em class="sig-param">max_total_losses=None</em>, <em class="sig-param">loss_product_adducts=None</em>, <em class="sig-param">uniques=True</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.insilico.MS2_silico.generate_ms2_mass_dictionary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a list of sequences and generates full ms2 fragment dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sequences</strong> (<em>str</em>) – sequence string comprised of monomer one letter codes.</p></li>
+<li><p><strong>fragment_series</strong> (<em>list</em>) – list of fragment types - must be keys in
+FRAG_SERIES dict in polymer config file.</p></li>
+<li><p><strong>adducts</strong> (<em>list</em>) – list of adduct strings.</p></li>
+<li><p><strong>mode</strong> (<em>str</em>) – either ‘pos’ or ‘neg’ for positive and negative mode,
+respectively.</p></li>
+<li><p><strong>add_signatures</strong> (<em>bool</em><em>, </em><em>optional</em>) – specifies whether to add
+monomer-specific MS2 signature ions.
+Defaults to True.</p></li>
+<li><p><strong>signatures</strong> (<em>list</em><em>, </em><em>optional</em>) – list of signature ion types to add; if
+None, all possible signature ions are added.
+Defaults to None.</p></li>
+<li><p><strong>losses</strong> (<em>bool</em><em>, </em><em>optional</em>) – specifies whether to include monomer-specific
+side chain loss products. Defaults to True.</p></li>
+<li><p><strong>max_total_losses</strong> (<em>int</em><em>, </em><em>optional</em>) – <p>specifies whether to cap number of
+side chain loss products per fragment. If None,
+all possible loss products are generated.</p>
+<blockquote>
+<div><p>Defaults to None.</p>
+</div></blockquote>
+</p></li>
+<li><p><strong>loss_product_adducts</strong> (<em>list</em><em>, </em><em>optional</em>) – list of adducts to add to loss
+product fragment masses. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl>
+<dt>ms2_fragment_dict – dictionary of sequences and corresponding MS2</dt><dd><dl>
+<dt>fragments in format: {</dt><dd><dl>
+<dt>seq: {</dt><dd><p>“frag”: [masses],
+“signatures”: {</p>
+<blockquote>
+<div><p>”signature_frag”: [masses]
+}</p>
+</div></blockquote>
+<p>}</p>
+</dd>
+</dl>
+<p>}</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>where seq = sequence, “frag” = fragment id, masses = MS2 fragment m/z
+values, “signature_frag” = signature fragment id.</p>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.insilico.MS2_silico.generate_unique_fragment_ms2_massdict">
+<code class="sig-prename descclassname">polymersoup.insilico.MS2_silico.</code><code class="sig-name descname">generate_unique_fragment_ms2_massdict</code><span class="sig-paren">(</span><em class="sig-param">massdict</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.insilico.MS2_silico.generate_unique_fragment_ms2_massdict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes an MS2 fragment mass dict and identifies unique fragments for each
+sequence in the dict, adds them as a key-value pair to output dict.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>massdict</strong> (<em>dict</em>) – <p>MS2 mass dict in the format: {
+sequence: {</p>
+<blockquote>
+<div><p>’frag’: [masses]
+}</p>
+</div></blockquote>
+<p>}</p>
+</p></li>
+<li><p><strong>frag = fragment id</strong><strong>, </strong><strong>masses = m/z values of fragments.</strong> (<em>where</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl>
+<dt>same as input massdict, but with extra key-value</dt><dd><p>pair added to each sequence subdictionary in format:
+{</p>
+<blockquote>
+<div><dl class="simple">
+<dt>sequence: {</dt><dd><p>‘frag’: [masses],
+‘unique_fragments’: [‘frag_1’, ‘frag_2’…]</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+<p>}
+where ‘frag_1’, ‘frag_2’ = fragment string ids for fragments
+that are unique to sequence.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>unique_fragment_dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-polymersoup.insilico.SilicoGenerator">
+<span id="silicogenerator"></span><h3>SilicoGenerator<a class="headerlink" href="#module-polymersoup.insilico.SilicoGenerator" title="Permalink to this headline">¶</a></h3>
+<p>This file contains functions for passing on silico parameters to insilico
+functions for generating theoretical MS and MSMS sequence data.</p>
+<dl class="function">
+<dt id="polymersoup.insilico.SilicoGenerator.find_unique_fragments_sequence_dict">
+<code class="sig-prename descclassname">polymersoup.insilico.SilicoGenerator.</code><code class="sig-name descname">find_unique_fragments_sequence_dict</code><span class="sig-paren">(</span><em class="sig-param">sequence_dict</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.insilico.SilicoGenerator.find_unique_fragments_sequence_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a dictionary of sequences and associated MS2 fragments, and returns
+a dictionary of sequences and lists of fragments that are unique to each
+sequences. This function is to be used to identify unique fragments from
+subsets of fragments, not full theoretical MSMS in silico sequence dicts.
+Intended use is for finding unique fragments from fragments that have been
+confirmed as being associated with sequences by functions in extractors
+and postprocessing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sequence_dict</strong> (<em>dict</em>) – <p>dictionary of sequences and MS2 fragments in
+format: {</p>
+<blockquote>
+<div><dl class="simple">
+<dt>seq: {</dt><dd><p>‘frag’: [m/z…]</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>}</p>
+</p></li>
+<li><p><strong>seq = sequence</strong><strong>, </strong><strong>'frag' = fragment id</strong><strong>, </strong><strong>and m/z = m/z value of</strong> (<em>where</em>) – </p></li>
+<li><p><strong>ion</strong> (<em>fragment</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>dictionary of sequences and associated</dt><dd><p>fragment ids for fragments that are unique to each sequence.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>unique_fragment_dict (dict)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.insilico.SilicoGenerator.generate_MS1_compositional_dict">
+<code class="sig-prename descclassname">polymersoup.insilico.SilicoGenerator.</code><code class="sig-name descname">generate_MS1_compositional_dict</code><span class="sig-paren">(</span><em class="sig-param">silico_parameters</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.insilico.SilicoGenerator.generate_MS1_compositional_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function generates a dictionary of compositions (not sequences) and
+associated MS1 ions for all possible compositions that can arise from
+constraints specified in input parameters .json file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>silico_parameters</strong> (<em>dict</em>) – dictionary of in silico parameters passed on
+from input parameters .json file.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>dictionary of compositions and their corresponding</dt><dd><p>MS1 m/z values in format : {composition: [m/z…]…}.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>MS1_dict (dict)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.insilico.SilicoGenerator.generate_MSMS_insilico_from_compositions">
+<code class="sig-prename descclassname">polymersoup.insilico.SilicoGenerator.</code><code class="sig-name descname">generate_MSMS_insilico_from_compositions</code><span class="sig-paren">(</span><em class="sig-param">composition_dict</em>, <em class="sig-param">silico_parameters</em>, <em class="sig-param">uniques=False</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.insilico.SilicoGenerator.generate_MSMS_insilico_from_compositions" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function takes a dictionary of product compositions and associated
+MS1 ions, and returns a full_MSMS_sequence dictionary containing in silico
+data for both MS1 ions and MS2 fragments for every possible sequence that
+matches a composition in the input composition_dict.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>composition_dict</strong> (<em>dict</em>) – dictionary of compositions and corresponding
+MS1 ion m/z values.</p></li>
+<li><p><strong>silico_parameters</strong> (<em>dict</em>) – dictionary of in silico parameters passed on
+from input parameters .json file.</p></li>
+<li><p><strong>uniques</strong> (<em>bool</em><em>, </em><em>optional</em>) – specifies whether to find unique MS2
+fragmentsfor each sequence and return these in the final sequence
+dict.
+Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>full_MSMS_sequence dictionary containing in silico</dt><dd><p>data for both MS1 ions and MS2 fragments for every possible sequence that
+matches a composition in the input composition_dict.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dictionary</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.insilico.SilicoGenerator.generate_MSMS_sequence_dict">
+<code class="sig-prename descclassname">polymersoup.insilico.SilicoGenerator.</code><code class="sig-name descname">generate_MSMS_sequence_dict</code><span class="sig-paren">(</span><em class="sig-param">parameters_file='C:/Users/group/PolymerMassSpec/Examples/InputParams_Test.json'</em>, <em class="sig-param">write=True</em>, <em class="sig-param">output_folder=None</em>, <em class="sig-param">ms1=True</em>, <em class="sig-param">ms2=True</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.insilico.SilicoGenerator.generate_MSMS_sequence_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is used to generate a full MS and MSMS in silico sequence
+dict in format: {</p>
+<blockquote>
+<div><blockquote>
+<div><dl>
+<dt>seq: {</dt><dd><p>‘MS1’ : [m/z…],
+‘MS2’: {</p>
+<blockquote>
+<div><p>‘frag’: [m/z…],
+‘signatures’: {</p>
+<blockquote>
+<div><p>‘signature’: [m/z…]</p>
+</div></blockquote>
+<p>},
+‘unique_fragments’ [‘unique_frag’…]</p>
+</div></blockquote>
+<p>}</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+<p>where seq = sequence string, m/z = m/z value of a given ion, ‘frag’ =
+MS2 fragment id string, ‘signature’ = MS2 fragment id string for a
+monomer-specific signature fragment, ‘unique_frag’ = MS2 fragment id
+string for a fragment with m/z unique to that sequence (i.e. not found
+in MS2 fragments of other, isobaric sequences).</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parameters_file</strong> (<em>str</em><em>, </em><em>optional</em>) – full file path to input parameters
+.json file. Defaults to “C:/Users/group/PolymerMassSpec/Examples/InputParams_Test.json”.</p></li>
+<li><p><strong>write</strong> (<em>bool</em><em>, </em><em>optional</em>) – specifies whether to write sequence dict to
+file. Defaults to True.</p></li>
+<li><p><strong>output_folder</strong> (<em>str</em><em>, </em><em>optional</em>) – full file path to output folder to put
+output file; if None, file is dumped in same directory as
+parameters_file. Defaults to None.</p></li>
+<li><p><strong>ms1</strong> (<em>bool</em><em>, </em><em>optional</em>) – specifies whether to generate theoretical MS1
+data for sequences. Defaults to True.</p></li>
+<li><p><strong>ms2</strong> (<em>bool</em><em>, </em><em>optional</em>) – specifies whether to generate theoretical MS2
+data for sequences. Defaults to True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>MSMS sequence dict, the format of which</dt><dd><p>is described in detail above.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>full_MSMS_dict (dict)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="extractors">
+<h2>Extractors<a class="headerlink" href="#extractors" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-polymersoup.extractors.extractor_helpers">
+<span id="extractor-helpers"></span><h3>extractor_helpers<a class="headerlink" href="#module-polymersoup.extractors.extractor_helpers" title="Permalink to this headline">¶</a></h3>
+<p>Module for filtering spectra based on the following criteria:</p>
+<ol class="arabic simple">
+<li><p>Retention Time</p></li>
+<li><p>Parent Ion (MS2 only)</p></li>
+<li><p>Signature ions</p></li>
+<li><p>Total intensity</p></li>
+<li><p>Maximum intensity</p></li>
+</ol>
+<dl class="function">
+<dt id="polymersoup.extractors.extractor_helpers.apply_pre_screening_filters">
+<code class="sig-prename descclassname">polymersoup.extractors.extractor_helpers.</code><code class="sig-name descname">apply_pre_screening_filters</code><span class="sig-paren">(</span><em class="sig-param">ripper_dict</em>, <em class="sig-param">min_rt</em>, <em class="sig-param">max_rt</em>, <em class="sig-param">essential_signatures</em>, <em class="sig-param">signature_ms_level</em>, <em class="sig-param">precursor_ions</em>, <em class="sig-param">precursor_ion_ms_level</em>, <em class="sig-param">min_MS1_total_intensity</em>, <em class="sig-param">min_MS2_total_intensity</em>, <em class="sig-param">min_MS1_max_intensity</em>, <em class="sig-param">min_MS2_max_intensity</em>, <em class="sig-param">err</em>, <em class="sig-param">err_abs</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.extractors.extractor_helpers.apply_pre_screening_filters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes an MS dictionary that is read from an mzml ripper json and
+returns a filtered dictionary of spectra within the input ripper_dict that
+meet the filter criteria specified (described below).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ripper_dict</strong> (<em>dict</em>) – mass spec data dict in mzml ripper format.</p></li>
+<li><p><strong>min_rt</strong> (<em>float</em>) – minimum retention time for spectra (in minutes).</p></li>
+<li><p><strong>max_rt</strong> (<em>float</em>) – maximum retention time for spectra (in minutes).</p></li>
+<li><p><strong>essential_signatures</strong> (<em>list</em>) – list of monomers that MUST have signature
+ions present in all spectra screened. Only spectra containing
+these monomer signature ions at the specified ms level will be
+returned.</p></li>
+<li><p><strong>signature_ms_level</strong> (<em>int</em>) – ms level for monomer signature screening.</p></li>
+<li><p><strong>precursor_ions</strong> (<em>list</em>) – list of precursor ions. At least one of these
+must be the precursor for any MSn spectra.</p></li>
+<li><p><strong>precursor_ion_ms_level</strong> (<em>int</em>) – MS level for screening precursors. This
+MUST be greater than 1, as MS1 spectra have no precursors.</p></li>
+<li><p><strong>min_MS1_total_intensity</strong> (<em>float</em>) – minimum total intensity of MS1 spectra.
+Spectra with a total intensity below this value will be filtered
+out.</p></li>
+<li><p><strong>min_MS2_total_intensity</strong> (<em>float</em>) – minimum total intensity of MS2 spectra.
+Spectra with a total intensity below this value will be filtered
+out. NOTE: This is either given as an absolute value or a decimal
+fraction of min_MS1_total_intensity; either is acceptable.</p></li>
+<li><p><strong>min_MS1_max_intensity</strong> (<em>float</em>) – minimum maximum intensity of MS1 spectra.
+Spectra with a maximum intensity below this value will be filtered
+out.</p></li>
+<li><p><strong>min_MS2_max_intensity</strong> (<em>float</em>) – minimum maximum intensity of MS2 spectra.
+Spectra with a maximum intensity below this value will be filtered
+out. NOTE: This is either given as an absolute value or a decimal
+fraction of min_MS1_max_intensity; either is acceptable.</p></li>
+<li><p><strong>err</strong> (<em>float</em>) – error threshold for screening - either in absolute mass
+units or ppm.</p></li>
+<li><p><strong>err_abs</strong> (<em>bool</em>) – specifies whether err units are absolute mass units
+or ppm.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A filtered dictionary of spectra within the input ripper_dict that
+meet the filter criteria specified.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.extractors.extractor_helpers.filter_mass_difference">
+<code class="sig-prename descclassname">polymersoup.extractors.extractor_helpers.</code><code class="sig-name descname">filter_mass_difference</code><span class="sig-paren">(</span><em class="sig-param">msdata: dict</em>, <em class="sig-param">monomer_massdiffs: dict</em>, <em class="sig-param">total_comparisons: int</em>, <em class="sig-param">err: float</em>, <em class="sig-param">err_abs=True</em>, <em class="sig-param">ms_level=2</em><span class="sig-paren">)</span> &#x2192; dict<a class="headerlink" href="#polymersoup.extractors.extractor_helpers.filter_mass_difference" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filters the spectra based on the mass difference between peaks.
+Scans through a list of monomer mass differences and check for peaks that
+match the difference.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>msdata</strong> (<em>dict</em>) – spectrum data.</p></li>
+<li><p><strong>monomer_massdiffs</strong> (<em>dict</em>) – monomers and their associated mass differences.</p></li>
+<li><p><strong>total_comparisons</strong> (<em>int</em>) – total number of comparisons to perform.</p></li>
+<li><p><strong>target_func</strong> (<em>Callable</em>) – find target function.</p></li>
+<li><p><strong>err</strong> (<em>float</em>) – error threshold for screening - either in absolute mass
+units or ppm.</p></li>
+<li><p><strong>err_abs</strong> (<em>bool</em>) – specifies whether err units are absolute mass units
+or ppm.</p></li>
+<li><p><strong>ms_level</strong> (<em>int</em>) – specifies ms_level for spectra being screened (default: 2).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Spectra IDs with found monomers.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.extractors.extractor_helpers.filter_max_intensity">
+<code class="sig-prename descclassname">polymersoup.extractors.extractor_helpers.</code><code class="sig-name descname">filter_max_intensity</code><span class="sig-paren">(</span><em class="sig-param">msdata: dict</em>, <em class="sig-param">intensity_threshold: float</em>, <em class="sig-param">ms_level: int</em><span class="sig-paren">)</span> &#x2192; dict<a class="headerlink" href="#polymersoup.extractors.extractor_helpers.filter_max_intensity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filters a spectra collection based on a maximum intensity threshold
+A spectrum’s maximum intensity must exceed the threshold.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>msdata</strong> (<em>dict</em>) – Spectra collection.</p></li>
+<li><p><strong>intensity_threshold</strong> (<em>int</em>) – Maximum intensity threshold.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Spectra which pass the filter.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.extractors.extractor_helpers.filter_parent_ion">
+<code class="sig-prename descclassname">polymersoup.extractors.extractor_helpers.</code><code class="sig-name descname">filter_parent_ion</code><span class="sig-paren">(</span><em class="sig-param">msdata: dict</em>, <em class="sig-param">parent_ions: list</em>, <em class="sig-param">err</em>, <em class="sig-param">err_abs=True</em>, <em class="sig-param">ms_level=2</em><span class="sig-paren">)</span> &#x2192; dict<a class="headerlink" href="#polymersoup.extractors.extractor_helpers.filter_parent_ion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filters a spectra collection based on their parent ion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>msdata</strong> (<em>dict</em>) – Spectra collection.</p></li>
+<li><p><strong>parent_ions</strong> (<em>List</em><em>[</em><em>float</em><em>]</em>) – List of parent ions to filter for.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Keyword Arguments</dt>
+<dd class="field-even"><p><strong>ms_level</strong> (<em>int</em>) – specifies ms_level for spectra being screened (default:
+2).</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Spectra which pass the filter.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.extractors.extractor_helpers.filter_retention_time">
+<code class="sig-prename descclassname">polymersoup.extractors.extractor_helpers.</code><code class="sig-name descname">filter_retention_time</code><span class="sig-paren">(</span><em class="sig-param">msdata: dict</em>, <em class="sig-param">ret_time_range: list</em><span class="sig-paren">)</span> &#x2192; dict<a class="headerlink" href="#polymersoup.extractors.extractor_helpers.filter_retention_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filters a spectra collection based on retention time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>msdata</strong> (<em>dict</em>) – Spectra collection.</p></li>
+<li><p><strong>ret_time_range</strong> (<em>List</em><em>[</em><em>float</em><em>]</em>) – Retention time range to filter for.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Spectra that pass the filter.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.extractors.extractor_helpers.filter_signature_ions">
+<code class="sig-prename descclassname">polymersoup.extractors.extractor_helpers.</code><code class="sig-name descname">filter_signature_ions</code><span class="sig-paren">(</span><em class="sig-param">msdata: dict</em>, <em class="sig-param">sig_ions: list</em>, <em class="sig-param">err</em>, <em class="sig-param">err_abs=True</em>, <em class="sig-param">ms_level=2</em><span class="sig-paren">)</span> &#x2192; dict<a class="headerlink" href="#polymersoup.extractors.extractor_helpers.filter_signature_ions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filters a spectra collection based on the presence of signature ions
+Only one signature may be found to pass the filter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>msdata</strong> (<em>dict</em>) – Spectra collection.</p></li>
+<li><p><strong>sig_ions</strong> (<em>List</em><em>[</em><em>float</em><em>]</em>) – List of ions to filter for.</p></li>
+<li><p><strong>target_func</strong> (<em>Callable</em>) – Target find function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Keyword Arguments</dt>
+<dd class="field-even"><p><strong>ms_level</strong> (<em>int</em>) – specifies MS level for signature ions; (default = 2).</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Spectra which pass the filter.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.extractors.extractor_helpers.filter_total_intensity">
+<code class="sig-prename descclassname">polymersoup.extractors.extractor_helpers.</code><code class="sig-name descname">filter_total_intensity</code><span class="sig-paren">(</span><em class="sig-param">msdata: dict</em>, <em class="sig-param">intensity_threshold: float</em>, <em class="sig-param">ms_level: int</em><span class="sig-paren">)</span> &#x2192; dict<a class="headerlink" href="#polymersoup.extractors.extractor_helpers.filter_total_intensity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filters a spectra collection based on a total intensity threshold
+The total intensity of the spectra must exceed the threshold.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>msdata</strong> (<em>dict</em>) – Spectra collection.</p></li>
+<li><p><strong>intensity_threshold</strong> (<em>int</em>) – Total intensity threshold.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Spectra which pass the filter.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.extractors.extractor_helpers.find_multiple_targets">
+<code class="sig-prename descclassname">polymersoup.extractors.extractor_helpers.</code><code class="sig-name descname">find_multiple_targets</code><span class="sig-paren">(</span><em class="sig-param">targets</em>, <em class="sig-param">candidates</em>, <em class="sig-param">err</em>, <em class="sig-param">err_abs</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.extractors.extractor_helpers.find_multiple_targets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes multiple target masses (m/z values) and returns matches from a list
+of candidate masses.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>targets</strong> (<em>list of floats</em>) – list of target m/z values.</p></li>
+<li><p><strong>candidates</strong> (<em>list of floats</em>) – list of candidate m/z values to match to
+targets.</p></li>
+<li><p><strong>err</strong> (<em>float</em>) – error tolerance for matching targets to target masses;
+units can either be in absolute mass units or ppm.</p></li>
+<li><p><strong>err_abs</strong> (<em>bool</em>) – specifies whether err units are absolute mass units
+or ppm; if True, units = absolute mass units.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>list of candidate masses that match one or</dt><dd><p>more targets within error threshold specified.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>matches (list of floats)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.extractors.extractor_helpers.find_target">
+<code class="sig-prename descclassname">polymersoup.extractors.extractor_helpers.</code><code class="sig-name descname">find_target</code><span class="sig-paren">(</span><em class="sig-param">target</em>, <em class="sig-param">candidates</em>, <em class="sig-param">err</em>, <em class="sig-param">err_abs=True</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.extractors.extractor_helpers.find_target" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a target, associated error (absoulte mass units or ppm), list of
+candidates and returns candidates that match target within specified error.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target</strong> (<em>float</em>) – target m/z.</p></li>
+<li><p><strong>candidates</strong> (<em>list</em>) – list of candidates for matching to target.</p></li>
+<li><p><strong>err</strong> (<em>float</em>) – error threshold, in either absolute mass units or ppm.</p></li>
+<li><p><strong>err_abs</strong> (<em>bool</em><em>, </em><em>optional</em>) – specifies whether error threshold is absolute
+or in ppm; if True, error is in absolute mass units.
+Defaults to True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>list of candidates that match target within specified</dt><dd><p>error.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>matches (list)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.extractors.extractor_helpers.sum_intensity_targets_spectrum">
+<code class="sig-prename descclassname">polymersoup.extractors.extractor_helpers.</code><code class="sig-name descname">sum_intensity_targets_spectrum</code><span class="sig-paren">(</span><em class="sig-param">spectrum_dict</em>, <em class="sig-param">found_targets</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.extractors.extractor_helpers.sum_intensity_targets_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function takes a spectrum, a list of ions confirmed to be present
+in that spectrum, and returns the combined intensity / abundance of those
+ions in the spectrum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spectrum_dict</strong> (<em>dict</em>) – single spectrum dict in mzml ripper format.</p></li>
+<li><p><strong>found_targets</strong> (<em>list of floats</em>) – list of ion m/z values that have been
+found in the spectrum.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>combined intensity / abundance of all found_targets.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>intensity (float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-polymersoup.extractors.run_extractors">
+<span id="run-extractors"></span><h3>run_extractors<a class="headerlink" href="#module-polymersoup.extractors.run_extractors" title="Permalink to this headline">¶</a></h3>
+<p>This file contains functions for reading extractor parameters and passing
+these on to core extractor functions</p>
+<dl class="function">
+<dt id="polymersoup.extractors.run_extractors.apply_filter_dict_ripper_json">
+<code class="sig-prename descclassname">polymersoup.extractors.run_extractors.</code><code class="sig-name descname">apply_filter_dict_ripper_json</code><span class="sig-paren">(</span><em class="sig-param">ripper_dict</em>, <em class="sig-param">filter_dict</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.extractors.run_extractors.apply_filter_dict_ripper_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a dictionary of mass spec data in mzml_ripper format OR a full
+filepath to an mzml_ripper .json file and returns a filtered mass spec
+data dict (also in mzml_ripper format) based on filters specified in
+filter_dict.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ripper_dict</strong> (<em>dict</em><em> or </em><em>str</em>) – mzml_ripper dict or full str filepath to
+mzml_ripper .json file.</p></li>
+<li><p><strong>filter_dict</strong> (<em>dict</em>) – dictionary of filter parameters, derived from
+input parameters .json file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>dictionary of filtered mass spec data, with filters</dt><dd><p>from filter_dict applied to data.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ripper_dict (dict)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.extractors.run_extractors.pre_filter_rippers">
+<code class="sig-prename descclassname">polymersoup.extractors.run_extractors.</code><code class="sig-name descname">pre_filter_rippers</code><span class="sig-paren">(</span><em class="sig-param">ripper_folder</em>, <em class="sig-param">extractor_parameters</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.extractors.run_extractors.pre_filter_rippers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a folder containing mzml_ripper jsons, input parameters file for
+data extraction and creates new mzml_ripper_jsons of filtered data. Returns
+list of full file paths to filtered ripper jsons.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ripper_folder</strong> (<em>str</em>) – path to folder containing mzml ripper jsons.</p></li>
+<li><p><strong>extractor_parameters</strong> (<em>dict</em>) – dictionary of extractor parameters passed
+on from input parameters .json file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>list of full file paths to newly created filtered</dt><dd><p>JSON files.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>file_dirs (list)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-polymersoup.extractors.sequence_screening">
+<span id="sequence-screening"></span><h3>sequence_screening<a class="headerlink" href="#module-polymersoup.extractors.sequence_screening" title="Permalink to this headline">¶</a></h3>
+<p>This file contains functions for extracting sequence-specific data from
+spectra</p>
+<dl class="function">
+<dt id="polymersoup.extractors.sequence_screening.confirm_fragments_sequence">
+<code class="sig-prename descclassname">polymersoup.extractors.sequence_screening.</code><code class="sig-name descname">confirm_fragments_sequence</code><span class="sig-paren">(</span><em class="sig-param">precursors</em>, <em class="sig-param">fragment_dict</em>, <em class="sig-param">peak_list</em>, <em class="sig-param">ripper_dict</em>, <em class="sig-param">err</em>, <em class="sig-param">err_abs=True</em>, <em class="sig-param">ms_level=2</em>, <em class="sig-param">min_annotated_peak_assignment=90</em>, <em class="sig-param">essential_signatures=[]</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.extractors.sequence_screening.confirm_fragments_sequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function takes a list of precursor ions, fragment dictionary and
+returns list of confirmed fragments associated with precursors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>precursors</strong> (<em>list of floats</em>) – list of m/z values for sequence precursors.</p></li>
+<li><p><strong>fragment_dict</strong> (<em>dict</em>) – dictionary of fragments and associated masses
+in insilico fragment dict format.</p></li>
+<li><p><strong>peak_list</strong> (<em>list of floats</em>) – list of ALL MS1 and MS2 / MSn masses
+associated with sequence.</p></li>
+<li><p><strong>ripper_dict</strong> (<em>dict</em>) – dict of mass spec data in mzml ripper format.</p></li>
+<li><p><strong>err</strong> (<em>float</em>) – error tolerance used when matching masses; units can
+either be in absolute mass units or ppm.</p></li>
+<li><p><strong>err_abs</strong> (<em>bool</em><em>, </em><em>optional</em>) – specifies whether err units are in absolute
+mass units or ppm; if True, absolute mass unit is used.
+Defaults to True.</p></li>
+<li><p><strong>ms_level</strong> (<em>int</em><em>, </em><em>optional</em>) – specifies MS level for screening fragments
+and precursors. Defaults to 2.</p></li>
+<li><p><strong>min_annotated_peak_assignment</strong> (<em>int</em><em>, </em><em>optional</em>) – minimum % intensity of
+most intense peak in a given spectrum that matches a mass in the
+peak list. Defaults to 90.</p></li>
+<li><p><strong>essential_signatures</strong> (<em>list</em><em>, </em><em>optional</em>) – list of signatures that MUST
+be found in a spectrum for fragments to be confirmed from that
+spectrum. Defaults to [].</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>list of fragment ids for</dt><dd><p>fragments in fragment_dict that have been confirmed as present in
+mass spectrum data from ripper_dict.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>confirmed_fragments (list of strings)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.extractors.sequence_screening.confirm_fragments_sequence_dict">
+<code class="sig-prename descclassname">polymersoup.extractors.sequence_screening.</code><code class="sig-name descname">confirm_fragments_sequence_dict</code><span class="sig-paren">(</span><em class="sig-param">silico_dict</em>, <em class="sig-param">ripper_dict</em>, <em class="sig-param">extractor_parameters</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.extractors.sequence_screening.confirm_fragments_sequence_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a full MSMS in silico sequence dict, mass spec data in mzml ripper
+dict format, and returns a dictionary of sequences and MS2 fragments that
+can be confirmed as associated with those sequences from the ripper data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>silico_dict</strong> (<em>dict</em>) – <p>full MSMS in silico sequence dict in format:
+{</p>
+<blockquote>
+<div><dl>
+<dt>seq: {</dt><dd><p>“MS1”: [m/z…],
+“MS2”: {</p>
+<blockquote>
+<div><p>”frag”: [m/z…],
+“signatures”: {</p>
+<blockquote>
+<div><p>”signature”: [m/z…]</p>
+</div></blockquote>
+</div></blockquote>
+<p>},
+“peak_list”: [m/z…]
+}</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+<p>}</p>
+</p></li>
+<li><p><strong>seq = sequence string; m/z = ion m/z values; &quot;frag&quot; = fragment id</strong> (<em>where</em>) – </p></li>
+<li><p><strong>&quot;signature&quot; = fragment id string for monomer-specific</strong> (<em>string;</em>) – </p></li>
+<li><p><strong>fragment; &quot;peak_list&quot; = list of ALL MS1 AND MS2 ions</strong> (<em>signature</em>) – </p></li>
+<li><p><strong>with sequence</strong><strong>, </strong><strong>including signature ions.</strong> (<em>associated</em>) – </p></li>
+<li><p><strong>ripper_dict</strong> (<em>dict</em>) – mass spec data dict in mzml ripper format.</p></li>
+<li><p><strong>err</strong> (<em>float</em>) – error tolerance for screening masses.</p></li>
+<li><p><strong>err_abs</strong> (<em>bool</em>) – specifies whether units of err are in absolute mass</p></li>
+<li><p><strong>or ppm; if True</strong><strong>, </strong><strong>units = absolute mass units.</strong> (<em>units</em>) – </p></li>
+<li><p><strong>min_ms2_peak_abundance</strong> (<em>float</em>) – minimum relative abundance (in % of</p></li>
+<li><p><strong>abundant / intense MS2 spectrum peak</strong><strong>) </strong><strong>of most intense peak in</strong> (<em>most</em>) – </p></li>
+<li><p><strong>peak_list.</strong> – </p></li>
+<li><p><strong>essential_signatures</strong> (<em>list of strings</em>) – list of signatures that</p></li>
+<li><p><strong>be found in a spectrum for fragments to be confirmed from that</strong> (<em>MUST</em>) – </p></li>
+<li><p><strong>spectrum.</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.extractors.sequence_screening.extract_MS1">
+<code class="sig-prename descclassname">polymersoup.extractors.sequence_screening.</code><code class="sig-name descname">extract_MS1</code><span class="sig-paren">(</span><em class="sig-param">silico_dict</em>, <em class="sig-param">extractor_parameters</em>, <em class="sig-param">ripper_dict</em>, <em class="sig-param">return_Rt_list=True</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.extractors.sequence_screening.extract_MS1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes an in silico sequence dict, dictionary of extractor parameters
+(passed on from input parameters .json file), mass spec data in mzml ripper
+format, and outputs a dictionary of sequences and their corresponding
+MS1 EICs (if there are MS1 hits).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>silico_dict</strong> (<em>dict</em>) – dictionary of sequences and corresponding masses.</p></li>
+<li><p><strong>extractor_parameters</strong> (<em>dict</em>) – dictionary of extractor parameters in
+standard input parameters format.</p></li>
+<li><p><strong>ripper_dict</strong> (<em>dict</em>) – dictionary of mass spec data in mzml ripper format.</p></li>
+<li><p><strong>return_Rt_list</strong> (<em>bool</em><em>, </em><em>optional</em>) – specify whether to return a list of
+ALL retention times in the ripper dict. Defaults to True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>dictionary of sequences and corresponding MS1 EICs.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>EIC_dict (dict)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.extractors.sequence_screening.extract_MS2">
+<code class="sig-prename descclassname">polymersoup.extractors.sequence_screening.</code><code class="sig-name descname">extract_MS2</code><span class="sig-paren">(</span><em class="sig-param">silico_dict</em>, <em class="sig-param">extractor_parameters</em>, <em class="sig-param">ripper_dict</em>, <em class="sig-param">filter_most_intense=True</em>, <em class="sig-param">extract_uniques=True</em>, <em class="sig-param">return_Rt_list=True</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.extractors.sequence_screening.extract_MS2" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function takes a silico MSMS sequence dict and generates MS2 EICs
+for each sequence in the dictionary, returning a dictionary of sequences
+and corresponidng MS2 EICs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>silico_dict</strong> (<em>dict</em>) – full MSMS silico dict in standard format.</p></li>
+<li><p><strong>extractor_parameters</strong> (<em>dict</em>) – extractor parameters dict passed on
+from input parameters .json file.</p></li>
+<li><p><strong>ripper_dict</strong> (<em>dict</em>) – mass spec data dict in mzml ripper format.</p></li>
+<li><p><strong>filter_most_intense</strong> (<em>bool</em><em>, </em><em>optional</em>) – specifies whether to only
+return the most intense MS2 EIC for target sequences.
+Defaults to True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>dictionary of sequences and their corresponding MS2 EICs.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>EIC_dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.extractors.sequence_screening.find_fragments_spectrum">
+<code class="sig-prename descclassname">polymersoup.extractors.sequence_screening.</code><code class="sig-name descname">find_fragments_spectrum</code><span class="sig-paren">(</span><em class="sig-param">spectrum</em>, <em class="sig-param">fragment_dict</em>, <em class="sig-param">err</em>, <em class="sig-param">err_abs</em>, <em class="sig-param">essential_signatures=[]</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.extractors.sequence_screening.find_fragments_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes an MS2 / MSn fragment dict, MS2 / MSn spectrum and returns list of
+fragments that have matching ions in the spectrum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spectrum</strong> (<em>dict</em>) – spectrum dict in mzml ripper format.</p></li>
+<li><p><strong>fragment_dict</strong> (<em>dict</em>) – fragment dictionary in standard insilico format.</p></li>
+<li><p><strong>err</strong> (<em>float</em>) – error tolerance for matching fragment masses; units can
+either be absolute mass units or ppm.</p></li>
+<li><p><strong>err_abs</strong> (<em>bool</em>) – specifies whether err units are in absolute mass
+units or ppm; if True, err is in absolute mass units.</p></li>
+<li><p><strong>essential_signtures</strong> (<em>list</em>) – list of signature fragment ids that must
+be found in spectrum if any fragments are to be confirmed
+from said spectrum (defaults to []).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>list of fragment ids from</dt><dd><p>input fragment_dict that have one or more matching masses
+in the spectrum.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>confirmed_fragments (list of strings)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.extractors.sequence_screening.find_maximum_annotated_peak_intensity">
+<code class="sig-prename descclassname">polymersoup.extractors.sequence_screening.</code><code class="sig-name descname">find_maximum_annotated_peak_intensity</code><span class="sig-paren">(</span><em class="sig-param">spectrum</em>, <em class="sig-param">peak_list</em>, <em class="sig-param">err</em>, <em class="sig-param">err_abs</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.extractors.sequence_screening.find_maximum_annotated_peak_intensity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Searches a spectrum in mzml ripper dict format for peaks (m/z values) in
+a peak list and returns % intensity of most intense matching peak relative
+to most intense peak in the spectrum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spectrum</strong> (<em>dict</em>) – spectrum dict in mzml ripper format</p></li>
+<li><p><strong>peak_list</strong> (<em>list of floats</em>) – list of peaks (m/z values), typically peaks
+associated with a target sequence.</p></li>
+<li><p><strong>err</strong> (<em>float</em>) – error tolerance in matching peak masses - can be in
+absolute mass units or ppm.</p></li>
+<li><p><strong>err_abs</strong> (<em>bool</em>) – specifies whether err units are in absolute mass units
+or ppm; if True, units = absolute mass units.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>maximum annotated peak intensity in % of most intense peak.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.extractors.sequence_screening.find_most_intense_matching_peak">
+<code class="sig-prename descclassname">polymersoup.extractors.sequence_screening.</code><code class="sig-name descname">find_most_intense_matching_peak</code><span class="sig-paren">(</span><em class="sig-param">spectrum</em>, <em class="sig-param">peak_list</em>, <em class="sig-param">err</em>, <em class="sig-param">err_abs</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.extractors.sequence_screening.find_most_intense_matching_peak" title="Permalink to this definition">¶</a></dt>
+<dd><p>takes a list of theoretical peaks associated with a sequence, a spectrum
+containing observed peaks and associated intensities, and returns the
+intensity of the most intense matching peak.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spectrum</strong> (<em>dict</em>) – spectrum dict in mzml ripper dict format.</p></li>
+<li><p><strong>peak_list</strong> (<em>list</em>) – list of theoretical m/z values associated with a
+sequence.</p></li>
+<li><p><strong>err</strong> (<em>float</em>) – error tolerance used when matching masses; units can
+either be in absolute mass units or ppm.</p></li>
+<li><p><strong>err_abs</strong> (<em>bool</em><em>, </em><em>optional</em>) – specifies whether err units are in absolute
+mass units or ppm; if True, absolute mass unit is used.
+Defaults to True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>intensity of most intense matching peak.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>top_intensity (float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.extractors.sequence_screening.find_most_intense_peak_spectrum">
+<code class="sig-prename descclassname">polymersoup.extractors.sequence_screening.</code><code class="sig-name descname">find_most_intense_peak_spectrum</code><span class="sig-paren">(</span><em class="sig-param">spectrum</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.extractors.sequence_screening.find_most_intense_peak_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a spectrum in mzml_ripper format and returns tuple of most intense
+peak with m/z and associated intensity in format (m/z, I) where m/z =
+m/z value of most intense peak and I = intensity of most intense peak.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>spectrum</strong> (<em>dict</em>) – single spectrum dictionary in mzml ripper format.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>tuple of peak m/z and intensity in format</dt><dd><p>(m/z, I).</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>most_intense (tuple)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.extractors.sequence_screening.generate_EIC">
+<code class="sig-prename descclassname">polymersoup.extractors.sequence_screening.</code><code class="sig-name descname">generate_EIC</code><span class="sig-paren">(</span><em class="sig-param">ions</em>, <em class="sig-param">ms_level</em>, <em class="sig-param">ripper_dict</em>, <em class="sig-param">err</em>, <em class="sig-param">err_abs=True</em>, <em class="sig-param">min_max_intensity=None</em>, <em class="sig-param">min_total_intensity=None</em>, <em class="sig-param">precursors=None</em>, <em class="sig-param">mapi=0</em>, <em class="sig-param">peak_list=None</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.extractors.sequence_screening.generate_EIC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a list of ions (m/z values) and generates a combined extracted ion
+chromatogram (EIC) of those ions from mass spectra in mzml ripper format
+(ripper_dict).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ions</strong> (<em>list of floats</em>) – list of target ion m/z values.</p></li>
+<li><p><strong>ms_level</strong> (<em>int</em>) – MS level at which to screen for ions.</p></li>
+<li><p><strong>ripper_dict</strong> (<em>dict</em>) – mzml ripper mass spectrometry data dictionary.</p></li>
+<li><p><strong>err</strong> (<em>float</em>) – error tolerance for matching target ions to masses found
+in spectra; units either in absolute mass units or ppm.</p></li>
+<li><p><strong>err_abs</strong> (<em>bool</em><em>, </em><em>optional</em>) – specifies whether err is in absolute mass
+units or ppm; if True, err is in absolute mass units.
+Defaults to True.</p></li>
+<li><p><strong>min_max_intensity</strong> (<em>float</em><em>, </em><em>optional</em>) – minimum maximum intensity of EIC
+for it to be returned. Defaults to None.</p></li>
+<li><p><strong>min_total_intensity</strong> (<em>float</em><em>, </em><em>optional</em>) – maximum total intensity of EIC
+for it to be returned. Defaults to None.</p></li>
+<li><p><strong>precursors</strong> (<em>list of floats</em><em>, </em><em>optional</em>) – list of precursor ions for
+matching to parents/precursors of MSn spectra.</p></li>
+<li><p><strong>mapi</strong> (<em>optional</em><em>, </em><em>float</em>) – minimum annotated peak intensity (in % of most
+intense peak), specifies minimum relative intensity of most
+intense peak associated with a sequence for spectra to be used
+in screening.</p></li>
+<li><p><strong>peak_list</strong> (<em>optional</em><em>, </em><em>list of floats</em>) – list of ALL ions associated with
+targets, not just ions used in generating EIC.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>extracted ion chromatogram in format: [[Rt, I]..]</dt><dd><p>where Rt = retention time (float) and I = intensity of all
+species that match target ions at that retention time.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>EIC (list of lists)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.extractors.sequence_screening.generate_MS1_EICs_sequence_dict">
+<code class="sig-prename descclassname">polymersoup.extractors.sequence_screening.</code><code class="sig-name descname">generate_MS1_EICs_sequence_dict</code><span class="sig-paren">(</span><em class="sig-param">silico_dict</em>, <em class="sig-param">ripper_dict</em>, <em class="sig-param">err</em>, <em class="sig-param">err_abs</em>, <em class="sig-param">min_max_intensity</em>, <em class="sig-param">min_total_intensity</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.extractors.sequence_screening.generate_MS1_EICs_sequence_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a silico_dict of sequences and corresponding MS1 ions, and outputs
+MS1 EICs for sequences.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>silico_dict</strong> (<em>dict</em>) – full MSMS in silico sequence dict.</p></li>
+<li><p><strong>ripper_dict</strong> (<em>dict</em>) – mzml ripper mass spectrometry data dictionary.</p></li>
+<li><p><strong>err</strong> (<em>float</em>) – error tolerance for matching target ions to masses found
+in spectra; units either in absolute mass units or ppm.</p></li>
+<li><p><strong>err_abs</strong> (<em>bool</em><em>, </em><em>optional</em>) – specifies whether err is in absolute mass
+units or ppm; if True, err is in absolute mass units.
+Defaults to True.</p></li>
+<li><p><strong>min_max_intensity</strong> (<em>float</em><em>, </em><em>optional</em>) – minimum maximum intensity of EIC
+for it to be returned. Defaults to None.</p></li>
+<li><p><strong>min_total_intensity</strong> (<em>float</em><em>, </em><em>optional</em>) – maximum total intensity of EIC
+for it to be returned. Defaults to None.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="post-processing">
+<h2>Post Processing<a class="headerlink" href="#post-processing" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-polymersoup.postprocessing.postprocess_helpers">
+<span id="postprocess-helpers"></span><h3>postprocess_helpers<a class="headerlink" href="#module-polymersoup.postprocessing.postprocess_helpers" title="Permalink to this headline">¶</a></h3>
+<p>This file contains core operations required by postprocessing module</p>
+<dl class="function">
+<dt id="polymersoup.postprocessing.postprocess_helpers.assign_confidence_sequence">
+<code class="sig-prename descclassname">polymersoup.postprocessing.postprocess_helpers.</code><code class="sig-name descname">assign_confidence_sequence</code><span class="sig-paren">(</span><em class="sig-param">insilico_fragments</em>, <em class="sig-param">confirmed_fragments</em>, <em class="sig-param">core_fragment_series</em>, <em class="sig-param">optional_fragments</em>, <em class="sig-param">exclude_fragments</em>, <em class="sig-param">essential_fragments</em>, <em class="sig-param">essential_fragment_cap</em>, <em class="sig-param">sequence_coverage_weight</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.postprocessing.postprocess_helpers.assign_confidence_sequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function takes in silico and confirmed fragments for a target
+sequence and assigns a confidence score using the confidence scoring
+criteria set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>insilico_fragments</strong> (<em>list of strings</em>) – list of fragment ids that are
+theoretically possible for sequence.</p></li>
+<li><p><strong>confirmed_fragments</strong> (<em>list of strings</em>) – list of fragment ids for
+fragments that have been confirmed from mass spec data.</p></li>
+<li><p><strong>core_fragment_series</strong> (<em>list of strings</em>) – list of fragment series one
+letter codes for fragment series used in calculating %
+confirmed fragments and / or fragment sequence coverage.</p></li>
+<li><p><strong>optional_fragments</strong> (<em>list of strings</em>) – list of fragment ids for
+fragments that can be excluded from consideration IF they
+are not confirmed.</p></li>
+<li><p><strong>exclude_fragments</strong> (<em>list of strings</em>) – list of fragment ids for
+fragments that are to be excludeed from consideration
+whether confirmed or not. These will never be used in
+confidence calculation.</p></li>
+<li><p><strong>essential_fragments</strong> (<em>list of strings</em>) – list of fragment ids for
+fragments whose presence is required for confidence
+assignment to exceed a threshold (essential_fragment_cap).</p></li>
+<li><p><strong>essential_fragment_cap</strong> (<em>float</em>) – upper limit on assigned confidence
+threshold for a sequence if any essential fragments are
+missing.</p></li>
+<li><p><strong>sequence_coverage_weight</strong> (<em>float</em>) – weighting assigned to sequence
+coverage for confidence calculation (given as a decimal
+fraction - i.e. MUST BE BETWEEN 0 AND 1).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>final confidence assignment (in %).</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>confidence (float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.postprocessing.postprocess_helpers.calculate_subsequence_coverage">
+<code class="sig-prename descclassname">polymersoup.postprocessing.postprocess_helpers.</code><code class="sig-name descname">calculate_subsequence_coverage</code><span class="sig-paren">(</span><em class="sig-param">fragment_indeces</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.postprocessing.postprocess_helpers.calculate_subsequence_coverage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a list of fragment indeces and returns sequence coverage (i.e.
+number of fragments in longest continuous block of fragments).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>fragment_indeces</strong> (<em>list of ints</em>) – list of fragment positions in a given
+series (ints).</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>number of fragments in longest continuous</dt><dd><p>block of fragments.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>sequence_coverage (int)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.postprocessing.postprocess_helpers.create_EIC_plots">
+<code class="sig-prename descclassname">polymersoup.postprocessing.postprocess_helpers.</code><code class="sig-name descname">create_EIC_plots</code><span class="sig-paren">(</span><em class="sig-param">EICs_json</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.postprocessing.postprocess_helpers.create_EIC_plots" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function creates an EIC plot (retention time vs intensity) for
+each sequence in the EICS.json and saves each figure as a .png files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>EICs_json</strong> (<em>str</em>) – functions.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.postprocessing.postprocess_helpers.get_Rt_I_binning">
+<code class="sig-prename descclassname">polymersoup.postprocessing.postprocess_helpers.</code><code class="sig-name descname">get_Rt_I_binning</code><span class="sig-paren">(</span><em class="sig-param">target_EIC</em>, <em class="sig-param">target_Rt</em>, <em class="sig-param">Rt_bin</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.postprocessing.postprocess_helpers.get_Rt_I_binning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes an EIC, a target retention time and target bin for screening
+retention time, and returns the most intense Rt_I pair within that bin
+region.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target_EIC</strong> (<em>list of lists</em>) – list of Rt_I sublists.</p></li>
+<li><p><strong>target_Rt</strong> (<em>float</em>) – target retention time.</p></li>
+<li><p><strong>Rt_bin</strong> (<em>float</em>) – bin tolerance for returning most intense Rt_I pair -
+most intense data point within range
+(target_Rt-Rt_bin, target_Rt+Rt_bin) will be returned.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Rt_I pair for most intense data point within Rt_bin.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Rt_I</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.postprocessing.postprocess_helpers.get_Rt_I_from_ms1_EIC">
+<code class="sig-prename descclassname">polymersoup.postprocessing.postprocess_helpers.</code><code class="sig-name descname">get_Rt_I_from_ms1_EIC</code><span class="sig-paren">(</span><em class="sig-param">EIC</em>, <em class="sig-param">Rt_bin</em>, <em class="sig-param">backup_Rt_bin=None</em>, <em class="sig-param">n_targets=1</em>, <em class="sig-param">min_relative_intensity=None</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.postprocessing.postprocess_helpers.get_Rt_I_from_ms1_EIC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes an MS1 EIC and returns matching MS1 peaks that match target(s)
+within constraints set.
+:param EIC: list of [Rt, I] sublists.
+:type EIC: list of lists
+:param Rt_bin: minimum gap between peaks (in retention time).
+:type Rt_bin: float
+:param backup_Rt_bin: backup to Rt_bin: minimum gap between</p>
+<blockquote>
+<div><p>peaks if Rt_bin is too stringent for data. Defaults to None.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_targets</strong> (<em>int</em><em>, </em><em>optional</em>) – specifies number of target peaks to
+return. Defaults to 1.</p></li>
+<li><p><strong>min_relative_intensity</strong> (<em>float</em><em>, </em><em>optional</em>) – minimum relative intensity
+for peaks to be returned expressed as a DECMICAL FRACTION OF MOST
+INTENSE PEAK IN THE EIC. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of [Rt, I] sublists for found peaks.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>found_targets (list of lists)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.postprocessing.postprocess_helpers.get_Rt_I_from_ms2_EIC">
+<code class="sig-prename descclassname">polymersoup.postprocessing.postprocess_helpers.</code><code class="sig-name descname">get_Rt_I_from_ms2_EIC</code><span class="sig-paren">(</span><em class="sig-param">MS1_EIC</em>, <em class="sig-param">MS2_EIC</em>, <em class="sig-param">ms2_Rt_bin</em>, <em class="sig-param">flexible_ms2_rt=True</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.postprocessing.postprocess_helpers.get_Rt_I_from_ms2_EIC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes an MS1 and MS2 EIC for target, and returns Rt_I intensity from MS1
+by matching MS1 EIC to most intense data point in MS2 EIC.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>MS1_EIC</strong> (<em>list of lists</em>) – list of [Rt, I] sublists for MS1 EIC.</p></li>
+<li><p><strong>MS2_EIC</strong> (<em>list of lists</em>) – list of [Rt, I] sublists for MS2 EIC.</p></li>
+<li><p><strong>ms2_Rt_bin</strong> (<em>float</em>) – specifies retention time tolerance for matching
+MS2 retention time to MS2 retention time.</p></li>
+<li><p><strong>flexible_ms2_rt</strong> (<em>bool</em><em>, </em><em>optional</em>) – specifies whether to widen ms2_Rt_bin
+until matching MS1 EIC [Rt, I] is found. Defaults to True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>Exception</strong> – raise Exception if MS1 EIC is empty.</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>MS1 retention time and intensity that most closely matches</dt><dd><p>MS2 data within the constraints set.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ms1_Rt_I</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.postprocessing.postprocess_helpers.get_core_fragments">
+<code class="sig-prename descclassname">polymersoup.postprocessing.postprocess_helpers.</code><code class="sig-name descname">get_core_fragments</code><span class="sig-paren">(</span><em class="sig-param">target_fragments</em>, <em class="sig-param">core_series</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.postprocessing.postprocess_helpers.get_core_fragments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a list of fragment ids, target core fragment series (one letter
+codes) and returns list of target fragments that fall within one or more
+of the specified core series.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target_fragments</strong> (<em>list</em>) – list of fragment id strings.</p></li>
+<li><p><strong>core_series</strong> (<em>list</em><em> or </em><em>str</em>) – list of core fragment series one letter
+codes OR single one letter code for single core series.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>list of fragments in input target fragments that belong to one</dt><dd><p>or more core series.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.postprocessing.postprocess_helpers.get_percent_found_fragments">
+<code class="sig-prename descclassname">polymersoup.postprocessing.postprocess_helpers.</code><code class="sig-name descname">get_percent_found_fragments</code><span class="sig-paren">(</span><em class="sig-param">insilico_fragments</em>, <em class="sig-param">confirmed_fragments</em>, <em class="sig-param">core_fragment_series</em>, <em class="sig-param">optional_fragments</em>, <em class="sig-param">exclude_fragments</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.postprocessing.postprocess_helpers.get_percent_found_fragments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a list of in silico fragments for a sequence, confirmed fragments
+and one letter codes for core fragments, and returns % core fragments that
+have been confirmed for sequence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>insilico_fragments</strong> (<em>list</em>) – list of fragment ids for in silico (i.e.
+theoretical) sequence fragment.</p></li>
+<li><p><strong>confirmed_fragments</strong> (<em>list</em>) – list of fragment ids for confirmed (i.e.
+observed) sequence fragments.</p></li>
+<li><p><strong>core_fragment_series</strong> (<em>list</em>) – list of ONE LETTER CODES for fragment
+series that are to be used to calculate percentage found fragments.</p></li>
+<li><p><strong>optional_fragments</strong> (<em>list</em>) – list of specific fragment ids to exclude
+from calculation IF they have not been confirmed.</p></li>
+<li><p><strong>exclude_fragments</strong> (<em>list</em>) – list of specific fragment ids to exclude
+from calculation UNDER ANY CIRCUMSTANCES, including if they have
+been confirmed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>% fragments that have been confirmed for a sequence.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.postprocessing.postprocess_helpers.get_subsequence_coverage">
+<code class="sig-prename descclassname">polymersoup.postprocessing.postprocess_helpers.</code><code class="sig-name descname">get_subsequence_coverage</code><span class="sig-paren">(</span><em class="sig-param">silico_fragments</em>, <em class="sig-param">confirmed_fragments</em>, <em class="sig-param">core_fragment_series</em>, <em class="sig-param">optional_fragments</em>, <em class="sig-param">excluded_fragments</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.postprocessing.postprocess_helpers.get_subsequence_coverage" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function calculates the % a sequence that is ‘covered’ by continuous
+blocks of core fragment series, returning an average % coverage of all
+core fragment series.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>confirmed_fragments</strong> (<em>list</em>) – list of confirmed fragment ids.</p></li>
+<li><p><strong>core_fragment_series</strong> (<em>list</em>) – list of fragment one letter codes for
+series that are to be used in calculation.</p></li>
+<li><p><strong>optional_fragments</strong> (<em>list</em>) – list of specific fragment ids to
+exclude from calculation ONLY IF they are not in the
+list of confirmed fragments. Include in the calculation
+if they are in the list.</p></li>
+<li><p><strong>excluded_fragments</strong> (<em>list</em>) – list of specific fragment ids to
+exclude from subsequence coverage in ALL cases.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>average % sequence coverage for all #</dt><dd><p>core fragment series.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>final_sequence_coverage (float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.postprocessing.postprocess_helpers.return_peaks_EIC">
+<code class="sig-prename descclassname">polymersoup.postprocessing.postprocess_helpers.</code><code class="sig-name descname">return_peaks_EIC</code><span class="sig-paren">(</span><em class="sig-param">EIC</em>, <em class="sig-param">n_peaks</em>, <em class="sig-param">Rt_bin</em>, <em class="sig-param">min_relative_intensity=None</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.postprocessing.postprocess_helpers.return_peaks_EIC" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>EIC (list of lists): list of [Rt, I] sublists.
+n_peaks (int): number of peaks to return.
+min_relative_intensity (float, optional): minimum intensity of peaks</p>
+<blockquote>
+<div><p>as a DECIMCAL FRACTION OF MOST INTENSE PEAK. Defaults to None.</p>
+</div></blockquote>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>list of [Rt, I] sublists for matching peaks.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>peaks (list of lists)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.postprocessing.postprocess_helpers.trim_EIC">
+<code class="sig-prename descclassname">polymersoup.postprocessing.postprocess_helpers.</code><code class="sig-name descname">trim_EIC</code><span class="sig-paren">(</span><em class="sig-param">EIC</em>, <em class="sig-param">min_Rt</em>, <em class="sig-param">max_Rt</em>, <em class="sig-param">min_absolute_intensity</em>, <em class="sig-param">min_relative_intensity</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.postprocessing.postprocess_helpers.trim_EIC" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function trims an EIC, removing data points that violate the
+thresholds specified.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>EIC</strong> (<em>list</em>) – list of retention time + intensity sub_lists in format:
+[[Rt, I]…] where Rt = retention time, I = signal intensity at
+Rt.</p></li>
+<li><p><strong>min_Rt</strong> (<em>float</em>) – minimum retention time, anything below which is removed.</p></li>
+<li><p><strong>max_Rt</strong> (<em>float</em>) – maximum retention time, anything above which is removed.</p></li>
+<li><p><strong>min_absolute_intensity</strong> (<em>float</em>) – minimum intensity of data points,
+anything below which is removed.</p></li>
+<li><p><strong>min_relative_intensity</strong> (<em>float</em>) – minimum RELATIVE intensity of data
+points as a decimal fraction of most intense point in the EIC.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>trimmed EIC in same format as input, but with data trimmed.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>EIC</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-polymersoup.postprocessing.postprocess">
+<span id="postprocess"></span><h3>postprocess<a class="headerlink" href="#module-polymersoup.postprocessing.postprocess" title="Permalink to this headline">¶</a></h3>
+<p>This file contains functions to pass on postprocessing parameters and
+execute postprocessing by calling on core functions from postprocess_helpers.py</p>
+<dl class="function">
+<dt id="polymersoup.postprocessing.postprocess.assign_confidence_sequences">
+<code class="sig-prename descclassname">polymersoup.postprocessing.postprocess.</code><code class="sig-name descname">assign_confidence_sequences</code><span class="sig-paren">(</span><em class="sig-param">silico_dict</em>, <em class="sig-param">confirmed_dict</em>, <em class="sig-param">postprocess_params</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.postprocessing.postprocess.assign_confidence_sequences" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>This function assigns confidence scores to each sequence in the confirmed dict</dt><dd><p>and returns a dictionary of sequences and their confidence scores.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>silico_dict</strong> (<em>dict</em><em>) </em><em>-- dictionary of all possible sequences</em><em> (</em><em>silico dictionary</em>) – </p></li>
+<li><p><strong>confirmed_dict</strong> (<em>dict</em>) – </p></li>
+<li><p><strong>postprocess_params</strong> (<em>dict</em>) – retrieved from input parameters JSON file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>dict – dictionary of sequences and their confidence scores.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="polymersoup.postprocessing.postprocess.find_Rt_I_sequences">
+<code class="sig-prename descclassname">polymersoup.postprocessing.postprocess.</code><code class="sig-name descname">find_Rt_I_sequences</code><span class="sig-paren">(</span><em class="sig-param">MS1_EICs</em>, <em class="sig-param">MS2_EICs</em>, <em class="sig-param">confident_assignments</em>, <em class="sig-param">postprocess_parameters</em>, <em class="sig-param">confidence_scores</em>, <em class="sig-param">return_confidence=True</em><span class="sig-paren">)</span><a class="headerlink" href="#polymersoup.postprocessing.postprocess.find_Rt_I_sequences" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes dicts of MS1 and MS2 EICs, confidently assigned sequences, and fits
+a retention time and intensity to each confidently assigned sequence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>MS1_EICs</strong> (<em>dict</em>) – dictionary of COMPOSITIONS and corresponding MS1 EICs.</p></li>
+<li><p><strong>MS2_EICs</strong> (<em>dict</em>) – dictionary of SEQUENCES and corresponding MS2 EICs.</p></li>
+<li><p><strong>confident_assignments</strong> (<em>dict</em>) – dictionary of sequences and their
+in silico MS1 and MS2 data for sequences that have been confirmed
+with high confidence.</p></li>
+<li><p><strong>postprocess_parameters</strong> (<em>dict</em>) – dictionary of postprocess parameters
+passed on from input parameters .json file.</p></li>
+<li><p><strong>confidence_scores</strong> (<em>dict</em>) – dictionary of confirmed sequences and
+assigned confidence scores.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Kewyword Args:</dt><dd><dl class="simple">
+<dt>return_confidence (bool): specifies whether to return sequences’</dt><dd><p>confidence score in output. Defaults to True.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>dictionary of final intensities and retention times.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">PolymerMassSpec Code</a><ul>
+<li><a class="reference internal" href="#core-scripts">Core Scripts</a><ul>
+<li><a class="reference internal" href="#executable">executable</a></li>
+<li><a class="reference internal" href="#module-polymersoup.filehandler">filehandler</a></li>
+<li><a class="reference internal" href="#module-polymersoup.parameter_handlers">parameter_handlers</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#insilico">Insilico</a><ul>
+<li><a class="reference internal" href="#module-polymersoup.insilico.silico_helpers.insilico_helpers">Insilico Helpers</a></li>
+<li><a class="reference internal" href="#module-polymersoup.insilico.MS1_silico">MS1_silico</a></li>
+<li><a class="reference internal" href="#module-polymersoup.insilico.MS2_silico">MS2_silico</a></li>
+<li><a class="reference internal" href="#module-polymersoup.insilico.SilicoGenerator">SilicoGenerator</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#extractors">Extractors</a><ul>
+<li><a class="reference internal" href="#module-polymersoup.extractors.extractor_helpers">extractor_helpers</a></li>
+<li><a class="reference internal" href="#module-polymersoup.extractors.run_extractors">run_extractors</a></li>
+<li><a class="reference internal" href="#module-polymersoup.extractors.sequence_screening">sequence_screening</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#post-processing">Post Processing</a><ul>
+<li><a class="reference internal" href="#module-polymersoup.postprocessing.postprocess_helpers">postprocess_helpers</a></li>
+<li><a class="reference internal" href="#module-polymersoup.postprocessing.postprocess">postprocess</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="useful links.html"
+                        title="previous chapter">Useful Links</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/polymermassspec functions.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="useful links.html" title="Useful Links"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">polymermassspec 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019, David Doran, Graham Keenan, Emma Clarke, Cole Mathis and Leroy Cronin.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0.
+    </div>
+  </body>
+</html>
