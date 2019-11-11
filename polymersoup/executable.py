@@ -54,6 +54,16 @@ def exhaustive_screen(parameters_dict):
     # load location of mass spec data in mzml_ripper .json file format
     ripper_folder = directories['ripper_folder']
 
+    # load output folder for saving data, create if it does not exist
+    output_folder = directories['output_folder']
+    if not os.path.exists(output_folder):
+        os.mkdir(output_folder)
+
+    write_to_json(
+        write_dict=parameters_dict,
+        output_json=os.path.join(output_folder, 'run_parameters.json')
+    )
+
     # load parameters for postprocessing operations
     postprocess_parameters = parameters_dict["postprocessing_parameters"]
 
@@ -224,7 +234,14 @@ def standard_extraction(
         ripper_dict = open_json(ripper)
 
         print(f'getting MS1 EICs for {len(compositional_silico_dict)} compositions')
-       
+
+        MS1_pre_screening_file = os.path.join(write_folder, "MS1_pre_Screening.json")
+    
+        write_to_json(
+            write_dict=compositional_silico_dict,
+            output_json=MS1_pre_screening_file
+        )
+
         # get MS1 EICs for all compositions
         MS1_EICs = extract_MS1(
             silico_dict=compositional_silico_dict,

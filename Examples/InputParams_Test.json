@@ -3,31 +3,42 @@
 
 "data_extraction": true,
 
-"postprocess": true,
+"data_extraction": true,
 
-"add_modifications": false,
+"postprocess": true,
 
 "silico_parameters":
     {
         "mode": "pos",
         "silico_ms1": true,
         "silico_ms2": true,
-        "add_modifications": false,
 
         "MS1": {
-            "monomers": ["H", "E"],
-            "max_length": 3,
-            "min_length": 3,
+            "monomers": ["V", "g"],
+            "max_length": 4,
+            "min_length": 2,
             "ms1_adducts": ["H", "Na"],
             "min_z": 1,
             "max_z": null,
             "losses": true,
             "max_neutral_losses": null,
             "loss_products_adducts": null,
-            "chain_terminators": null,
             "universal_rxn": true,
+            "modifications": true,
             "terminal_tags": {
                 "0": null,
+                "-1": null
+            },
+            "universal_sidechain_modifications": true,
+            "max_total_sidechain_modifications": null,
+            "max_monomer_sidechain_modifications": {},
+            "universal_ms1_sidechain_mass_shift": true,
+            "terminal_monomer_tags": {
+                "0": null,
+                "-1": null
+            },
+            "terminal_modifications": {
+                "0": ["Ole"],
                 "-1": null
             },
             "side_chain_tags": {
@@ -37,7 +48,7 @@
         },
 
         "MS2": {
-            "fragment_series": ["b", "y"],
+            "fragment_series": ["b", "y", "a"],
             "ms2_adducts": ["H", "Na"],
             "ms2_losses": true,
             "ms2_max_neutral_losses": null,
@@ -57,13 +68,13 @@
         
         "min_MS1_total_intensity": null,
         "min_MS2_total_intensity": null,
-        "min_MS1_max_intensity": 1E7,
+        "min_MS1_max_intensity": 0,
         "min_MS2_max_intensity": null,
         "filter" : false,
         
         "pre_screen_filters": {
             "min_rt": 0,
-            "max_rt": 20,
+            "max_rt": 1E6,
             "essential_signatures": null,
             "signature_types": ["Im"],
             "signature_ms_level": 2,
@@ -87,11 +98,11 @@
         "subsequence_weight": [0, 0.25, 0.5, 0.75, 1],
         "min_rt": null,
         "max_rt": null,
-        "Rt_bin": 0.25,
-        "backup_Rt_bin": 0.1,
-        "ms2_Rt_bin": 0.5,
+        "Rt_bin": 15,
+        "backup_Rt_bin": 6,
+        "ms2_Rt_bin": 30,
         "ms2_Rt_flexible": true,
-        "min_viable_confidence": 55,
+        "min_viable_confidence": 40,
         "min_relative_intensity": null,
         "plot_EICs": true,
 
@@ -104,9 +115,9 @@
     },
 
 "directories":
-    {   "ripper_folder": "Z:/group/Emma Clarke/Data/SPPS-Mixtures/Sequencing/ECK2-26/ripper",
-        "output_folder": "Z:/group/Emma Clarke/Data/SPPS-Mixtures/Sequencing/ECK2-26/output",
-        "polymer_type": "Depsipeptide"
+    {   "ripper_folder": "C:/Users/group/Documents/MSAnalysis/mass_spec_jsons",
+        "output_folder": "C:/Users/group/Documents/MSAnalysis/VgNOle-test",
+        "polymer_config": ""
     }
 
 }

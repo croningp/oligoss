@@ -165,8 +165,8 @@ def generate_insilico_writefile_string(
     ms1_adducts = silico_dict["MS1"]["ms1_adducts"]
     max_length = silico_dict["MS1"]["max_length"]
     min_length = silico_dict["MS1"]["min_length"]
-    start_tags = silico_dict["MS1"]["terminal_tags"]["0"]
-    end_tags = silico_dict["MS1"]["terminal_tags"]["-1"]
+    start_tags = silico_dict["MS1"]["terminal_monomer_tags"]["0"]
+    end_tags = silico_dict["MS1"]["terminal_monomer_tags"]["-1"]
 
     write_string = f"monomers={monomers},mode={mode},adducts={ms1_adducts},min_len={min_length},max_len={max_length}"
     if start_tags:
