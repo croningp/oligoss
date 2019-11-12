@@ -357,9 +357,16 @@ def filter_max_intensity(
     # Return spectra
     return msdata
 
-def find_ms2_signature_ions(monomer_list, spectrum, error, error_abs, signature_ion_dict):
+def find_ms2_signature_ions(
+    monomer_list, 
+    spectrum, 
+    error, 
+    error_abs, 
+    signature_ion_dict
+    ):
     """ This function searches an MS2 spectrum and looks for signature ions
-    from the monomer list. If a dominant signature ion is found, the monomer is confirmed.
+    from the monomer list. If a dominant signature ion is found, the monomer is 
+    confirmed.
 
     Arguments:
         monomer_list {list} -- list of monomers within the sample.
@@ -390,13 +397,18 @@ def find_ms2_signature_ions(monomer_list, spectrum, error, error_abs, signature_
 
                 # check if signature fragment mass is in the spectrum
                 # if so, add to dictionary
-                signature_frag_search = find_multiple_targets(signature_frag_mass,
-                                                              candidates=spectra_only.keys(),
-                                                              err=error,
-                                                              err_abs=error_abs)
+                signature_frag_search = find_multiple_targets(
+                    signature_frag_mass,
+                    candidates=spectra_only.keys(),
+                    err=error,
+                    err_abs=error_abs
+                )
 
                 if signature_frag_search:
-                    confirmed_monomers[monomer] = [signature_ions, signature_frag_mass]
+                    confirmed_monomers[monomer] = [
+                        signature_ions, 
+                        signature_frag_mass
+                    ]
                     unconfirmed_monomers.remove(monomer)
 
                 # check if monomers is dominant
@@ -433,7 +445,6 @@ def filter_mass_difference(
         err_abs (bool): specifies whether err units are absolute mass units
             or ppm.
         ms_level(int):specifies ms_level for spectra being screened (default: 2).
-
 
     Returns:
         dict: Spectra IDs with found monomers.
