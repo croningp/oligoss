@@ -301,7 +301,7 @@
             "terminus": null,
             "side chain attachments": ["E", "D"],
             "free_mod_fragments": {
-                "pos": [105.03349],
+                "pos": [91.05477],
                 "neg": [107.04969]
             },
             "mass_diff": {
@@ -317,20 +317,6 @@
             "free_mod_fragments": {
                 "pos": [96.99012],
                 "neg": [112.98504]
-            },
-            "mass_diff": {
-                "ms1": "H2O",
-                "ms2": "H2O"
-            },
-            "universal_ms2_shift": false
-        },
-        "BtA": {
-            "mass": 73.089149,
-            "terminus": -1,
-            "side chain attachments": ["E", "D"],
-            "free_mod_fragments": {
-                "pos": [74.09463],
-                "neg": null
             },
             "mass_diff": {
                 "ms1": "H2O",

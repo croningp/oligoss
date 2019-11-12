@@ -295,8 +295,10 @@ def generate_ms1_mass_dictionary_adducts_losses(
     max_length,
     adducts,
     monomer_modifications_dict,
-    universal_sidechain_modification,
-    universal_terminal_modification,
+    universal_modification,
+    max_total_modifications,
+    max_monomer_modifications,
+    universal_ms1_mass_shift,
     terminal_modifications_dict,
     mode='pos',
     min_z=1,
@@ -310,6 +312,7 @@ def generate_ms1_mass_dictionary_adducts_losses(
     start_tags=None,
     end_tags=None,
     sequencing=True,
+    modifications=True,
     isobaric_targets=None
 ):
     """ This function generates a loss product dictionary and then
@@ -349,13 +352,6 @@ def generate_ms1_mass_dictionary_adducts_losses(
         dict -- dictionary of loss products masses with specified adducts.
     """
 
-    # generate list of monomers, both standard and modified 
-    monomers = generate_monomers_list_with_sidechain_mods(
-        standard_monomers=monomers,
-        sidechain_mods=monomer_modifications_dict,
-        universal_modification=universal_sidechain_modification
-    )
-
     # generate neutral mass dictionary of all possible sequences arising from
     # input monomers and constraints set
     MS1_neutral = generate_mass_dictionary(
@@ -376,7 +372,10 @@ def generate_ms1_mass_dictionary_adducts_losses(
         MS1_neutral.update(add_sidechain_modification_MS1_massdict(
             massdict=MS1_neutral,
             monomer_modifications_dict=monomer_modifications_dict,
-            universal_modification=universal_sidechain_modification
+            universal_modification=universal_modification,
+            max_total_modifications=max_total_modifications,
+            max_monomer_modifications=max_monomer_modifications,
+            universal_ms1_mass_shift=universal_ms1_mass_shift
         ))
 
     if terminal_modifications_dict:
@@ -444,7 +443,10 @@ def generate_ms1_mass_dictionary_adducts_losses(
 def add_sidechain_modification_MS1_sequence(
     sequence,
     monomer_modifications_dict,
-    universal_modification
+    universal_modification,
+    max_total_modifications,
+    max_monomer_modifications,
+    universal_ms1_mass_shift=True
 ):
     """ This function creates a dictionary of all possible modified sequences 
     and their masses for any core sequence.
@@ -468,7 +470,9 @@ def add_sidechain_modification_MS1_sequence(
     sidechain_modified_sequences = create_sidechain_modification_sequence_strings(
         sequence=sequence,
         monomer_modifications_dict=monomer_modifications_dict,
-        universal_modification=universal_modification
+        universal_modification=universal_modification,
+        max_total_modifications=max_total_modifications,
+        max_monomer_modifications=max_monomer_modifications
         )
 
     # initiate modified sequence dictionary
@@ -487,7 +491,10 @@ def add_sidechain_modification_MS1_sequence(
 def add_sidechain_modification_MS1_massdict(
     massdict,
     monomer_modifications_dict,
-    universal_modification
+    universal_modification,
+    max_total_modifications,
+    max_monomer_modifications,
+    universal_ms1_mass_shift=True
 ):
     """ 
     This function takes an MS1 sequence mass dictionary and adds a sidechain 
@@ -519,7 +526,10 @@ def add_sidechain_modification_MS1_massdict(
             add_sidechain_modification_MS1_sequence(
                 sequence=sequence,
                 monomer_modifications_dict=monomer_modifications_dict,
-                universal_modification=universal_modification
+                universal_modification=universal_modification,
+                max_total_modifications=max_total_modifications,
+                max_monomer_modifications=max_monomer_modifications,
+                universal_ms1_mass_shift=universal_ms1_mass_shift
             )
         )
 
