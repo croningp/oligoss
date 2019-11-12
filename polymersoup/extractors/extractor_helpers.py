@@ -423,7 +423,8 @@ def filter_mass_difference(
     match the difference.
 
     Args:
-        msdata (dict): spectrum data.
+        msdata (dict): full mass spec data JSON (in mzml ripper format) OR
+            subset of mzml ripper dict for one ms level.
         monomer_massdiffs (dict): monomers and their associated mass differences.
         total_comparisons (int): total number of comparisons to perform.
         target_func (Callable): find target function.
@@ -437,6 +438,10 @@ def filter_mass_difference(
     Returns:
         dict: Spectra IDs with found monomers.
     """
+
+    # checks whether input is full ripper dict or just one ms level
+    if f'ms{ms_level}' in msdata:
+        msdata = msdata[f'ms{ms_level}']
 
     # Create output map
     spectra = {}
