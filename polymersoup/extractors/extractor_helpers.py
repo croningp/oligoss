@@ -358,7 +358,8 @@ def filter_max_intensity(
     return msdata
 
 def find_ms2_signature_ions(
-    monomer_list, 
+    monomer_list,
+    signature_ion_type, 
     spectrum, 
     error, 
     error_abs, 
@@ -375,14 +376,10 @@ def find_ms2_signature_ions(
         dict - dictionary of monomers and confirmed fragment types
     """
     # initiate confirmed monomer dict
-    confirmed_monomers = {}
+    confirmed_monomers = []
 
     # initiate list on unconfirmed monomers
     unconfirmed_monomers = monomer_list
-    
-    # list signature ion dict types
-    signature_ion_types = list(signature_ion_dict.keys())
-    signature_ion_type = signature_ion_types[0]
 
     # keep spectra only (remove retention time, mass lists, parent peak)
     keys_to_remove = ["retention_time", "mass_list", "parent"]
@@ -405,19 +402,17 @@ def find_ms2_signature_ions(
                 )
 
                 if signature_frag_search:
-                    confirmed_monomers[monomer] = [
-                        signature_ions, 
-                        signature_frag_mass
-                    ]
+                    confirmed_monomers.append(monomer)
                     unconfirmed_monomers.remove(monomer)
 
                 # check if monomers is dominant
                 else:
                     if monomer in signature_ion_dict['dominant']:
-                        # if can't find the dominant signature ion for the monomer, stop looking for iT
+                        # if can't find the dominant signature ion for the monomer,
+                        # stop looking for it
                         unconfirmed_monomers.remove(monomer)
 
-    # return dictionary of confirmed monomers, their confirmed fragment type and mass of confirmed fragment
+    # return dictionary of confirmed monomers, their confirmed fragment type 
     # and list of unconfirmed monomers
     return confirmed_monomers, unconfirmed_monomers
 

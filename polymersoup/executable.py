@@ -189,25 +189,32 @@ def mass_difference_screen(parameters_dict):
                     if ms2_spectrum_id.startswith("spectrum_"):
                         if ms2_spectrum["parent"]==highest_peak_mass[0]:
 
+                            # list signature ion dict types
+                            signature_ion_types = list(MS2_SIGNATURE_IONS.keys())
+                            signature_ion_type = signature_ion_types[0]
+
                             # in the ms2 spectrum look for the signature ion of the specified monomers
                             confirmed_monomers, unconfirmed_monomers = find_ms2_signature_ions(
-                                                    monomer_list=monomer_list,
-                                                    spectrum=ms2_spectrum,
-                                                    error=extractor_params["error"],
-                                                    error_abs=extractor_params["err_abs"],
-                                                    signature_ion_dict=MS2_SIGNATURE_IONS)
+                                monomer_list=monomer_list,
+                                signature_ion_type=signature_ion_type,
+                                spectrum=ms2_spectrum,
+                                error=extractor_params["error"],
+                                error_abs=extractor_params["err_abs"],
+                                signature_ion_dict=MS2_SIGNATURE_IONS)
 
                             # if found add the spectrum id dict and confirmed monomer info
                             # to confirmed monomer dict
-                            confirmed_monomers_dict[ms2_spectrum_id] = confirmed_monomers
                             if confirmed_monomers:
-                                print(f'MS2 signature ions found for {list(confirmed_monomers.keys())}')
-
+                                confirmed_monomers_dict[ms2_spectrum_id] = {signature_ion_type: confirmed_monomers}
+                                print(f'MS2 signature ions found for {confirmed_monomers} in {ms2_spectrum_id}')
+                                
                             # if signature not found search for mass differences
                             # (loss products etc + adducts) between peaks above ms2 peak level
+                            #for unconfirmed_monomer in unconfirmed_monomers:
+
                             #mass_difference_search = filter_mass_difference(
                                                         #msdata=ms2_spectrum,
-                                                        #monomer_massdiffs=,
+                                                        #monomer_massdiffs='31',
                                                         #total_comparisons=50,
                                                         #err=extractor_params["error"],
                                                         #err_abs=extractor_params["err_abs"],
