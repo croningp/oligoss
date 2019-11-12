@@ -174,32 +174,44 @@ def mass_difference_screen(parameters_dict):
         bpc_dict = {}
 
         for ms1_spectrum_id, ms1_spectrum in ripper_dict["ms1"].items():
+            if ms1_spectrum_id.startswith("spectrum_"):
 
-            # find highest peak and it's mass in each spectrum, save to bpc dict
-            highest_peak = max([intensity for intensity in ms1_spectrum.values()])
-            highest_peak_mass = [mass for mass, intensity in ms1_spectrum.items() if intensity==highest_peak]
-            bpc_dict[ms1_spectrum_id] = [highest_peak_mass[0], highest_peak]
+                # find highest peak and it's mass in each spectrum, save to bpc dict
+                highest_peak = max([float(intensity) for intensity in ms1_spectrum.values() if type(intensity) != list])
+                highest_peak_mass = [mass for mass, intensity in ms1_spectrum.items() if intensity==highest_peak]
+                bpc_dict[ms1_spectrum_id] = [highest_peak_mass[0], highest_peak]
 
-            # initiate confirmed monomer dict
-            confirmed_monomer = {}
+                # initiate confirmed monomer dict
+                confirmed_monomers_dict = {}
 
-            # find ms2 spectra that precursors match the highest peak
-            for ms2_spectrum_id, ms2_spectrum in ripper_dict["ms2"].items():
-                if ms2_spectrum["parent"]==highest_peak_mass[0]:
+                # find ms2 spectra that precursors match the highest peak
+                for ms2_spectrum_id, ms2_spectrum in ripper_dict["ms2"].items():
+                    if ms2_spectrum_id.startswith("spectrum_"):
+                        if ms2_spectrum["parent"]==highest_peak_mass[0]:
 
-                    # in the ms2 spectrum look for the signature ion of the specified monomers
-                    confirmed_dominant_signature_ions = find_ms2_dominant_signature_ions(
-                                                            monomer_list=monomer_list,
-                                                            spectrum=ms2_spectrum,
-                                                            error=extractor_params["error"],
-                                                            error_abs=extractor_params["err_abs"],
-                                                            signature_ion_dict)  
+                            # in the ms2 spectrum look for the signature ion of the specified monomers
+                            confirmed_monomers, unconfirmed_monomers = find_ms2_signature_ions(
+                                                    monomer_list=monomer_list,
+                                                    spectrum=ms2_spectrum,
+                                                    error=extractor_params["error"],
+                                                    error_abs=extractor_params["err_abs"],
+                                                    signature_ion_dict=MS2_SIGNATURE_IONS)
 
-        # if found add the spectrum id dict: key = spectrum id, values = mass difference list and signatures list
+                            # if found add the spectrum id dict and confirmed monomer info
+                            # to confirmed monomer dict
+                            confirmed_monomers_dict[ms2_spectrum_id] = confirmed_monomers
+                            if confirmed_monomers:
+                                print(f'MS2 signature ions found for {list(confirmed_monomers.keys())}')
 
-        # if signature not found search for mass differences (loss products etc + adducts) between peaks above ms2 peak level
-
-        # if found mass difference peak does not reach min ms2 peak abundance, keep looking
+                            # if signature not found search for mass differences
+                            # (loss products etc + adducts) between peaks above ms2 peak level
+                            #mass_difference_search = filter_mass_difference(
+                                                        #msdata=ms2_spectrum,
+                                                        #monomer_massdiffs=,
+                                                        #total_comparisons=50,
+                                                        #err=extractor_params["error"],
+                                                        #err_abs=extractor_params["err_abs"],
+                                                        #ms_level=2)
 
         # return json containing dictionary of spectra IDs and found mass diffs / signatures
 
