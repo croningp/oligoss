@@ -423,7 +423,9 @@ def filter_mass_difference(
         total_comparisons: int,
         err: float,
         err_abs=True,
-        ms_level=2
+        ms_level=2,
+        single_spectrum=False,
+        single_spectra_id=None
     ) -> dict:
     """ Filters the spectra based on the mass difference between peaks.
     Scans through a list of monomer mass differences and check for peaks that
@@ -440,6 +442,9 @@ def filter_mass_difference(
         err_abs (bool): specifies whether err units are absolute mass units
             or ppm.
         ms_level(int):specifies ms_level for spectra being screened (default: 2).
+        single_spectrum (bool): specifies if data is single spectrum or not
+            (default: False).
+        spectra_id (str): spectra id string of single spectrum data (default: None).
 
     Returns:
         dict: Spectra IDs with found monomers.
@@ -454,11 +459,19 @@ def filter_mass_difference(
 
     # Iterate through each spectrum
     for spec_id, spectrum in msdata.items():
-        # Map empty list to output spectra id
-        spectra[spec_id] = []
 
-        # Get the mass list from the spectrum
-        mass_list = spectrum["mass_list"]
+        # if ms data is not single spectrum define mass list and spectrum id differently
+        try:
+            # Get the mass list from the spectrum
+            mass_list = spectrum["mass_list"]
+
+        except:
+            spectrum = msdata
+            mass_list = spectrum["mass_list"]
+            spec_id = single_spectra_id
+
+        # Map empty list to output spectra id
+        spectra[spec_id] = []    
 
         # Get spectrum peaks, sorted form the most intense
         spectrum_peaks = _sort_spectrum_peaks_by_intensity(spectrum)
