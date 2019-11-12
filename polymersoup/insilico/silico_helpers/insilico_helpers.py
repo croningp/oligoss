@@ -167,6 +167,73 @@ def find_monomer_mass(
 
     return monomer_mass
 
+def generate_monomers_list_with_sidechain_mods(
+    standard_monomers,
+    sidechain_mods,
+    universal_modification
+):
+    """
+    This function takes a list of standard, unmodified monomers (i.e. one-letter
+    codes), dict of covalent modifications to be added to one or more of the
+    monomers, and returns a list of modified and / or unmodified monomers. 
+    
+    Args:
+        standard_monomers (list): list of monomer one letter codes
+        sidechain_mods (dict): dict of monomers targeted for modification and
+            the three letter codes of modifying groups. Example: 
+            {
+                'D' : ['Bnz']
+            } 
+            targets monomer 'D' for modification with 'Bnz'. NOTE: 'Bnz' must 
+            be in MODIFICATIONS in polymer-specific config file. 
+        universal_modification (bool): specifies whether every monomer targeted
+            for modification at sidechain MUST be modified. True if this is
+            the case, otherwise False.
+    
+    Returns:
+        list: list of modified and unmodified monomers 
+    """
+
+    # return standard input monomers if no sidechain modifications are 
+    # specified
+    if not sidechain_mods:
+        return list(set(standard_monomers))
+    
+    # init list to store modified monomers
+    mod_monomers = []
+
+    # iterate through sidechain modifications dict, adding modification(s)
+    # to each target monomer
+    for target_monomer, mods in sidechain_mods.items():
+
+        # iterate through each modification, work out whether it's compatible
+        # with target monomer; if so, add it to mod_monomers
+        for mod in mods:
+            compatible_monomers = MODIFICATIONS[mod]["side chain attachments"] 
+            if target_monomer not in compatible_monomers:
+                print(f'{target_monomer} is not compatible with {mod}')
+                print(f'please either update MODIFICATIONS in config file or')
+                print(f'choose another monomer-side chain modification')
+
+            else:
+                mod_monomers.append(f'{target_monomer}({mod})')
+    
+    # check whether target monomers are universally modified; if so, remove
+    # unmodified monomers that have been targeted 
+    if universal_modification: 
+
+        standard_monomers = [
+            monomer for monomer in standard_monomers
+            if monomer not in [mod_mon[0] for mod_mon in mod_monomers]
+        ]
+
+    # add remaining unmodified monomers to mod_monomers, combining all 
+    # monomers in one list
+    mod_monomers.extend(standard_monomers)
+    
+    # return list of monomers, both modified and unmodified 
+    return (list(set(mod_monomers)))
+
 def return_sequence_terminal_modifications(
     sequence
 ):
