@@ -171,7 +171,13 @@ def mass_difference_screen(parameters_dict):
     monomer_list = silico_params["MS1"]["monomers"]
 
     for ripper_json in filtered_rippers:
-        print(f'searching {ripper_json} for {monomer_list}')
+
+        # find ripper name
+        start = ripper_json.find('filtered_rippers') + 17
+        end = ripper_json.find('.json', start)
+        ripper_name = ripper_json[start:end]
+
+        print(f'searching {ripper_name} for {monomer_list}')
         ripper_dict = open_json(ripper_json)
 
         # extract base peak chromatogram (bpc) from each ms1 spectrum
@@ -261,19 +267,19 @@ def mass_difference_screen(parameters_dict):
                     for found_monomer in found_monomer_list:
                         if found_monomer not in monomers_found:
                             monomers_found.append(found_monomer)
-                print(f'{monomers_found} in {ms2_spectrum_id} during mass difference screening')
+                if monomers_found:
+                    print(f'{monomers_found} in {ms2_spectrum_id} during mass difference screening')
                 # add all confirmed monomers (from ms2 signature screening and mass difference screening)
                 # to final confirmed monomers dict
-                confirmed_monomers_dict[ms2_spectrum_id] = {
-                    signature_ion_type: confirmed_monomers,
-                    "mass_diff": monomers_found
-                    }
-                
-            # save json for each ripper containing dictionary of format:
-            # {"spectrum_id": {"signature_type": [monomers found], "mass_diff": [monomers found]}
-            json_file_name = f'{ripper_json}_mass_difference_screen.json'
-            json_file_path = os.path.join(output_folder, json_file_name)
-            json_file_path.write(json.dumps(confirmed_monomers_dict))
+                if confirmed_monomers or monomers_found:
+                    confirmed_monomers_dict[ms2_spectrum_id] = {
+                        signature_ion_type: confirmed_monomers,
+                        "mass_diff": monomers_found
+                        }
+                    
+        # save json for each ripper containing dictionary of format:
+        # {"spectrum_id": {"signature_type": [monomers found], "mass_diff": [monomers found]}
+        write_to_json(confirmed_monomers_dict, os.path.join(output_folder, f'{ripper_name}_mass_difference_screen.json'))
 
     return print(f'jsons saved to {output_folder}')
 
