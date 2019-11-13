@@ -135,7 +135,8 @@ def mass_difference_screen(parameters_dict):
             input parameters format.
 
     Returns:
-        json (dict) -- {"spectrum_id": {"signature_type": [monomers found], "mass_diff": [monomers found]}
+        json (dict) -- {"spectrum_id": {"signature_type": [monomers found],
+            "mass_diff": [monomers found]}
     """
     
     # load parameters for in silico operations
@@ -192,7 +193,8 @@ def mass_difference_screen(parameters_dict):
         for ms1_spectrum_id, ms1_spectrum in ripper_dict["ms1"].items():
             if ms1_spectrum_id.startswith("spectrum_"):
 
-                # find highest peak and it's mass in each spectrum, save to bpc dict
+                # find highest peak and it's mass in each spectrum
+                # save to bpc dict
                 highest_peak = max([float(intensity) for intensity in ms1_spectrum.values() if type(intensity) != list])
                 highest_peak_mass = [mass for mass, intensity in ms1_spectrum.items() if intensity==highest_peak]
                 bpc_dict[ms1_spectrum_id] = [highest_peak_mass[0], highest_peak]
@@ -250,7 +252,8 @@ def mass_difference_screen(parameters_dict):
                     else:
                         monomer_mass_dict[unconfirmed_monomer] = [(monomer_mass-MASS_DIFF)]
 
-                # search for unconfirmed monomers by looking for mass differences between MS2 peaks
+                # search for unconfirmed monomers by looking for mass differences
+                # between MS2 peaks
                 mass_difference_search = filter_mass_difference(
                     msdata=ms2_spectrum,
                     monomer_massdiffs=monomer_mass_dict,
@@ -269,8 +272,8 @@ def mass_difference_screen(parameters_dict):
                             monomers_found.append(found_monomer)
                 if monomers_found:
                     print(f'{monomers_found} in {ms2_spectrum_id} during mass difference screening')
-                # add all confirmed monomers (from ms2 signature screening and mass difference screening)
-                # to final confirmed monomers dict
+                # add all confirmed monomers (from ms2 signature screening and
+                # mass difference screening) to final confirmed monomers dict
                 if confirmed_monomers or monomers_found:
                     confirmed_monomers_dict[ms2_spectrum_id] = {
                         signature_ion_type: confirmed_monomers,
