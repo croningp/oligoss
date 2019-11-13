@@ -15,7 +15,7 @@
         "add_modifications": false,
 
         "MS1": {
-            "monomers": ["G", "S", "N", "Q"],
+            "monomers": ["G", "S", "N", "Q", "F"],
             "max_length": 5,
             "min_length": 5,
             "ms1_adducts": ["H", "Na"],
@@ -104,8 +104,8 @@
     },
 
 "directories":
-    {   "ripper_folder": "Z:/group/Emma Clarke/Data/SPPS-Mixtures/Sequencing/mass_difference_screening_tests/GSGNQ/ripper_jsons",
-        "output_folder": "Z:/group/Emma Clarke/Data/SPPS-Mixtures/Sequencing/mass_difference_screening_tests/GSGNQ/output",
+    {   "ripper_folder": "Z:/group/Emma Clarke/Data/SPPS-Mixtures/Sequencing/mass_difference_screening_tests/FGSNQ/ripper_jsons",
+        "output_folder": "Z:/group/Emma Clarke/Data/SPPS-Mixtures/Sequencing/mass_difference_screening_tests/FGSNQ/output",
         "polymer_type": "Depsipeptide"
     }
 

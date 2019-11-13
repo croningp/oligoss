@@ -201,12 +201,13 @@ def mass_difference_screen(parameters_dict):
 
                 if highest_peak_mass not in highest_peak_masses:
                     highest_peak_masses.append(highest_peak_mass[0])
-
-        # initiate unconfirmed monomer list
-        unconfirmed_monomers = []
         
         # find ms2 spectra that precursors match the highest peak
         for ms2_spectrum_id, ms2_spectrum in ripper_dict["ms2"].items():
+            
+            # initiate unconfirmed monomer list
+            unconfirmed_monomers = []
+
             if ms2_spectrum["parent"] in highest_peak_masses:
 
                 # list signature ion dict types
@@ -276,6 +277,7 @@ def mass_difference_screen(parameters_dict):
                 # mass difference screening) to final confirmed monomers dict
                 if confirmed_monomers or monomers_found:
                     confirmed_monomers_dict[ms2_spectrum_id] = {
+                        "precursor_mass": ms2_spectrum["parent"],
                         signature_ion_type: confirmed_monomers,
                         "mass_diff": monomers_found
                         }
