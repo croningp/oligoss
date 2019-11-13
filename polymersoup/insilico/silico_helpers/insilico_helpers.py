@@ -56,8 +56,6 @@ def find_sequence_mass(
         return_set=False
     )
 
-    print(f'monomers for {sequence} = {monomers}')
-
     # retrieve any terminal modifications from sequence string
     terminal_modifications = remove_substrings_sequence(
         sequence=sequence,
@@ -95,6 +93,7 @@ def find_sequence_mass(
     # init sequence mass as 0 
     sequence_mass = 0
 
+    print(f'for {sequence}, monomers = {monomers}')
     for i in range(0, len(monomers)):
 
         if i == 0: 
@@ -104,8 +103,7 @@ def find_sequence_mass(
         
         sequence_mass += find_monomer_mass(
             monomer=monomers[i],
-            subtract_massdiff=subtract_massdiff,
-            mod_markers=mod_markers
+            subtract_massdiff=subtract_massdiff
         )
     
     # return sequence mass, rounded to specified number of decimal places
@@ -121,6 +119,8 @@ def find_monomer_mass(
     ms_level=1
 ):
 
+    if monomer[0] in ['(', ')']:
+        raise Exception(f'{monomer}')
     # if monomer string is only 1 character, no mods are present - return
     # unmodified monomer mass 
     if len(monomer) == 1:
@@ -149,22 +149,35 @@ def find_monomer_mass(
         for key, value in mod_markers.items()
         if key != 'trim_chars'
     ]
-
+    
     # work out neutral mass of monomer sidechain modifications by summing their
     # neutral masses and subtracting mass_diffs. Info on modifications is 
     # defined in MODIFICATIONS dict found in polymer-specific config file
-    monomer_mod_mass = sum(
-        [
-            MODIFICATIONS[mod]['mass'] - MODIFICATIONS[mod]['mass_diff'][f'ms{ms_level}']
-            for mod in monomer_mods
-        ]
-    )
+    monomer_mod_mass = 0
+    for mod in monomer_mods: 
+
+        mod_mass = float(MODIFICATIONS[mod]['mass'])
+        mod_mass_diff =  MODIFICATIONS[mod]['mass_diff'][f'ms{ms_level}']
+        
+        try: 
+            mod_mass_diff = float(mod_mass_diff)
+        except ValueError:
+            if mod_mass_diff[0] == '-':
+                mod_mass_diff = -FG[mod_mass_diff[1::]]
+            else:
+                mod_mass_diff = FG[mod_mass_diff]
+        
+        mod_mass -= mod_mass_diff
+        
+        monomer_mod_mass += mod_mass
+        
 
     # work out final monomer mass by adding mass of unmodified monomer (found
     # by retrieving monomer one-letter code from first char in monomer string)
     # and mass of modifications
-    monomer_mass = MONOMERS[monomer[0]][0] + monomer_mod_mass
-
+    monomer_mass = float(MONOMERS[monomer[0]][0]) + monomer_mod_mass
+    
+    
     return monomer_mass
 
 def return_sequence_terminal_modifications(
@@ -356,6 +369,73 @@ def return_monomers_sequence(
         return list(set(monomers))
     
     return monomers
+
+def generate_monomers_list_with_sidechain_mods(
+    standard_monomers,
+    sidechain_mods,
+    universal_modification
+):
+    """
+    This function takes a list of standard, unmodified monomers (i.e. one-letter
+    codes), dict of covalent modifications to be added to one or more of the
+    monomers, and returns a list of modified and / or unmodified monomers. 
+    
+    Args:
+        standard_monomers (list): list of monomer one letter codes
+        sidechain_mods (dict): dict of monomers targeted for modification and
+            the three letter codes of modifying groups. Example: 
+            {
+                'D' : ['Bnz']
+            } 
+            targets monomer 'D' for modification with 'Bnz'. NOTE: 'Bnz' must 
+            be in MODIFICATIONS in polymer-specific config file. 
+        universal_modification (bool): specifies whether every monomer targeted
+            for modification at sidechain MUST be modified. True if this is
+            the case, otherwise False.
+    
+    Returns:
+        list: list of modified and unmodified monomers 
+    """
+
+    # return standard input monomers if no sidechain modifications are 
+    # specified
+    if not sidechain_mods:
+        return list(set(standard_monomers))
+    
+    # init list to store modified monomers
+    mod_monomers = []
+
+    # iterate through sidechain modifications dict, adding modification(s)
+    # to each target monomer
+    for target_monomer, mods in sidechain_mods.items():
+
+        # iterate through each modification, work out whether it's compatible
+        # with target monomer; if so, add it to mod_monomers
+        for mod in mods:
+            compatible_monomers = MODIFICATIONS[mod]["side chain attachments"] 
+            if target_monomer not in compatible_monomers:
+                print(f'{target_monomer} is not compatible with {mod}')
+                print(f'please either update MODIFICATIONS in config file or')
+                print(f'choose another monomer-side chain modification')
+
+            else:
+                mod_monomers.append(f'{target_monomer}({mod})')
+    
+    # check whether target monomers are universally modified; if so, remove
+    # unmodified monomers that have been targeted 
+    if universal_modification: 
+
+        standard_monomers = [
+            monomer for monomer in standard_monomers
+            if monomer not in [mod_mon[0] for mod_mon in mod_monomers]
+        ]
+
+    # add remaining unmodified monomers to mod_monomers, combining all 
+    # monomers in one list
+    mod_monomers.extend(standard_monomers)
+    
+    # return list of monomers, both modified and unmodified 
+    return (list(set(mod_monomers)))
 
 def return_core_sequence(
     sequence,
@@ -733,7 +813,7 @@ def generate_all_sequences(
     # copy monomers list for combinatorial addition of monomers to elongating
     # sequences
     sequences = copy.deepcopy(monomers)
-
+    
     # start building sequences of length i+1 for whole range of i
     for i in range(0,max_length-1):
 
@@ -741,14 +821,26 @@ def generate_all_sequences(
         # sequences of length i
         for monomer in monomers:
             sequences.extend(
-                [seq+monomer for seq in sequences
-                if len(seq) == i +1])
+                [
+                    seq+monomer for seq in sequences
+                    if (len(return_monomers_sequence(
+                        sequence=seq,
+                        return_modified=True,
+                        return_set=False)) == i +1)
+                ]
+        )
+    
 
-    # check whether sequencing or just compositional dict is required; if
-    # not sequencing, return compositions
-    if not sequencing:
-        sequences = ["".join(sorted(seq)) for seq in sequences]
-
+    # check whether unique sequences or just compositions are to be returned 
+    if not sequencing: 
+        sequences = [
+            "".join(sorted(return_monomers_sequence(
+                sequence=sequence,
+                return_modified=True,
+                return_set=False)))
+                for sequence in sequences
+        ]
+    
     # remove duplicate sequences and / or compositions
     sequences = list(set(sequences))
     
@@ -778,7 +870,13 @@ def generate_all_sequences(
 
     # again, check whether to return sequences or just compositions
     if not sequencing:
-        sequences = list(set(["".join(sorted(seq)) for seq in sequences]))
+        sequences = [
+            "".join(sorted(return_monomers_sequence(
+                sequence=sequence,
+                return_modified=True,
+                return_set=False)))
+                for sequence in sequences
+        ]
 
     # check for isobaric target sequences; if specified, return only sequences
     # that are isobaric to one or more of those targets 
@@ -788,7 +886,7 @@ def generate_all_sequences(
 
         sequences = [
             seq for seq in sequences if sorted(seq) in isobaric_targets]
-
+    
     # return list of sequences and / or compositions
     return sequences
 
@@ -843,7 +941,13 @@ def add_sidechain_neutral_loss_products_sequence(
         return None
 
     # get dictionary of loss-product prone monomers and associated loss products
-    monomers = return_monomers_sequence(sequence=sequence)
+    monomers = return_monomers_sequence(
+        sequence=sequence,
+        return_modified=True,
+        return_set=True
+    )
+
+    # get dict of loss product-prone monomers and their losses 
     loss_monomers = {
         monomer: LOSS_PRODUCTS[monomer]
         for monomer in monomers
@@ -1029,7 +1133,6 @@ def add_peak_lists_massdict(massdict):
                 and frag != "unique_fragments")
             }
 
-            print(f'frag_dict = {frag_dict}')
             for masses in frag_dict.values():
                 peak_list.extend(masses)
 
@@ -1092,9 +1195,16 @@ def add_modification_sequence_mass_list(
     if type(mass_list) != list:
         mass_list = [mass_list]
 
+    try:
+        mod_mass_diff = float(mod_mass_diff)
+    except ValueError:
+        if mod_mass_diff[0] == "-":
+            mod_mass_diff = -FG[mod_mass_diff[1::]]
+        else:
+            mod_mass_diff = FG[mod_mass_diff]
     # make list of modified masses
     modified_masses = [
-        round(mass + modification_mass - mod_mass_diff, 4)
+        round(mass + float(modification_mass) - mod_mass_diff, 4)
         for mass in mass_list
     ]
 

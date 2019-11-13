@@ -75,8 +75,23 @@ def build_fragment_series_single_sequence(
             
             # get info for terminal modification
             terminal_mod_info = MODIFICATIONS[terminal_mods[str(mod_terminus)]]
-            mod_mass = terminal_mod_info["mass"]
-            mod_mass -= terminal_mod_info["mass_diff"]["ms2"]
+
+            try:
+                mod_mass = float(terminal_mod_info["mass"])
+            except ValueError:
+                if mod_mass[0] == '-':
+                    mod_mass = -FG[mod_mass[1::]]
+                else:
+                    mod_mass = FG[mod_mass]
+            try:
+                mod_mass -= float(terminal_mod_info["mass_diff"]["ms2"])
+            except ValueError:
+                mod_mass_diff = terminal_mod_info["mass_diff"]["ms2"]
+                if mod_mass_diff[0] == '-':
+                    mod_mass_diff = -FG[mod_mass_diff[1::]]
+                else:
+                    mod_mass_diff = FG[mod_mass_diff]
+                mod_mass -= mod_mass_diff
 
             if int(mod_terminus) == int(terminus):
                 start_terminal_mass += mod_mass 
@@ -328,7 +343,7 @@ def apply_fragmentation_exceptions(
         return None
 
     for pos in exception_positions:
-        print(f'exception_positions = {exception_positions}')
+        
         monomer = monomers[int(pos)][0]
 
         rxn_classes = exception_positions[pos].keys()

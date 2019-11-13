@@ -3,26 +3,21 @@
 
 "data_extraction": true,
 
-"data_extraction": true,
-
 "postprocess": true,
 
 "silico_parameters":
     {
         "mode": "pos",
-        "silico_ms1": true,
-        "silico_ms2": true,
 
         "MS1": {
-            "monomers": ["V", "g"],
+            "monomers": ["L", "E"],
             "max_length": 4,
-            "min_length": 2,
+            "min_length": 1,
             "ms1_adducts": ["H", "Na"],
             "min_z": 1,
             "max_z": null,
             "losses": true,
             "max_neutral_losses": null,
-            "loss_products_adducts": null,
             "universal_rxn": true,
             "modifications": true,
             "terminal_tags": {
@@ -30,18 +25,17 @@
                 "-1": null
             },
             "universal_sidechain_modifications": true,
-            "max_total_sidechain_modifications": null,
-            "max_monomer_sidechain_modifications": {},
-            "universal_ms1_sidechain_mass_shift": true,
+            "universal_terminal_modifications": true,
             "terminal_monomer_tags": {
                 "0": null,
                 "-1": null
             },
             "terminal_modifications": {
-                "0": ["Ole"],
-                "-1": null
+                "0": null,
+                "-1": ["BtA"]
             },
-            "side_chain_tags": {
+            "side_chain_modifications": {
+                "E": ["Bnz"]
             },
             "cyclic_sequences": false,
             "isobaric_targets": null
@@ -68,7 +62,7 @@
         
         "min_MS1_total_intensity": null,
         "min_MS2_total_intensity": null,
-        "min_MS1_max_intensity": 0,
+        "min_MS1_max_intensity": 1E3,
         "min_MS2_max_intensity": null,
         "filter" : false,
         
@@ -115,8 +109,8 @@
     },
 
 "directories":
-    {   "ripper_folder": "C:/Users/group/Documents/MSAnalysis/mass_spec_jsons",
-        "output_folder": "C:/Users/group/Documents/MSAnalysis/VgNOle-test",
+    {   "ripper_folder": "C:/Users/group/Documents/MSAnalysis/mass_spec_jsons/HSC1-30-2",
+        "output_folder": "C:/Users/group/Documents/MSAnalysis/HSC_test",
         "polymer_type": "Depsipeptide"
     }
 
