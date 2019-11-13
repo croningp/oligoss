@@ -373,13 +373,10 @@ def find_ms2_signature_ions(
         monomer_list {list} -- list of monomers within the sample.
 
     Returns:
-        dict - dictionary of monomers and confirmed fragment types
+        list - list of monomers with confirmed signature ions
     """
     # initiate confirmed monomer dict
     confirmed_monomers = []
-
-    # initiate list on unconfirmed monomers
-    unconfirmed_monomers = monomer_list
 
     # keep spectra only (remove retention time, mass lists, parent peak)
     keys_to_remove = ["retention_time", "mass_list", "parent"]
@@ -403,18 +400,10 @@ def find_ms2_signature_ions(
 
                 if signature_frag_search:
                     confirmed_monomers.append(monomer)
-                    unconfirmed_monomers.remove(monomer)
-
-                # check if monomers is dominant
-                else:
-                    if monomer in signature_ion_dict['dominant']:
-                        # if can't find the dominant signature ion for the monomer,
-                        # stop looking for it
-                        unconfirmed_monomers.remove(monomer)
 
     # return dictionary of confirmed monomers, their confirmed fragment type 
     # and list of unconfirmed monomers
-    return confirmed_monomers, unconfirmed_monomers
+    return confirmed_monomers
 
 
 def filter_mass_difference(

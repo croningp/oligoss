@@ -195,8 +195,14 @@ def mass_difference_screen(parameters_dict):
 
                 # find highest peak and it's mass in each spectrum
                 # save to bpc dict
-                highest_peak = max([float(intensity) for intensity in ms1_spectrum.values() if type(intensity) != list])
-                highest_peak_mass = [mass for mass, intensity in ms1_spectrum.items() if intensity==highest_peak]
+                highest_peak = max([
+                    float(intensity) for intensity in ms1_spectrum.values() 
+                    if type(intensity) != list])
+
+                highest_peak_mass = [
+                    mass for mass, intensity in ms1_spectrum.items() 
+                    if intensity==highest_peak]
+
                 bpc_dict[ms1_spectrum_id] = [highest_peak_mass[0], highest_peak]
 
                 if highest_peak_mass not in highest_peak_masses:
@@ -204,9 +210,6 @@ def mass_difference_screen(parameters_dict):
         
         # find ms2 spectra that precursors match the highest peak
         for ms2_spectrum_id, ms2_spectrum in ripper_dict["ms2"].items():
-            
-            # initiate unconfirmed monomer list
-            unconfirmed_monomers = []
 
             if ms2_spectrum["parent"] in highest_peak_masses:
 
@@ -215,7 +218,7 @@ def mass_difference_screen(parameters_dict):
                 signature_ion_type = signature_ion_types[0]
 
                 # in the ms2 spectrum look for the signature ion of the specified monomers
-                confirmed_monomers, unconfirmed_monomers = find_ms2_signature_ions(
+                confirmed_monomers = find_ms2_signature_ions(
                     monomer_list=monomer_list,
                     signature_ion_type=signature_ion_type,
                     spectrum=ms2_spectrum,
@@ -226,10 +229,14 @@ def mass_difference_screen(parameters_dict):
                 if confirmed_monomers:
                     print(f'MS2 signature ions found for {confirmed_monomers} in {ms2_spectrum_id}')
 
-                for unconfirmed_monomer in unconfirmed_monomers:
-                    if unconfirmed_monomer not in unconfirmed_monomers:
-                        unconfirmed_monomers.append(unconfirmed_monomer)
+                unconfirmed_monomers = [
+                    monomer for monomer in monomer_list
+                    if (monomer not in confirmed_monomers
+                    and monomer not in MS2_SIGNATURE_IONS["dominant"])
+                ]
 
+                unconfirmed_monomers = list(set(unconfirmed_monomers))
+                
                 # search for unconfirmed monomers
                 monomer_mass_dict = {}
 
