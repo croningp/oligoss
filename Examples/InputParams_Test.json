@@ -10,7 +10,7 @@
         "mode": "pos",
 
         "MS1": {
-            "monomers": ["H", "g"],
+            "monomers": ["H", "g", "N"],
             "max_length": 11,
             "min_length": 1,
             "ms1_adducts": ["H", "Na", "Fe"],
