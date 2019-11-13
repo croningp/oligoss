@@ -281,7 +281,6 @@ def generate_MSMS_insilico_from_compositions(
                    modified_sequences.extend(modified_sequence)
 
         sequences.extend(modified_sequences)
-        print(f'sequences pre-filter = {sequences}')
 
         # filter out sequences that do not match composition
         sequences = [

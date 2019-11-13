@@ -93,7 +93,6 @@ def find_sequence_mass(
     # init sequence mass as 0 
     sequence_mass = 0
 
-    print(f'for {sequence}, monomers = {monomers}')
     for i in range(0, len(monomers)):
 
         if i == 0: 
@@ -634,8 +633,6 @@ def reverse_sequence(
         str: reverse of input sequence
     """
     reversed_sequence = sequence[::-1]
-
-    print(f'for {sequence}, standard reversed = {reversed_sequence}')
 
     # reverse NON-TERMINAL mod markers to deal with reversed sequence
     r_mod_markers = {

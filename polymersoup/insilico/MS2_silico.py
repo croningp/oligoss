@@ -35,10 +35,13 @@ def build_fragment_series_single_sequence(
 
     # reverse sequence if fragment series is indexed from -1 terminus
     if int(terminus) == -1:
+        
         sequence = reverse_sequence(
             sequence=sequence,
             mod_markers=mod_markers
         )
+        
+
         
     # get fragment mass diff (i.e. mass difference between fragments and
     # equivalent sub-sequences)
@@ -59,8 +62,6 @@ def build_fragment_series_single_sequence(
         return_modified=True,
         return_set=False
     )
-
-    print(f'for {sequence}, terminal mods: {terminal_mods}')
 
     # init values to add to start and end terminal fragments
     start_terminal_mass = 0
@@ -119,8 +120,9 @@ def build_fragment_series_single_sequence(
 
         # create subsequence for current fragment
         subsequence = "".join(monomers[0:i+1])
-        current_fragment = f"{fragment_series}{i+1}"
 
+        current_fragment = f"{fragment_series}{i+1}"
+        
         # get neutral monoisotopic mass of subsequence 
         neutral_fragment_masses = [find_sequence_mass(
             sequence=subsequence,
@@ -238,7 +240,6 @@ def return_modification_signature_ions(
             }
         )
 
-    print(f'for {sequence}, mods = {mod_signatures}')
     return mod_signatures
 
 def build_multiple_fragment_series_single_sequence(

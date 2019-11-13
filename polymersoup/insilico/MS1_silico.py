@@ -351,7 +351,7 @@ def generate_ms1_mass_dictionary_adducts_losses(
         sidechain_mods=monomer_modifications_dict,
         universal_modification=universal_monomer_modification
     )
-
+    
     # generate neutral mass dictionary of all possible sequences arising from
     # input monomers and constraints set
     MS1_neutral = generate_mass_dictionary(
@@ -366,7 +366,6 @@ def generate_ms1_mass_dictionary_adducts_losses(
         isobaric_targets=isobaric_targets
     )
     
-    
     # check for terminal modificatios; if specified, add these to massdict
     if terminal_modifications_dict:
 
@@ -376,10 +375,11 @@ def generate_ms1_mass_dictionary_adducts_losses(
         )
 
         if universal_terminal_modification:
-            MS1_neutral = modified_seq_massdict
+            if modified_seq_massdict:
+                MS1_neutral = modified_seq_massdict
         else:
             MS1_neutral.update(modified_seq_massdict)
-      
+    
     # update massdict to include sidechain-specific neutral loss products 
     if losses:
         MS1_neutral = add_loss_products_ms1_massdict(
@@ -389,6 +389,7 @@ def generate_ms1_mass_dictionary_adducts_losses(
     else:
         MS1_neutral = MS1_neutral
 
+    
     MS1_adduct_dict = add_adducts_ms1_massdict(
         massdict=MS1_neutral,
         adducts=adducts,
