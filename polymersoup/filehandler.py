@@ -165,8 +165,8 @@ def generate_insilico_writefile_string(
     ms1_adducts = silico_dict["MS1"]["ms1_adducts"]
     max_length = silico_dict["MS1"]["max_length"]
     min_length = silico_dict["MS1"]["min_length"]
-    start_tags = silico_dict["MS1"]["terminal_tags"]["0"]
-    end_tags = silico_dict["MS1"]["terminal_tags"]["-1"]
+    start_tags = silico_dict["MS1"]["terminal_monomer_tags"]["0"]
+    end_tags = silico_dict["MS1"]["terminal_monomer_tags"]["-1"]
 
     write_string = f"monomers={monomers},mode={mode},adducts={ms1_adducts},min_len={min_length},max_len={max_length}"
     if start_tags:
@@ -396,12 +396,20 @@ def write_standard_postprocess_data(
         ]
     )
     
-    # get max peak intensity of each sequence from its MS1 EIC
-    max_intensities = {
-        seq: max([Rt_I[1] for Rt_I in MS1_EICs["".join(sorted(seq))]])
-        for seq in confirmed_fragdict
-    }
+    # init dict to store maximum MS1 EIC intensities of each sequence
+    max_intensities = {}
 
+    # get max peak intensity of each sequence from its MS1 EIC
+    for seq in confirmed_fragdict:
+
+        composition = [
+            hit for hit in MS1_EICs
+            if "".join(sorted(hit)) == "".join(sorted(seq))
+        ][0]
+        
+        max_intensities[seq] = max(
+            [Rt_I[1] for Rt_I in MS1_EICs[composition]])
+   
     # write all data to final csv for each sequence 
     for seq in confirmed_fragdict: 
 

@@ -59,20 +59,28 @@ def generate_MSMS_sequence_dict(
         ms1 = silico_params["MS1"]
 
         MS1 = generate_ms1_mass_dictionary_adducts_losses(
-            ms1["monomers"],
-            ms1["max_length"],
-            ms1["ms1_adducts"],
-            silico_params["mode"],
-            ms1["min_z"],
-            ms1["max_z"],
-            ms1["losses"],
-            ms1["max_neutral_losses"],
-            ms1["loss_products_adducts"],
-            ms1["min_length"],
-            ms1["chain_terminators"],
-            ms1["universal_rxn"],
-            ms1["terminal_tags"]["0"],
-            ms1["terminal_tags"]["-1"]
+            monomers=ms1["monomers"],
+            max_length=ms1["max_length"],
+            adducts=ms1["ms1_adducts"],
+            modifications=ms1["modifications"],
+            monomer_modifications_dict=ms1["side_chain_tags"],
+            universal_modification=ms1["universal_side_chain_modifications"],
+            max_total_modifications=ms1["max_total_sidechain_modifications"],
+            max_monomer_modifications=ms1["max_monomer_sidechain_modifications"],
+            universal_ms1_mass_shift=ms1["universal_ms1_sidechain_mass_shift"],
+            terminal_modifications_dict=ms1["terminal_modifications"],
+            mode=silico_params["mode"],
+            min_z=ms1["min_z"],
+            max_z=ms1["max_z"],
+            losses=ms1["losses"],
+            max_total_losses=ms1["max_neutral_losses"],
+            loss_product_adducts=ms1["loss_products_adducts"],
+            min_length=ms1["min_length"],
+            chain_terminators=ms1["chain_terminators"],
+            universal_rxn=ms1["universal_rxn"],
+            start_tags=ms1["terminal_monomer_tags"]["0"],
+            end_tags=ms1["terminal_monomer_tags"]["-1"],
+            sequencing=True
         )
         end = time.time()
         time_elapsed = end-start
@@ -81,17 +89,24 @@ def generate_MSMS_sequence_dict(
 
     start = time.time()
     ms2 = silico_params["MS2"]
+
+    if ms2["side_chain_tags"]:
+        modifications = True
+
     MS2 = generate_ms2_mass_dictionary(
-            MS1.keys(),
-            ms2["fragment_series"],
-            ms2["ms2_adducts"],
-            silico_params["mode"],
-            ms2["add_signatures"],
-            ms2["signatures"],
-            ms2["ms2_losses"],
-            ms2["ms2_max_neutral_losses"],
-            ms2["ms2_loss_products_adducts"],
-            ms2["uniques"]
+            sequences=MS1.keys(),
+            fragment_series=ms2["fragment_series"],
+            adducts=ms2["ms2_adducts"],
+            modifications=modifications,
+            monomer_modifications_dict=ms2["side_chain_tags"],
+            terminal_modifications_dict=ms1["terminal_modifications"],
+            mode=silico_params["mode"],
+            add_signatures=ms2["add_signatures"],
+            signatures=ms2["signatures"],
+            losses=ms2["ms2_losses"],
+            max_total_losses=ms2["ms2_max_neutral_losses"],
+            loss_product_adducts=ms2["ms2_loss_products_adducts"],
+            uniques=ms2["uniques"]
     )
     end = time.time()
     time_elapsed = end-start
@@ -147,16 +162,18 @@ def generate_MS1_compositional_dict(
         monomers=ms1_params["monomers"],
         max_length=ms1_params["max_length"],
         adducts=ms1_params["ms1_adducts"],
+        monomer_modifications_dict=ms1_params["side_chain_modifications"],
+        universal_monomer_modification=ms1_params["universal_sidechain_modifications"],
+        universal_terminal_modification=ms1_params["universal_terminal_modifications"],
+        terminal_modifications_dict=ms1_params["terminal_modifications"],
         mode=silico_parameters["mode"],
         min_z=ms1_params["min_z"],
         max_z=ms1_params["max_z"],
         losses=ms1_params["losses"],
         max_total_losses=ms1_params["max_neutral_losses"],
-        loss_product_adducts=ms1_params["loss_products_adducts"],
         min_length=ms1_params["min_length"],
-        chain_terminators=ms1_params["chain_terminators"],
-        start_tags=ms1_params["terminal_tags"]["0"],
-        end_tags=ms1_params["terminal_tags"]["-1"],
+        start_tags=ms1_params["terminal_monomer_tags"]["0"],
+        end_tags=ms1_params["terminal_monomer_tags"]["-1"],
         sequencing=False,
         isobaric_targets=ms1_params["isobaric_targets"]
     )
@@ -191,37 +208,88 @@ def generate_MSMS_insilico_from_compositions(
     """
     full_MSMS_sequence_dict = {}
 
+    print(composition_dict)
+
     ms1_params = silico_parameters["MS1"]
     ms2_params = silico_parameters["MS2"]
 
-
     for composition, MS1_ions in composition_dict.items():
-        monomers = list(set([c for i, c in enumerate(composition)]))
-        sequence_length = len(composition)
 
-        start_tags = ms1_params["terminal_tags"]["0"]
-        end_tags = ms1_params["terminal_tags"]["-1"]
+        # get monomers from sequence, including sidechain-modified monomers
+        monomers = return_monomers_sequence(
+            sequence=composition,
+            return_set=False,
+            return_modified=True
+        )
+        sequence_length = len(monomers)
 
+        monomers = list(set(monomers))
+
+        # get monomer tags at start and end of sequence
+        start_tags = ms1_params["terminal_monomer_tags"]["0"]
+        end_tags = ms1_params["terminal_monomer_tags"]["-1"]
+
+        # check for monomer tags and, if found, remove from list of standard
+        # monomers that could be anywhere in the sequence    
+        all_tags = start_tags
+        if all_tags:
+            all_tags.extend(end_tags)
+        else:
+            all_tags = end_tags
+
+        if all_tags:
+            monomers = list(filter(
+                lambda monomer: monomer not in all_tags,
+                monomers
+            ))
+        
+        # reduce sequence length if start_tags and / or end_tags are specified
         if start_tags:
             sequence_length -= 1
         if end_tags:
             sequence_length -= 1
 
+        # generate all sequences which are isobaric to composition
         sequences = generate_all_sequences(
-            monomers,
+            monomers=monomers,
             max_length=sequence_length,
             min_length=sequence_length,
             sequencing=True,
-            chain_terminators=ms1_params["chain_terminators"],
             start_tags=start_tags,
             end_tags=end_tags
         )
 
-        sequences = list(filter(
-            lambda seq: sorted(seq) == sorted(composition),
-            sequences
-        ))
+        # retrieve terminal modifications 
+        terminal_modifications = ms1_params["terminal_modifications"]
 
+        # init list to store terminally modified sequences 
+        modified_sequences = []
+
+        # add new terminally modified sequences
+        for terminus, modifications in terminal_modifications.items():
+
+            if modifications:
+             
+               for sequence in sequences:
+
+                   modified_sequence = add_terminal_modification_sequence_string(
+                       sequence=sequence,
+                       terminal_modification=modifications,
+                       terminus=terminus
+                   )
+
+                   modified_sequences.extend(modified_sequence)
+
+        sequences.extend(modified_sequences)
+
+        # filter out sequences that do not match composition
+        sequences = [
+            seq for seq in sequences
+            if sorted(seq) == sorted(composition)
+        ]
+
+        # generate ms2 fragment dictionary for all sequences matching
+        # composition
         ms2_dict = generate_ms2_mass_dictionary(
             sequences=sequences,
             fragment_series=ms2_params["fragment_series"],

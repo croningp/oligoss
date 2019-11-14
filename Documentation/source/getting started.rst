@@ -25,9 +25,9 @@ http://datalore.chem.gla.ac.uk/DBD/polymermassspec.git
 Running PolymerMassSpec
 =======================
 
-(1) Convert raw data files to JSON files using mzmlripper
+(1) Convert raw data files to JSON files using mzmlripper.
 
-(2) Ensure Input Parameters JSON file is filled in with correct run parameters (see "Run Parameters" section)
+(2) Ensure Input Parameters JSON file is filled in with correct run parameters (see "Run Parameters" section).
 
 (3) Run executable script:
 

@@ -10,10 +10,10 @@ from .silico_helpers.insilico_helpers import *
 def generate_mass_dictionary(
     monomers,
     max_length,
+    ms_level,
     min_length=1,
     sequencing=True,
     universal_rxn=True,
-    chain_terminators=None,
     start_tags=None,
     end_tags=None,
     isobaric_targets=None):
@@ -31,31 +31,26 @@ def generate_mass_dictionary(
         min_length (int) -- minimum sequence length (in monomer units).
                             (default: {1}).
         sequencing (bool) -- specifies whether all possible sequences are to
-                            be enumerated or just compositions. Set to False if
-                            you just need to screen for compositions.
-                            (default: {True}).
+            be enumerated or just compositions. Set to False if you just need 
+            to screen for compositions. (default: {True}).
         universal_rxn (bool) -- specifies whether all monomers are universally
-                            cross-reactive. If this is set to False, reactivity
-                            classes must be read from the polymer config file
-                            to ensure that any chemically infeasbile sequences
-                            are not included in the final mass dictionary.
-                            (default: {True}).
-        chain_terminators (list) -- list of monomers which prevent further
-                            elongation. (default: {None}.
-        starting_monomers (list) -- list of monomers. If this list is input,
-                            only sequences beginning with a monomer in this
-                            list will be returned. (default: {None}).
+            cross-reactive. If this is set to False, reactivity classes must be 
+            read from the polymer config file to ensure that any chemically 
+            infeasbile sequences are not included in the final mass dictionary
+            (default: {True})
+        starting_monomers {list} -- list of monomers. If this list is input,
+            only sequences beginning with a monomer in this list will be 
+            returned. (default: {None}).
         ending_monomers (list) -- list of monomers. If this is input,
-                            only sequences ending with a monomer in this list
-                            will be returned. (default: {None}.
+            only sequences ending with a monomer in this list will be returned. 
+            (default: {None}.
         isobaric_targets (list) -- list of sequences and / or compositions that
-                        output sequences must be isobaric to. (default: 
-                        {None}).
+            output sequences must be isobaric to. (default: {None}).
 
     Returns:
-        massdict -- dictionary of sequences and associated neutral
-                    monoisotopic masses. Keys = sequence strings, values =
-                    masses (float).
+        dict -- dictionary of sequences and associated neutral
+            monoisotopic masses. Keys = sequence strings, values = masses 
+            (float).
     """
 
     # check to see if input monomers are set as universally cross-reactive
@@ -66,25 +61,27 @@ def generate_mass_dictionary(
             max_length=max_length,
             min_length=min_length,
             sequencing=sequencing,
-            chain_terminators=chain_terminators,
             start_tags=start_tags,
             end_tags=end_tags,
             isobaric_targets=isobaric_targets
         )
-
+    
     # if input monomers are not universally cross-reactive, more complicated
     # function is required to read polymer config file and generate only
     # those sequences that can be produced from appropriately cross-reactive
     # monomers
     elif not universal_rxn:
         sequences = generate_all_sequences_rxn_classes(monomers)
-
+    
     # work out neutral mass of each sequence and add to mass dictionary in
     # format {seq : mass} where seq = sequence, mass = neutral monoisotopic
     # mass
     massdict = {
-        sequence: float("{0:0.4f}".format(find_sequence_mass(sequence)))
-        for sequence in sequences
+        sequence: round(find_sequence_mass(
+            sequence=sequence,
+            ms_level=1), 
+            4)
+            for sequence in sequences
     }
 
     return massdict
@@ -168,9 +165,9 @@ def add_loss_products_ms1_massdict(
     # side chain-specific neutral losses to sequence mass lists
     for sequence, neutral_mass in massdict.items():
         loss_product_dict[sequence] = add_sidechain_neutral_loss_products_sequence(
-            sequence,
-            neutral_mass,
-            max_total_losses
+            sequence=sequence,
+            sequence_masses=neutral_mass,
+            max_total_losses=max_total_losses
         )
 
     # return dictionary of sequences and associated lists of neutral masses
@@ -180,10 +177,7 @@ def add_loss_products_ms1_massdict(
 def add_terminal_modification_MS1_sequence(
     sequence,
     sequence_masses,
-    modification,
-    modification_mass,
-    modification_massdiff,
-    modification_terminus
+    terminal_modifications_dict
 ):
     """
     Takes a sequence, associated masses, modification three letter code and
@@ -191,44 +185,73 @@ def add_terminal_modification_MS1_sequence(
     modified sequence masses.
 
     Args:
-        sequence (str): sequence string comprised of monomer one letter codes.
-        sequence_masses (list): list of m/z values for unmodified sequence
-                        (floats). SHOULD BE IN +1 CHARGE STATE.
-        modification (str): modification three letter code from
-                        MODIFICATIONS_DICT in modifications config file.
-        modification_mass (float): neutral monoisotopic mass of modifier.
-        modification_massdiff (float): mass lost upon addition of modification
-                        to sequence (e.g. H2O for fatty acid acylations of
-                        peptide N-termini).
-        modification_terminus (int): either 0 or -1 for start and end terminus,
-                        respectively.
-
+        sequence (str): sequence string comprised of monomer one letter codes
+        sequence_masses (list): list of monoisotopic NEUTRAL masses for 
+            input sequence. 
+        terminal_modifications_dict (dict): dict of termini and modifications
     Returns:
         {mod_seq: [mod_seq_masses]}: dictionary of modified sequence string
                         and corresponding modified sequence masses.
     """
-    if type(sequence_masses) != list:
-        sequence_masses = [sequence_masses]
+    # return nothing if no terminal modifications are specified.
+    if not terminal_modifications_dict: 
+        return {}
+    
+    mod_sequences = {}
+    
+    # iterate through termini in terminal_modifications_dict
+    for terminus, terminal_modifications in terminal_modifications_dict.items():
+        
+        # check whether modifications are specified for current terminus
+        if terminal_modifications:
 
-    if modification_terminus == 0:
-        mod_seq = f"{modification}={sequence}"
+            # retrieve modification information for each modification
+            for terminal_modification in terminal_modifications:
+                modification_mass=MODIFICATIONS[terminal_modification]["mass"]
+                modification_massdiff=MODIFICATIONS[terminal_modification]["mass_diff"]["ms1"]
+                modification_termini=MODIFICATIONS[terminal_modification]["termini"]
 
-    elif modification_terminus == -1:
-        mod_seq = f"{sequence}={modification}"
+                # check whether current modification is compatible with 
+                # current terminus, as defined MODIFICATIONS in polymer-
+                # specific config file
+                if float(terminus) not in [float(mod_term) for mod_term in modification_termini]:
 
-    modified_sequence_masses = add_modification_sequence_mass_list(
-        sequence_masses,
-        modification_mass,
-        modification_massdiff,
-        universal_shift=True
-    )
+                    print(f'you are trying to modify terminus {terminus}')
+                    print(f'with {terminal_modification}, but this can only')
+                    print(f'modify the following termini: {modification_termini}')
+                    raise Exception("please try again")
+
+                # initialise modified sequence dictionary
+                mod_sequences = {}
+
+                # modify sequence string
+                if type(sequence_masses) != list:
+                    sequence_masses = [sequence_masses]
+                
+                # build terminally modified sequence string
+                if float(terminus)==0:
+                    mod_seq = f"[{terminal_modification}]{sequence}"
+
+                elif float(terminus)==-1:
+                    mod_seq = f"{sequence}[{terminal_modification}]"
+                
+                # add terminal modification mass to unmodified sequence masses
+                modified_sequence_masses = add_modification_sequence_mass_list(
+                    mass_list=sequence_masses,
+                    modification_mass=modification_mass,
+                    mod_mass_diff=modification_massdiff,
+                    universal_shift=True
+                )
+                
+                # add modified sequence and the corresponding mass to dictionary
+                mod_sequences[mod_seq] = modified_sequence_masses
+    
+    return mod_sequences
+        
 
 def add_terminal_modification_MS1_massdict(
     massdict,
-    modification,
-    modification_mass,
-    modification_massdiff,
-    modification_terminus
+    terminal_modifications_dict
 ):
     """
     Takes an MS1 sequence mass dictionary and adds a terminal modification to
@@ -238,9 +261,9 @@ def add_terminal_modification_MS1_massdict(
     Args:
         massdict (dict): dictionary of sequences and corresponding MS1 masses.
         modification (str): modification three letter code from
-                MODIFICATIONS_DICT in modificatiosn config file.
-        modification_mass (float): neutral monoisotopic mass of modifier.
-        modification_massdiff ([type]): mass lost upon addition of modification
+                MODIFICATIONS_DICT in modificatiosn config file
+        modification_mass (float): neutral monoisotopic mass of modifier
+        modification_massdiff (float): mass lost upon addition of modification
                 to sequence (e.g. H2O for fatty acid acylation of peptides
                 as this is a condensation reaction).
         modification_terminus (int): either 0 or -1 to specify start and
@@ -250,32 +273,33 @@ def add_terminal_modification_MS1_massdict(
         modified_massdict (dict): dictionary of modified sequence strings and
                 masses.
     """
+    #  initialise modified mass dictionary
     modified_massdict = {}
 
     for sequence, masses in massdict.items():
         modified_massdict.update(
             add_terminal_modification_MS1_sequence(
-                sequence,
-                masses,
-                modification,
-                modification_mass,
-                modification_massdiff,
-                modification_terminus
+                sequence=sequence,
+                sequence_masses=masses,
+                terminal_modifications_dict=terminal_modifications_dict
+                )
             )
-        )
-
+    
     return modified_massdict
 
 def generate_ms1_mass_dictionary_adducts_losses(
     monomers,
     max_length,
     adducts,
+    monomer_modifications_dict,
+    universal_monomer_modification,
+    universal_terminal_modification,
+    terminal_modifications_dict,
     mode='pos',
     min_z=1,
     max_z=None,
     losses=True,
     max_total_losses=None,
-    loss_product_adducts=None,
     min_length=1,
     chain_terminators=None,
     universal_rxn=True,
@@ -320,70 +344,59 @@ def generate_ms1_mass_dictionary_adducts_losses(
     Returns:
         dict -- dictionary of loss products masses with specified adducts.
     """
-
+    
+    # generate list of modified and unmodified monomers 
+    monomers = generate_monomers_list_with_sidechain_mods(
+        standard_monomers=monomers,
+        sidechain_mods=monomer_modifications_dict,
+        universal_modification=universal_monomer_modification
+    )
+    
     # generate neutral mass dictionary of all possible sequences arising from
     # input monomers and constraints set
     MS1_neutral = generate_mass_dictionary(
         monomers=monomers,
         max_length=max_length,
         min_length=min_length,
+        ms_level=1,
         sequencing=sequencing,
         universal_rxn=universal_rxn,
-        chain_terminators=chain_terminators,
         start_tags=start_tags,
         end_tags=end_tags,
         isobaric_targets=isobaric_targets
     )
+    
+    # check for terminal modificatios; if specified, add these to massdict
+    if terminal_modifications_dict.values():
 
-    # generate a separate mass dictionary, including side chain-specific
-    # neutral loss products for every sequence in the MS1_neutral mass
-    # dictionary
+        modified_seq_massdict = add_terminal_modification_MS1_massdict(
+            massdict=MS1_neutral,
+            terminal_modifications_dict=terminal_modifications_dict
+        )
+
+        if universal_terminal_modification:
+            if modified_seq_massdict:
+                MS1_neutral = modified_seq_massdict
+        else:
+            MS1_neutral.update(modified_seq_massdict)
+    
+    # update massdict to include sidechain-specific neutral loss products 
     if losses:
-        MS1_loss_products = add_loss_products_ms1_massdict(
-            MS1_neutral,
-            max_total_losses
+        MS1_neutral = add_loss_products_ms1_massdict(
+            massdict=MS1_neutral,
+            max_total_losses=max_total_losses
         )
     else:
-        MS1_loss_products = MS1_neutral
-        
-    # before adding charged adducts to masses, check whether any specific
-    # charged adducts have been specified to add to side chain loss product
-    # masses. This is only to be used in cases where the adducts added to loss
-    # product masses are to be different to adducts added to full sequence masses
-    # Most common usage of this is to add less adducts to loss products in order
-    # to minimise false positives in later screening
-    if not loss_product_adducts:
+        MS1_neutral = MS1_neutral
 
-        # No specific adducts specified for loss products, so assume all
-        # adducts are to be added to all masses and combine both neutral mass
-        # dicts + / - loss products
-        MS1_neutral = MS1_loss_products
+    
+    MS1_adduct_dict = add_adducts_ms1_massdict(
+        massdict=MS1_neutral,
+        adducts=adducts,
+        mode=mode,
+        min_z=min_z,
+        max_z=max_z
 
-        # add and return charged adducts to MS1 sequence mass lists
-        MS1_adduct_dict = add_adducts_ms1_massdict(
-            MS1_neutral,
-            adducts,
-            mode,
-            min_z,
-            max_z
-        )
-
-        # exit function here, returning adduct dict
-        return MS1_adduct_dict
-
-    elif loss_product_adducts:
-        loss_product_dict = add_adducts_ms1_massdict(
-            MS1_loss_products,
-            loss_product_adducts,
-            mode,
-            min_z,
-            max_z
-        )
-        for sequence, masses in loss_product_dict.items():
-            MS1_adduct_dict[sequence].extend(
-                [
-                    mass for mass in masses
-                    if mass not in MS1_adduct_dict[sequence]
-                ]
-            )
+    )
     return MS1_adduct_dict
+

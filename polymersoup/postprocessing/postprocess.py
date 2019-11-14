@@ -40,10 +40,11 @@ def assign_confidence_sequences(
 
         print(f"assigning confidence for {sequence}")
         
+
         # assign sequence a confidence score, using constraints specified in
         # input postprocess parameters from input parameters .json file
         confidence_assignment = assign_confidence_sequence(
-            insilico_fragments=list(silico_dict[sequence]["MS2"].keys()),
+            insilico_fragments=silico_dict[sequence]["MS2"],
             confirmed_fragments=confirmed_fragments,
             core_fragment_series=postprocess_params["core_linear_series"],
             optional_fragments=postprocess_params["optional_core_frags"],
@@ -89,31 +90,24 @@ def find_Rt_I_sequences(
     Returns:
         dict: dictionary of final intensities and retention times.
     """
+    # init dict to store compositions of hit sequences
     compositions = {}
 
+    # iterate through sequences assigned with high confidence
+    # and identify their composition in MS1_EICs
     for sequence in confident_assignments:
-        composition = "".join(sorted(sequence))
+        sorted_seq = "".join(sorted(sequence))
 
-        if composition not in compositions:
-            compositions[composition] = [sequence]
+        composition = [
+            seq for seq in MS1_EICs
+            if "".join(sorted(seq)) == sorted_seq
+        ][0]
 
-        else:
+        if composition in compositions:
             compositions[composition].append(sequence)
-
-        if composition not in MS1_EICs:
-            raise Exception(f'something has gone wrong with {sequence}')
-
-
+        else:
+            compositions[composition] = [sequence]
     final_Rt_Is = {}
-
-    for seq in MS2_EICs:
-        seq_Rt_I = get_Rt_I_from_ms2_EIC(
-            MS1_EIC = MS1_EICs["".join(sorted(seq))],
-            MS2_EIC=MS2_EICs[seq],
-            ms2_Rt_bin=postprocess_parameters["ms2_Rt_bin"],
-            flexible_ms2_rt=postprocess_parameters["ms2_Rt_flexible"]
-        )
-        final_Rt_Is[seq] = seq_Rt_I
 
     for composition in compositions:
 
@@ -122,7 +116,6 @@ def find_Rt_I_sequences(
             if (seq not in MS2_EICs
                 and seq in confident_assignments)
         ]
-
 
         seq_Rt_Is = get_Rt_I_from_ms1_EIC(
             EIC=MS1_EICs[composition],
