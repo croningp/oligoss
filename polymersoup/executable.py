@@ -33,6 +33,9 @@ def launch_screen(input_parameters_file):
     if parameters_dict['screening_method'] == 'exhaustive':
         exhaustive_screen(parameters_dict)
 
+    if parameters_dict['screening_method'] == 'mass_difference':
+        mass_difference_screen(parameters_dict)
+
 def exhaustive_screen(parameters_dict): 
     """ This function performs an exhaustive or 'brute force' screen for all
     possible sequences arising from input monomers and constraints set, read
@@ -132,6 +135,177 @@ def exhaustive_screen(parameters_dict):
                 extracted_data_folder=extracted_data,
                 postprocess_parameters=postprocess_parameters
             )
+
+def mass_difference_screen(parameters_dict): 
+    """ This function screens for mass differences based on input monomers and
+    constraints set, read directly from input parameters .json file. Useful for
+    identifying monomers present in the data.
+    
+    Args:
+        parameters_dict (dict) -- input parameters dictionary in standard
+            input parameters format.
+
+    Returns:
+        json (dict) -- {"spectrum_id": {"signature_type": [monomers found],
+            "mass_diff": [monomers found]}
+    """
+    
+    # load parameters for in silico operations
+    silico_params = parameters_dict['silico_parameters']
+
+    # load parameters for data extraction operations
+    extractor_params = parameters_dict['extractor_parameters']
+
+    # load important file paths from parameters_dict
+    directories = parameters_dict['directories']
+
+    # load location of mass spec data in mzml_ripper .json file format
+    ripper_folder = directories['ripper_folder']
+
+    # load output folder for saving data, create if it does not exist
+    output_folder = directories['output_folder']
+    if not os.path.exists(output_folder):
+        os.mkdir(output_folder)
+
+    # write run parameters to .json
+    write_to_json(
+        write_dict=parameters_dict,
+        output_json=os.path.join(output_folder, 'run_parameters.json')
+    )
+
+    # apply any pre-filtering steps to ripper data 
+    filtered_rippers = apply_filters(
+        extractor_parameters=extractor_params,
+        ripper_folder=ripper_folder
+    )
+
+    # generate dictionary of MS2 signature ion masses for each monomer
+    monomer_list = silico_params["MS1"]["monomers"]
+
+    for ripper_json in filtered_rippers:
+
+        # find ripper name
+        start = ripper_json.find('filtered_rippers') + 17
+        end = ripper_json.find('.json', start)
+        ripper_name = ripper_json[start:end]
+
+        print(f'searching {ripper_name} for {monomer_list}')
+        ripper_dict = open_json(ripper_json)
+
+        # extract base peak chromatogram (bpc) from each ms1 spectrum
+        bpc_dict = {}
+
+        # initiate dictionary for all confirmed monomers found in ripper json
+        confirmed_monomers_dict = {}
+
+        # make list of highest peak masses
+        highest_peak_masses = []
+
+        for ms1_spectrum_id, ms1_spectrum in ripper_dict["ms1"].items():
+            if ms1_spectrum_id.startswith("spectrum_"):
+
+                # find highest peak and it's mass in each spectrum
+                # save to bpc dict
+                highest_peak = max([
+                    float(intensity) for intensity in ms1_spectrum.values() 
+                    if type(intensity) != list])
+
+                highest_peak_mass = [
+                    mass for mass, intensity in ms1_spectrum.items() 
+                    if intensity==highest_peak]
+
+                bpc_dict[ms1_spectrum_id] = [highest_peak_mass[0], highest_peak]
+
+                if highest_peak_mass not in highest_peak_masses:
+                    highest_peak_masses.append(highest_peak_mass[0])
+        
+        # find ms2 spectra that precursors match the highest peak
+        for ms2_spectrum_id, ms2_spectrum in ripper_dict["ms2"].items():
+
+            if ms2_spectrum["parent"] in highest_peak_masses:
+
+                # list signature ion dict types
+                signature_ion_types = list(MS2_SIGNATURE_IONS.keys())
+                signature_ion_type = signature_ion_types[0]
+
+                # in the ms2 spectrum look for the signature ion of the specified monomers
+                confirmed_monomers = find_ms2_signature_ions(
+                    monomer_list=monomer_list,
+                    signature_ion_type=signature_ion_type,
+                    spectrum=ms2_spectrum,
+                    error=extractor_params["error"],
+                    error_abs=extractor_params["err_abs"],
+                    signature_ion_dict=MS2_SIGNATURE_IONS)
+                        
+                if confirmed_monomers:
+                    print(f'MS2 signature ions found for {confirmed_monomers} in {ms2_spectrum_id}')
+
+                unconfirmed_monomers = [
+                    monomer for monomer in monomer_list
+                    if (monomer not in confirmed_monomers
+                    and monomer not in MS2_SIGNATURE_IONS["dominant"])
+                ]
+
+                unconfirmed_monomers = list(set(unconfirmed_monomers))
+                
+                # search for unconfirmed monomers
+                monomer_mass_dict = {}
+
+                for unconfirmed_monomer in unconfirmed_monomers:
+
+                    # get monomer masses and loss product monomer masses
+                    monomer_mass = MONOMERS[unconfirmed_monomer][0]
+                                        
+                    if unconfirmed_monomer in LOSS_PRODUCTS:
+                        loss_products = LOSS_PRODUCTS[unconfirmed_monomer]
+                        monomer_masses = [monomer_mass-MASS_DIFF]
+
+                        # get masses - loss products to search for
+                        for loss_product in loss_products:
+                            monomer_loss_mass = monomer_mass-FG[loss_product]-MASS_DIFF
+                            monomer_masses.append(monomer_loss_mass)
+
+                            # add all masses to monomer mass dict
+                            monomer_mass_dict[unconfirmed_monomer] = monomer_masses
+                                            
+                    else:
+                        monomer_mass_dict[unconfirmed_monomer] = [(monomer_mass-MASS_DIFF)]
+
+                # search for unconfirmed monomers by looking for mass differences
+                # between MS2 peaks
+                mass_difference_search = filter_mass_difference(
+                    msdata=ms2_spectrum,
+                    monomer_massdiffs=monomer_mass_dict,
+                    total_comparisons=50,
+                    err=extractor_params["error"],
+                    err_abs=extractor_params["err_abs"],
+                    single_spectrum=True,
+                    single_spectra_id=ms2_spectrum_id,
+                    ms_level=2)
+
+                # update confirmed monomers dict with mass difference search findings
+                monomers_found = []
+                for found_monomer_list in mass_difference_search.values():
+                    for found_monomer in found_monomer_list:
+                        if found_monomer not in monomers_found:
+                            monomers_found.append(found_monomer)
+                if monomers_found:
+                    print(f'{monomers_found} in {ms2_spectrum_id} during mass difference screening')
+                # add all confirmed monomers (from ms2 signature screening and
+                # mass difference screening) to final confirmed monomers dict
+                if confirmed_monomers or monomers_found:
+                    confirmed_monomers_dict[ms2_spectrum_id] = {
+                        "precursor_mass": ms2_spectrum["parent"],
+                        signature_ion_type: confirmed_monomers,
+                        "mass_diff": monomers_found
+                        }
+                    
+        # save json for each ripper containing dictionary of format:
+        # {"spectrum_id": {"signature_type": [monomers found], "mass_diff": [monomers found]}
+        write_to_json(confirmed_monomers_dict, os.path.join(output_folder, f'{ripper_name}_mass_difference_screen.json'))
+
+    return print(f'jsons saved to {output_folder}')
+
 
 def apply_filters(
     extractor_parameters,

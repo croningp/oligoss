@@ -1,5 +1,5 @@
 {
-"screening_method": "exhaustive",
+"screening_method": "mass_difference",
 
 "data_extraction": true,
 
@@ -57,7 +57,7 @@
     {   "error": 25,
         "err_abs": false,
         "min_ms2_peak_abundance": 90,
-        "pre_run_filter": false,
+        "pre_run_filter": true,
         
         "min_MS1_total_intensity": null,
         "min_MS2_total_intensity": null,
@@ -75,7 +75,7 @@
             "ms2_precursors": null,
             "min_MS1_total_intensity": null,
             "min_MS2_total_intensity": null,
-            "min_MS1_max_intensity": null,
+            "min_MS1_max_intensity": 1E7,
             "min_MS2_max_intensity": null
         }
 

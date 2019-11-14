@@ -84,6 +84,10 @@ def find_multiple_targets(
 
     # initiate list to store candidate masses that match target(s)
     matches = []
+    
+    # convert targets to list if not already
+    if type(targets) != list:
+        targets = [targets]
 
     # iterate through targets and return candidate masses that match target
     # masses within specified error threshold
@@ -353,20 +357,72 @@ def filter_max_intensity(
     # Return spectra
     return msdata
 
+def find_ms2_signature_ions(
+    monomer_list,
+    signature_ion_type, 
+    spectrum, 
+    error, 
+    error_abs, 
+    signature_ion_dict
+    ):
+    """ This function searches an MS2 spectrum and looks for signature ions
+    from the monomer list. If a dominant signature ion is found, the monomer is 
+    confirmed.
+
+    Arguments:
+        monomer_list {list} -- list of monomers within the sample.
+
+    Returns:
+        list - list of monomers with confirmed signature ions
+    """
+    # initiate confirmed monomer dict
+    confirmed_monomers = []
+
+    # keep spectra only (remove retention time, mass lists, parent peak)
+    keys_to_remove = ["retention_time", "mass_list", "parent"]
+    spectra_only = {k:v for k,v in spectrum.items() if k not in keys_to_remove}
+
+    for monomer in monomer_list:
+
+        # get mass for dominant signature ion
+        for signature_ions in signature_ion_dict[signature_ion_type]:
+            if signature_ions[0] == monomer:
+                signature_frag_mass = signature_ions[1]
+
+                # check if signature fragment mass is in the spectrum
+                # if so, add to dictionary
+                signature_frag_search = find_multiple_targets(
+                    signature_frag_mass,
+                    candidates=spectra_only.keys(),
+                    err=error,
+                    err_abs=error_abs
+                )
+
+                if signature_frag_search:
+                    confirmed_monomers.append(monomer)
+
+    # return dictionary of confirmed monomers, their confirmed fragment type 
+    # and list of unconfirmed monomers
+    return confirmed_monomers
+
+
 def filter_mass_difference(
         msdata: dict,
         monomer_massdiffs: dict,
         total_comparisons: int,
         err: float,
         err_abs=True,
-        ms_level=2
+        ms_level=2,
+        single_spectrum=False,
+        single_spectra_id=None
     ) -> dict:
     """ Filters the spectra based on the mass difference between peaks.
     Scans through a list of monomer mass differences and check for peaks that
     match the difference.
 
     Args:
-        msdata (dict): spectrum data.
+        msdata (dict): full mass spec data JSON (in mzml ripper format) OR
+            subset of mzml ripper dict for one ms level.
         monomer_massdiffs (dict): monomers and their associated mass differences.
         total_comparisons (int): total number of comparisons to perform.
         target_func (Callable): find target function.
@@ -375,22 +431,36 @@ def filter_mass_difference(
         err_abs (bool): specifies whether err units are absolute mass units
             or ppm.
         ms_level(int):specifies ms_level for spectra being screened (default: 2).
-
+        single_spectrum (bool): specifies if data is single spectrum or not
+            (default: False).
+        spectra_id (str): spectra id string of single spectrum data (default: None).
 
     Returns:
         dict: Spectra IDs with found monomers.
     """
+
+    # checks whether input is full ripper dict or just one ms level
+    if f'ms{ms_level}' in msdata:
+        msdata = msdata[f'ms{ms_level}']
 
     # Create output map
     spectra = {}
 
     # Iterate through each spectrum
     for spec_id, spectrum in msdata.items():
-        # Map empty list to output spectra id
-        spectra[spec_id] = []
 
-        # Get the mass list from the spectrum
-        mass_list = spectrum["mass_list"]
+        # if ms data is not single spectrum define mass list and spectrum id differently
+        try:
+            # Get the mass list from the spectrum
+            mass_list = spectrum["mass_list"]
+
+        except:
+            spectrum = msdata
+            mass_list = spectrum["mass_list"]
+            spec_id = single_spectra_id
+
+        # Map empty list to output spectra id
+        spectra[spec_id] = []    
 
         # Get spectrum peaks, sorted form the most intense
         spectrum_peaks = _sort_spectrum_peaks_by_intensity(spectrum)
