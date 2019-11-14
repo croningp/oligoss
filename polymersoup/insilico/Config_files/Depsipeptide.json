@@ -127,7 +127,7 @@
                 "neg": "-H",
                 "exceptions": {
                     "pos": {
-                        "hydroxyA": "-OH"
+                        "-1": {"hydroxyA": "-OH"}
                     }
                 }
             },
@@ -182,11 +182,161 @@
             ["C", 76.0221, 133.0436, 134.0276, 147.0772], ["K", 101.1079],
             ["S", 60.0449], ["Y", 136.0762], ["V", 72.08133],
             ["T", 74.06059], ["A", 44.05003], ["M", 104.0534, 120.0483],
-            ["Q", 101.0715], ["P", 70.06568]
+            ["Q", 101.0715], ["P", 70.06568], ["N", 87.05584, 70.02864]
         ],
 
         "dominant": ["F", "I",  "L", "P", "H", "Y"]
 
-    }
+    },
 
+    "MODIFICATIONS": {
+        "Ole": {
+    
+            "mass": 282.25589,
+    
+            "termini": [0],
+    
+            "side_chains_attachments": ["K", "R"],
+    
+            "free_mod_fragments": {
+                "pos": [265.2532],
+                "neg": [281.2181]
+            },
+    
+           
+            "mass_diff": {
+                "ms1": "H2O",
+                "ms2": "H2O"
+            },
+
+           
+            "universal_ms2_shift": false
+        },
+        "Pal": {
+            "mass": 256.24024,
+            "terminus": [0],
+            "side chain attachments": ["K", "R"],
+            "free_mod_fragments": {
+                "pos": [239.2375],
+                "neg": [255.2324]
+            },
+            "mass_diff": {
+                "ms1": "H2O",
+                "ms2": "H2O"
+            },
+            "universal_ms2_shift": false
+        },
+        "Ace": {
+            "mass": 60.02114,
+            "terminus": [0],
+            "side chain attachments": ["K", "R"],
+            "free_mod_fragmnts": {
+                "pos": [],
+                "neg": []
+            },
+            "mass_diff": {
+                "ms1": "H2O",
+                "ms2": "H2O"
+            },
+            "universal_ms2_shift": false
+        },
+        "Fmc": {
+            "mass": 240.07866,
+            "terminus": [-1],
+            "side chain attachments": ["D", "E"],
+            "free_mod_fragments": {
+                "pos": [],
+                "neg": []
+            },
+            "mass_diff": {
+                "ms1": "H2O",
+                "ms2": "H2O"
+            },
+            "universal_ms2_shift": false
+        },
+        "Tbu": {
+            "mass": 74.07317,
+            "terminus": null,
+            "side chain attachments": [],
+            "free_mod_fragments": {
+                "pos": [],
+                "neg": []
+            },
+            "mass_diff": {
+                "ms1": "H2O",
+                "ms2": "H2O"
+            },
+            "universal_ms2_shift": false
+        },
+        "Trt": {
+            "mass": 260.12012,
+            "terminus": null,
+            "side chain attachments": ["S", "T"],
+            "free_mod_fragments": {
+                "pos": [],
+                "neg": []
+            },
+            "mass_diff": {
+                "ms1": "H2O",
+                "ms2": "H2O"
+            },
+            "universal_ms2_shift": false
+        },
+        "Boc": {
+            "mass": 118.06301,
+            "terminus": [0],
+            "side chain attachments": [],
+            "free_mod_fragments": {
+                "pos": [],
+                "neg": []
+            },
+            "mass_diff": {
+                "ms1": "H2O",
+                "ms2": "H2O"
+            },
+            "universal_ms2_shift": false
+        },
+        "Bnz": {
+            "mass": 108.05751,
+            "terminus": null,
+            "side chain attachments": ["E", "D"],
+            "free_mod_fragments": {
+                "pos": [105.03349],
+                "neg": [121.02950]
+            },
+            "mass_diff": {
+                "ms1": "H2O",
+                "ms2": "H2O"
+            },
+            "universal_ms2_shift": false
+        },
+        "Tfa": {
+            "mass": 113.99287,
+            "terminus": null,
+            "side chain attachments": ["K", "R"],
+            "free_mod_fragments": {
+                "pos": [96.99012],
+                "neg": [112.98504]
+            },
+            "mass_diff": {
+                "ms1": "H2O",
+                "ms2": "H2O"
+            },
+            "universal_ms2_shift": false
+        },
+        "BtA": {
+            "mass": 73.08915,
+            "termini": [-1],
+            "side chain attachments": ["D", "E"],
+            "free_mod_fragments": {
+                "pos": [74.09643],
+                "neg": null
+            },
+            "mass_diff": {
+                "ms1": "H2O",
+                "ms2": "H2O"
+            },
+            "universal_ms2_shift": false
+        }
+    }
 }

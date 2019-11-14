@@ -16,10 +16,17 @@ from .filehandler import *
 # commonly used in experiments
 from .StandardInstrumentParameters.InstrumentStandards import *
 
-def __init__(parameters_file="C:/Users/group/PolymerMassSpec/Examples/InputParams_Test.json"):
+def __init__():
 
     # get full filepath for polymermassspec
     polymermassspec_path = os.path.dirname(os.path.abspath(__file__))
+
+    # load parameters file
+    parameters_file = os.path.join(
+        os.path.dirname(polymermassspec_path), 
+        "Examples", 
+        "InputParams_Test.json"
+    )
 
     # get the filepath for the polymer config jsons
     config_folder = os.path.join(polymermassspec_path, "insilico", "Config_files")
@@ -107,6 +114,7 @@ INTRINSICALLY_CHARGE_MONOMERS=POLYMER_INFO["INTRINSICALLY_CHARGE_MONOMERS"]
 FRAG_SERIES=POLYMER_INFO["FRAG_SERIES"]
 IMMONIUM_IONS=POLYMER_INFO["IMMONIUM_IONS"] 
 MS2_SIGNATURE_IONS=POLYMER_INFO["MS2_SIGNATURE_IONS"] 
+MODIFICATIONS=POLYMER_INFO["MODIFICATIONS"]
 
 def return_silico_parameters(
     parameters_file

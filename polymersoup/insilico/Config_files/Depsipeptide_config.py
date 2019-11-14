@@ -90,10 +90,7 @@ MONOMERS = {
     "V": [117.07899, [["amine", 1], ["carboxyl", 1]]],
     "W": [204.08989, [["amine", 1], ["carboxyl", 1]]],
     "Y": [181.07391, [["amine", 1], ["carboxyl", 1]]],
-    "g": [76.01606, [["hydroxyA", 1], ["carboxyl", 1]]],
-    "j": [73.08915, [["amine", 1], ["carboxyl", 1]]],
-    "e": [237.10011, [["amine", 1], ["carboxyl", 1]]],
-    "k": [243.09510, [["amine", 1], ["carboxyl", 1]]]
+    "g": [76.01606, [["hydroxyA", 1], ["carboxyl", 1]]]
 }
 
 """
@@ -101,8 +98,7 @@ A = alanine; C = cysteine; D = aspartic acid; E = glutamic acid;
 F = phenylalanine; G = glycine; H = histidine; I = isoleucine; K = lysine;
 L = leucine; M = methionine; N = asparagine; P = proline; Q = glutamine;
 R = arginine; S = serine; T = threonine; V = valine; W = tryptophan;
-Y = tyrosine; g = glycolic acid; e = L-glutamic benzyl ester;  
-k = Nε-Trifluoroacetyl-L-lysine; j = butyl amine
+Y = tyrosine; g = glycolic acid
 
 """
 
@@ -144,6 +140,159 @@ INSERT ADDITIONAL DETAILS REGARDING CHAIN TERMINATORS HERE
 
 """
 
+MODIFICATIONS = {
+    "Ole": {
+
+    # "mass" = neutral monoisotopic mass of oleic acid
+        "mass": 282.25589,
+
+    # "terminus" = terminus acylated by oleic acid; 0 = N-terminus (i.e.
+    # starting terminus) 
+        "termini": [0],
+
+    # "side_chain_attachments" = list of monomer one letter codes for monomers
+    # with side chains that can be acylated by oleic acid
+        "side_chains_attachments": ["K", "R"],
+
+        # "free_mod_fragments" = m/z values of free oleic acid fragments
+        # produced from acylated precursors in both positive and negative mode
+        "free_mod_fragments": {
+            "pos": [265.2532],
+            "neg": [281.2181]
+        },
+
+        # "mass_diff" = the mass lost when adding oleic acid to a peptide -
+        # water as this is a condensation reaction
+        "mass_diff": {
+            "ms1": H2O,
+            "ms2": H2O
+        },
+        # "universal_ms2_shift" = specifies whether ALL MS2 fragments with
+        # acylated termini MUST have the oleic acid mass shift; set to False
+        # as acylated fragments can be found + / - oleic acid
+        "universal_ms2_shift": False
+    },
+    "Pal": {
+        "mass": 256.24024,
+        "terminus": [0],
+        "side chain attachments": ["K", "R"],
+        "free_mod_fragments": {
+            "pos": [239.2375],
+            "neg": [255.2324]
+        },
+        "mass_diff": {
+            "ms1": H2O,
+            "ms2": H2O
+        },
+        "universal_ms2_shift": False
+    },
+    "Ace": {
+        "mass": 60.02114,
+        "terminus": [0],
+        "side chain attachments": ["K", "R"],
+        "free_mod_fragmnts": {
+            "pos": [],
+            "neg": []
+        },
+        "mass_diff": {
+            "ms1": H2O,
+            "ms2": H2O
+        },
+        "universal_ms2_shift": False
+    },
+    "Fmc": {
+        "mass": 240.07866,
+        "terminus": [-1],
+        "side chain attachments": ["D", "E"],
+        "free_mod_fragments": {
+            "pos": [],
+            "neg": []
+        },
+        "mass_diff": {
+            "ms1": H2O,
+            "ms2": H2O
+        },
+        "universal_ms2_shift": False
+    },
+    "Tbu": {
+        "mass": 74.07317,
+        "terminus": None,
+        "side chain attachments": [],
+        "free_mod_fragments": {
+            "pos": [],
+            "neg": []
+        },
+        "mass_diff": {
+            "ms1": H2O,
+            "ms2": H2O
+        },
+        "universal_ms2_shift": False
+    },
+    "Trt": {
+        "mass": 260.12012,
+        "terminus": None,
+        "side chain attachments": ["S", "T"],
+        "free_mod_fragments": {
+            "pos": [],
+            "neg": []
+        },
+        "mass_diff": {
+            "ms1": H2O,
+            "ms2": H2O
+        },
+        "universal_ms2_shift": False
+    },
+    "Boc": {
+        "mass": 118.06301,
+        "terminus": [0],
+        "side chain attachments": [],
+        "free_mod_fragments": {
+            "pos": [],
+            "neg": []
+        },
+        "mass_diff": {
+            "ms1": H2O,
+            "ms2": H2O
+        },
+        "universal_ms2_shift": False
+    },
+    "Bnz": {
+        "mass": 108.05752,
+        "terminus": None,
+        "side chain attachments": ["E", "D"],
+        "free_mod_fragments": {
+            "pos": [91.05477],
+            "neg": [107.04969]
+        },
+        "mass_diff": {
+            "ms1": H2O,
+            "ms2": H2O
+        },
+        "universal_ms2_shift": False
+    },
+    "Tfa": {
+        "mass": 113.99287,
+        "terminus": None,
+        "side chain attachments": ["K", "R"],
+        "free_mod_fragments": {
+            "pos": [96.99012],
+            "neg": [112.98504]
+        },
+        "mass_diff": {
+            "ms1": H2O,
+            "ms2": H2O
+        },
+        "universal_ms2_shift": False
+    }
+}
+
+"""
+Ole = oleic acid; Pal = palmitic acid; Ace = acetic acid
+Fmc = Fmc; Tbu = tert-butyl; Trt = trityl; Boc = boc;
+Bnz =  benzilic acid; Tfa = trifluoroacetic acid
+
+"""
+
 LOSS_PRODUCTS = {
     "S" : [H2O],
     "T": [H2O],
@@ -152,10 +301,7 @@ LOSS_PRODUCTS = {
     "N" : [NH3, H2O],
     "R": [NH3],
     "K": [NH3],
-    "Q" : [NH3],
-    "j": [73.08468],
-    "e": [108.05751],
-    "k": [95.9823]
+    "Q" : [NH3]
 }
 """
 LOSS_PRODUCTS: Side chains with hydroxyl and carboxylic acid groups can lose
@@ -320,7 +466,7 @@ FRAG_SERIES_PY = {
             "neg": -H,
             "exceptions": {
                 "pos": {
-                    "-1": {"hydroxy_A": -OH}
+                    "-1": {"hydroxyA": -OH}
                 }
             }
         },
@@ -376,7 +522,6 @@ IMMONIUM_IONS = MS2_SIGNATURE_IONS = {
         "S": [60.0449], "Y": [136.0762], "V": [72.08133],
         "T": [74.06059], "A": [44.05003], "M": [104.0534, 120.0483],
         "Q": [101.0715], "P": [70.06568], "N": [87.05584], "W": [159.0922],
-        "e": [102.0555, 192.10191], "k": [101.1079, 197.08962],
 
         # 'dominant' is a list of monomers for which the signature ion is
         # expected to be present in all MS2 spectra of a sequence containing

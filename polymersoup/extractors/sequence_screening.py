@@ -280,6 +280,7 @@ def confirm_fragments_sequence(
                     essential_signatures=essential_signatures
                 )
             )
+            
     # remove any duplicates from confirmed fragment list
     confirmed_fragments = list(set(confirmed_fragments))
 
@@ -465,18 +466,36 @@ def find_fragments_spectrum(
     # iterate through SIGNATURE FRAGMENTS
     for signature, signature_masses in fragment_dict['signatures'].items():
         
-        # retrieve masses in spectrum that match fragment target masses
-        matches = find_multiple_targets(
-            targets=signature_masses,
-            candidates=spectrum_masses,
-            err=err,
-            err_abs=err_abs
-        )
+        if type(signature_masses) == list:
+           
+            # retrieve masses in spectrum that match fragment target masses
+            matches = find_multiple_targets(
+                targets=signature_masses,
+                candidates=spectrum_masses,
+                err=err,
+                err_abs=err_abs
+            )
 
-        # if any spectrum masses are a match for fragment masses, add
-        # fragment id to list of confirmed fragments
-        if matches:
-            confirmed_fragments.append(signature)
+            # if any spectrum masses are a match for fragment masses, add
+            # fragment id to list of confirmed fragments
+            if matches:
+                confirmed_fragments.append(signature)
+
+    # check for terminal modification signatures
+    if fragment_dict['signatures']['terminal_modifications']:
+        
+        # iterate through terminal modifications to find free modification 
+        # fragments
+        for mod, mod_ions in fragment_dict['signatures']['terminal_modifications'].items():
+
+            matches = find_multiple_targets(
+                targets=mod_ions,
+                candidates=spectrum_masses,
+                err=err,
+                err_abs=err_abs
+            )
+            if matches:
+                confirmed_fragments.append(mod)
 
     # check whether there are any essential signatures, i.e. signatures that
     # MUST be found in the spectrum for fragments to be confirmed
