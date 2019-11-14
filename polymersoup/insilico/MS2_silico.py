@@ -72,8 +72,6 @@ def build_fragment_series_single_sequence(
 
         for mod_terminus in terminal_mods: 
             
-            print(f'terminal mods, sequence = {terminal_mods}, {sequence}')
-            
             # get info for terminal modification
             terminal_mod_info = MODIFICATIONS[terminal_mods[str(mod_terminus)]]
 
@@ -314,11 +312,12 @@ def build_multiple_fragment_series_single_sequence(
     # checks if monomer-specific MS2 signature ion fragments are to be added
     # if specified, signature ions are then added to fragment dict
     if add_signatures:
+        
         fragment_dict.update({
             'signatures': generate_monomer_ms2_signature_ions_sequence(
                 sequence=sequence,
                 signatures=signatures)})
-
+    
     return fragment_dict
 
 def apply_fragmentation_exceptions(
@@ -505,7 +504,8 @@ def generate_monomer_ms2_signature_ions_sequence(
     # get list of unique monomers within sequence
     monomers = return_monomers_sequence(
         sequence=sequence,
-        return_modified=False
+        return_modified=True,
+        return_set=True
     )
 
     # get list of signature ion id strings used to access signature ion values
@@ -518,16 +518,60 @@ def generate_monomer_ms2_signature_ions_sequence(
 
     # iterate through signature ion types and add to signature ion dictionary
     for signature in signatures:
+        
         if signature != "dominant":
             signature_ions = MS2_SIGNATURE_IONS[signature]
+            
+            sig_monomers = [
+                sig_ion[0] for sig_ion in signature_ions
+            ]
 
-            MS2_signature_dict.update(
-                {
-                    f'{signature}{monomer}': signature_ions[monomer]
-                    for monomer in monomers
-                    if monomer in signature_ions
-                }
-            )
+            sig_monomers = [
+                monomer for monomer in monomers
+                if monomer[0] in sig_monomers
+            ]
+
+            signature_ions = {
+                sig_ion[0]: [float(x) for x in sig_ion[1::]]
+                for sig_ion in signature_ions
+                if sig_ion[0] in [sig_mon[0] for sig_mon in sig_monomers]
+            }
+            
+            for monomer in sig_monomers: 
+
+                mod = remove_substrings_sequence(
+                    sequence=monomer,
+                    return_substrings=True
+                )
+
+
+                if not mod:
+                    mod_mass = 0
+
+                elif mod:
+                    mod=mod[0]
+                    mod = mod[1:len(mod)-1]
+                    mod_info = MODIFICATIONS[mod]
+                    mod_mass = mod_info["mass"]
+                    mod_mass_diff = mod_info["mass_diff"]["ms2"]
+                    try: 
+                        mod_mass_diff = float(mod_mass_diff)
+                    except ValueError:
+                        if mod_mass_diff[0] == "-":
+                            mod_mass_diff = -FG[mod_mass_diff[1::]]
+                        else:
+                            mod_mass_diff = FG[mod_mass_diff]
+                    mod_mass -= mod_mass_diff 
+                
+                signature_masses = [
+                    round(mass + mod_mass, 4) 
+                    for mass in signature_ions[monomer[0]]]
+                
+                signature_masses.extend(signature_ions[monomer[0]])
+
+                MS2_signature_dict.update(
+                    {
+                        f'{signature}{monomer}':list(set(signature_masses))})
 
     modifications = return_sequence_terminal_modifications(
         sequence=sequence

@@ -280,6 +280,7 @@ def confirm_fragments_sequence(
                     essential_signatures=essential_signatures
                 )
             )
+            
     # remove any duplicates from confirmed fragment list
     confirmed_fragments = list(set(confirmed_fragments))
 
@@ -465,7 +466,8 @@ def find_fragments_spectrum(
     # iterate through SIGNATURE FRAGMENTS
     for signature, signature_masses in fragment_dict['signatures'].items():
         
-        if signature.find('modification') == -1:
+        if type(signature_masses) == list:
+           
             # retrieve masses in spectrum that match fragment target masses
             matches = find_multiple_targets(
                 targets=signature_masses,
@@ -494,7 +496,7 @@ def find_fragments_spectrum(
             )
             if matches:
                 confirmed_fragments.append(mod)
-            print(f'{mod} of mass {mod_ions} confirmed')
+
     # check whether there are any essential signatures, i.e. signatures that
     # MUST be found in the spectrum for fragments to be confirmed
     if essential_signatures:

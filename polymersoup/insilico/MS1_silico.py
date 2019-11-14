@@ -367,7 +367,7 @@ def generate_ms1_mass_dictionary_adducts_losses(
     )
     
     # check for terminal modificatios; if specified, add these to massdict
-    if terminal_modifications_dict:
+    if terminal_modifications_dict.values():
 
         modified_seq_massdict = add_terminal_modification_MS1_massdict(
             massdict=MS1_neutral,
@@ -400,98 +400,3 @@ def generate_ms1_mass_dictionary_adducts_losses(
     )
     return MS1_adduct_dict
 
-def add_sidechain_modification_MS1_sequence(
-    sequence,
-    monomer_modifications_dict,
-    universal_modification,
-    max_total_modifications,
-    max_monomer_modifications,
-    universal_ms1_mass_shift=True
-):
-    """ This function creates a dictionary of all possible modified sequences 
-    and their masses for any core sequence.
-    
-    Arguments:
-        sequence {str} -- sequence string comprised of monomer one letter codes
-        monomer_modifications_dict {dict} -- dictionary containing the modifications
-            possible for each monomer.
-        universal_modification {bool} -- specifies whether the modification will
-            be added to every instance of the monomer within the sequence
-        max_total_modifications {int} -- maxmimum number of total modifications
-            that can be in any given sequence.
-        max_monomer_modifications {dict} -- dictionary containing monomers as
-            keys and individual monomer modification limits as values.
-    
-    Returns:
-        dictionary -- format: key = modified sequence,
-                              value = modified sequence mass
-    """
-    # create all possible modified sequences
-    sidechain_modified_sequences = create_sidechain_modification_sequence_strings(
-        sequence=sequence,
-        monomer_modifications_dict=monomer_modifications_dict,
-        universal_modification=universal_modification,
-        max_total_modifications=max_total_modifications,
-        max_monomer_modifications=max_monomer_modifications
-        )
-
-    # initiate modified sequence dictionary
-    sidechain_modified_sequence_dict = {}
-    
-    for modified_sequence in sidechain_modified_sequences:
-        
-        # find core sequence for each modified sequence
-        modified_sequence_mass = find_sequence_mass(sequence=modified_sequence, ms_level=1)
-        
-        # add modified sequence and mass to dictionary
-        sidechain_modified_sequence_dict[modified_sequence] = modified_sequence_mass
-        
-    return sidechain_modified_sequence_dict
-
-def add_sidechain_modification_MS1_massdict(
-    massdict,
-    monomer_modifications_dict,
-    universal_modification,
-    max_total_modifications,
-    max_monomer_modifications,
-    universal_ms1_mass_shift=True
-):
-    """ 
-    This function takes an MS1 sequence mass dictionary and adds a sidechain 
-    modification to every sequqence, returning a dictionary of modified sequence 
-    string and corresponding modified masses.
-
-    Arguments:
-        massdict {dict} -- dictionary of sequences and corresponding MS1 masses
-        monomer_modifications_dict {dict} -- dictionary containing the modifications
-            possible for each monomer.
-        universal_modification {bool} -- specifies whether the modification will
-            be added to every instance of the monomer within the sequence
-        max_total_modifications {int} -- maxmimum number of total modifications
-            that can be in any given sequence.
-        max_monomer_modifications {dict} -- dictionary containing monomers as
-            keys and individual monomer modification limits as values.
-
-    Returns:
-        side_modified_massdict (dict): dictionary of modified sequence strings and
-        masses
-    """
-    # initiate sidechain modified massdict
-    sidechain_modified_massdict = {}
-
-    # iterate through sequences and add modified sequence and modified sequence
-    # mass to dictionary
-    for sequence, masses in massdict.items():
-        sidechain_modified_massdict.update(
-            add_sidechain_modification_MS1_sequence(
-                sequence=sequence,
-                monomer_modifications_dict=monomer_modifications_dict,
-                universal_modification=universal_modification,
-                max_total_modifications=max_total_modifications,
-                max_monomer_modifications=max_monomer_modifications,
-                universal_ms1_mass_shift=universal_ms1_mass_shift
-            )
-        )
-
-    # return mass dictionary of sidechain modified sequences
-    return sidechain_modified_massdict

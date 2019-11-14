@@ -243,8 +243,9 @@ def remove_substrings_sequence(
             ])
 
             mod_indices.extend([x for x in range(i, mod_end+1)])
-            substrings.append(sequence[mod_indices[0]:mod_indices[-1]+1])
-            
+            substring = sequence[i:mod_indices[-1]+1]
+            substrings.append(substring)
+
     # check whether substrings are to be returned
     if return_substrings:
         return substrings
@@ -827,7 +828,6 @@ def generate_all_sequences(
                 ]
         )
     
-
     # check whether unique sequences or just compositions are to be returned 
     if not sequencing: 
         sequences = [
@@ -844,7 +844,7 @@ def generate_all_sequences(
     # remove sequences and / or compositions that do not exceed minimum
     # sequence length threshold specified
     sequences = [seq for seq in sequences if len(seq) >= min_length]
-
+    
     # check for 0 terminal tags to add to sequences; add if specified
     if start_tags:
         tagged_seqs = []
@@ -854,7 +854,7 @@ def generate_all_sequences(
                     start_tag + sequence for sequence in sequences])
                 
         sequences = tagged_seqs
-
+    
     # check for -1 terminal tags to add to sequences; add if specified
     if end_tags:
         tagged_seqs = []
@@ -864,7 +864,7 @@ def generate_all_sequences(
                     [sequence + end_tag for sequence in sequences])
 
         sequences = tagged_seqs
-
+    
     # again, check whether to return sequences or just compositions
     if not sequencing:
         sequences = [
@@ -875,6 +875,7 @@ def generate_all_sequences(
                 for sequence in sequences
         ]
 
+    
     # check for isobaric target sequences; if specified, return only sequences
     # that are isobaric to one or more of those targets 
     if isobaric_targets:
@@ -1250,8 +1251,6 @@ def add_terminal_modification_sequence_string(
             f"[{mod}]{sequence}"
             for mod in terminal_modification
         ]
-
-        print(f'modified sequences = {modified_sequences}')
         
     elif str(terminus) == "-1":        
         modified_sequences = [
