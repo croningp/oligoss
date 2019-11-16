@@ -302,7 +302,13 @@ def mass_difference_screen(parameters_dict):
                     
         # save json for each ripper containing dictionary of format:
         # {"spectrum_id": {"signature_type": [monomers found], "mass_diff": [monomers found]}
-        write_to_json(confirmed_monomers_dict, os.path.join(output_folder, f'{ripper_name}_mass_difference_screen.json'))
+        write_to_json(
+            write_dict=confirmed_monomers_dict, 
+            output_json=os.path.join(
+                output_folder, 
+                f'{ripper_name}_mass_difference_screen.json'
+            )
+        )
 
     return print(f'jsons saved to {output_folder}')
 
