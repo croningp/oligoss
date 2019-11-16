@@ -114,9 +114,9 @@
             },
             "start": 0,
             "end": 0,
-            "permissible_adducts": {
-                "pos": [],
-                "neg": []
+            "intrinsic_charge": {
+                "pos": 1,
+                "neg": null
             }
         },
 
@@ -124,17 +124,7 @@
             "terminus": -1,
             "mass_diff": {
                 "pos": "H",
-                "neg": "-H",
-                "exceptions": {
-                    "pos": {
-                        "-1": {
-                            "hydroxyA": {
-                                "mass_diff": 26.98709,
-                                "start": 0,
-                                "end": 1
-                            }
-                    }
-                }
+                "neg": "-H"
             },
             "fragmentation_unit": {
                 "pos": "ELONGATION_UNIT",
@@ -145,6 +135,31 @@
             "intrinsic_adducts": {
                 "pos": "H",
                 "neg": "-H"
+            },
+            "exceptions": {
+                "mass_diff": {
+                    "pos": {
+                        "-1": {
+                            "hydroxyA": {
+                                "mass_diff_value": 26.98709,
+                                "start": 0,
+                                "end": 1
+                            }
+                        }
+                    }
+                },
+                "intrinsic_ions": {
+                    "pos": {
+                        "-1": {
+                            "hydroxyA": {
+                                "intrinsic_adduct": null,
+                                "intrinsic_charge": 1,
+                                "start": 0,
+                                "end": 1
+                            }
+                        }
+                    }
+                }
             }
         },
 
@@ -196,25 +211,17 @@
 
     "MODIFICATIONS": {
         "Ole": {
-    
             "mass": 282.25589,
-    
             "termini": [0],
-    
             "side_chains_attachments": ["K", "R"],
-    
             "free_mod_fragments": {
                 "pos": [265.2532],
                 "neg": [281.2181]
             },
-    
-           
             "mass_diff": {
                 "ms1": "H2O",
                 "ms2": "H2O"
             },
-
-           
             "universal_ms2_shift": false
         },
         "Pal": {

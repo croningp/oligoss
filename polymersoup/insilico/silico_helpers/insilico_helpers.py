@@ -511,17 +511,19 @@ def return_core_sequence(
     return core_sequence
 
 def add_adducts_sequence_mass(
-    neutral_mass,
+    mass,
     adducts,
     min_z=1,
     max_z=None,
-    mode='pos'
+    mode='pos',
+    incoming_charge=0
 ):
     """
     This functions adds charged adducts to a neutral sequence mass.
 
     Arguments:
-        neutral_mass (float) -- neutral monoisotopic mass of sequence.
+        mass (float) -- neutral monoisotopic mass of sequence OR m/z if 
+            incoming_charge > 0.
         adducts (list) -- list of adduct strings. All adducts must be found
                         in either ANIONS or CATIONS dicts in
                         GlobalChemicalConstants.py.
@@ -532,6 +534,9 @@ def add_adducts_sequence_mass(
                         state of adduct ions (default: {None}).
         mode (str) -- either 'pos' or 'neg' for positive and negative mode
                         mass spectrometry, respectively (default: {'pos'}).
+        incoming_charge (int, optional): specifies charge associated with 
+            input mass. This will only be greater than 0 for MS2 fragments 
+            with intrinsic charges (e.g. peptide b fragments). Defaults to 0.
     Returns:
         charged_sequence_masses (list) -- list of m/z values for charged sequences
                         with adducts.
@@ -540,19 +545,21 @@ def add_adducts_sequence_mass(
     anions = [adduct for adduct in adducts if adduct in ANIONS]
     cations = [adduct for adduct in adducts if adduct in CATIONS]
 
-    if type(neutral_mass) != list:
-        neutral_mass = [neutral_mass]
+    if type(mass) != list:
+        masses = [mass]
+    else:
+        masses = mass
 
     # check whether counterions need to be considered for adducts which have the
     # opposite charge from mode. If so, return charged adducts from adduct_complex
     # function
     if (mode == 'pos' and len(anions) > 0) or (mode == 'neg' and len(cations) > 0):
         charged_sequence_masses = add_adduct_complexes_sequence_mass(
-            sequence,
-            neutral_mass,
-            adducts,
-            min_z,
-            max_z)
+            sequence='',
+            neutral_mass=mass,
+            adducts=adducts,
+            min_z=min_z,
+            max_z=max_z)
         return charged_sequence_masses
 
     # retrieve adduct masses and charges from GlobalChemicalConstants
@@ -582,7 +589,7 @@ def add_adducts_sequence_mass(
 
         for i in range(min_z, max_z+1):
             charged_sequence_masses.extend(
-                [(mass+adduct_mass)/i for mass in neutral_mass])
+                [(mass+adduct_mass)/i for mass in masses])
 
     #finally, return list of charged sequence m/z values
     return sorted(list(set(
