@@ -127,7 +127,12 @@
                 "neg": "-H",
                 "exceptions": {
                     "pos": {
-                        "-1": {"hydroxyA": "-OH"}
+                        "-1": {
+                            "hydroxyA": {
+                                "mass_diff": 26.98709,
+                                "start": 0,
+                                "end": 1
+                            }
                     }
                 }
             },

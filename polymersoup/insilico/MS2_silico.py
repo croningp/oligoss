@@ -354,10 +354,10 @@ def apply_fragmentation_exceptions(
                     exception_mass = float(exception_positions[pos][rxn_class])
                 except ValueError:
                     exception_key = exception_positions[pos][rxn_class]
-                if exception_key[0] == "-":
-                    exception_mass = -FG[exception_key[1::]]
-                else:
-                    exception_mass = FG[exception_key]
+                    if exception_key[0] == "-":
+                        exception_mass = -FG[exception_key[1::]]
+                    else:
+                        exception_mass = FG[exception_key]
                 return exception_mass
 
     return None
