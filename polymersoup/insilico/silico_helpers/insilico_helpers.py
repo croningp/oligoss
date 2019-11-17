@@ -304,11 +304,13 @@ def return_monomers_sequence(
             sequence=sequence,
             mod_markers=mod_markers
         )
-        return list(set([c for i,c in enumerate(core_sequence)]))
+        if return_set:
+            return list(set([c for i,c in enumerate(core_sequence)]))
+        return [c for i,c in enumerate(core_sequence)]
 
     # init list to store monomers
     monomers = []
-
+    
     # init list to store indices in sequence which are part of modification
     # substrings
     mod_indices = []
@@ -335,7 +337,6 @@ def return_monomers_sequence(
             sequence = sequence[0:mod_start]
     except KeyError:
         pass
-    
     # iterate through sequence, retrieving sidechain-modified monomers and 
     # adding them to list of monomers
     for i, c in enumerate(sequence):
@@ -347,22 +348,33 @@ def return_monomers_sequence(
                 if d == mod_markers[c] and j > i
             ])
 
-            monomers.append(sequence[i-1:mod_end+1])
+            # append monomer and its index to monomers list in format [m, i]
+            # where m = monomer string and i = index of its first character in
+            # sequence
+            monomers.append([sequence[i-1:mod_end+1], i-1])
+            
+            # get indices of all characters containing modified monomer 
+            # substrings so that unmodified monomers can be identified
             mod_indices.extend([
                 x for x in range(i-1, mod_end+1)
             ])
-    
-    # add non-sidechain-modified monomers to monomers list 
-    monomers.extend(
-        [c for i,c in enumerate(sequence)
-         if i not in mod_indices]
-    )
-    
-    # sort monomers by order they appear in sequence string
+
+    # extend monomers list with non-sidechain modified monomers and the index
+    # positions in sequence    
+    monomers.extend([
+        [c, i] for i, c in enumerate(sequence)
+        if i not in mod_indices])
+
+    # sort monomers by order they appear in sequence string and remove index
+    # markers
     monomers = sorted(
-        monomers, 
-        key=lambda monomer: sequence.find(monomer)
+        monomers,
+        key=lambda x: x[1]
     )
+    monomers = [x[0] for x in monomers]
+
+    print(f'mod_indices for {sequence} = {mod_indices}')
+    print(f'monomers for {sequence} = {monomers}')
     
     # return list of unique monomers if return_set is set to True
     if return_set:

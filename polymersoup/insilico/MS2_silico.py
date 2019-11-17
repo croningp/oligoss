@@ -63,6 +63,8 @@ def build_fragment_series_single_sequence(
         return_set=False
     )
 
+    print(f'at line 66, monomers for {sequence} = {monomers}')
+    
     # init values to add to start and end terminal fragments
     start_terminal_mass = 0
     end_terminal_mass = 0
@@ -96,7 +98,10 @@ def build_fragment_series_single_sequence(
                 start_terminal_mass += mod_mass 
             else: 
                 end_terminal_mass += mod_mass
-    
+    print(f'at line 101, monomers for {sequence} = {monomers}')
+    if sequence == 'HggH':
+        raise Exception(f'check {monomers} for {sequence}')
+
     # get sequence length from number of constituent monomers
     sequence_length = len(monomers)
 
@@ -119,8 +124,15 @@ def build_fragment_series_single_sequence(
         # create subsequence for current fragment
         subsequence = "".join(monomers[0:i+1])
 
+        
         current_fragment = f"{fragment_series}{i+1}"
         
+        # if i > 2: 
+        #     print(f'at line 126 {sequence}, {current_fragment} subsequence: {subsequence}')
+        #     proceed = input('proceed?')
+        #     if proceed.upper() != 'Y':
+        #         raise Exception('fuck')
+
         # get neutral monoisotopic mass of subsequence 
         neutral_fragment_masses = [find_sequence_mass(
             sequence=subsequence,
@@ -225,6 +237,12 @@ def build_fragment_series_single_sequence(
             final_frag_masses = modified_frag_masses
         else:
             final_frag_masses.extend(modified_frag_masses)
+
+        # if i > 2: 
+        #     print(f'at line 237 {sequence}, {current_fragment} subsequence: {subsequence}')
+        #     proceed = input('proceed?')
+        #     if proceed.upper() != 'Y':
+        #         raise Exception('fuck')
 
         # add fragment and neutral masses to frag_dict
         frag_dict[current_fragment] = list(set(
