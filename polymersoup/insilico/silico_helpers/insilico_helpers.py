@@ -372,9 +372,6 @@ def return_monomers_sequence(
         key=lambda x: x[1]
     )
     monomers = [x[0] for x in monomers]
-
-    print(f'mod_indices for {sequence} = {mod_indices}')
-    print(f'monomers for {sequence} = {monomers}')
     
     # return list of unique monomers if return_set is set to True
     if return_set:
