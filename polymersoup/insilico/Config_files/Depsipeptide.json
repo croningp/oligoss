@@ -124,7 +124,18 @@
             "terminus": -1,
             "mass_diff": {
                 "pos": "H",
-                "neg": "-H"
+                "neg": "-H",
+                "exceptions": {
+                    "pos": {
+                        "-1": {
+                            "hydroxyA": {
+                                "mass_diff": 26.98709,
+                                "start": 0,
+                                "end": 1
+                            }
+                        }
+                    }
+                }
             },
             "fragmentation_unit": {
                 "pos": "ELONGATION_UNIT",
