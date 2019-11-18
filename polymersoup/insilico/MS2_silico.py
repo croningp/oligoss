@@ -183,14 +183,15 @@ def build_fragment_series_single_sequence(
 
         if check_exceptions: 
 
+            check_adduct_exceptions = True
             try:
                 exception_info = frag_info["exceptions"]["intrinsic_ions"]
-                check_adduct_exceptions = True
             except KeyError:
                 check_adduct_exceptions = False 
         else:
             check_adduct_exceptions = False 
-
+            
+        
         current_frag_dict = add_adducts_ms2_fragments(
             fragment_dict=current_frag_dict,
             adducts=adducts,
@@ -501,8 +502,10 @@ def apply_fragmentation_intrinsic_ion_exceptions(
     try: 
         exception_positions = frag_info["exceptions"]["intrinsic_ions"][mode]
     except KeyError:
+        if subsequence[-1] == 'g' and frag_series == 'y':
+            raise Exception(f'for {subsequence}, {fragment_id} exceptions are broken')
         return None, None
-
+    
     # retrieve monomers in current fragment and get length of fragment 
     # subsequence
     subseq_monomers = return_monomers_sequence(
@@ -527,7 +530,7 @@ def apply_fragmentation_intrinsic_ion_exceptions(
         # get functional group of monomer at exception position and list of
         # functional groups to which an exception potentially applies 
         monomer = subseq_monomers[int(pos)][0]
-        rxn_classes = exception_positions[pos].keys()
+        rxn_classes = [rxn_class for rxn_class in exception_positions[pos]]
 
         # iterate through functional groups with possible exceptions to 
         # intrinsic ions, and check if monomer is a match 
@@ -544,10 +547,14 @@ def apply_fragmentation_intrinsic_ion_exceptions(
                 start_index = int(exception_info["start"])
                 end_index = len_precursor - int(exception_info["end"]) + 1
 
+                print(f'sequence, subsequence, fragment, monomer = {precursor_sequence}, {subsequence}, {fragment_id}, {monomer}')
+                print(f'exception_info = {exception_info}')
+                print(f'start, end index = {start_index}, {end_index}')
+                
                 # check whether fragment is in range for which exception to
                 # intrinsic ion rules apply 
-                if frag_index in range(start_index, end_index):
-                     
+                if int(frag_index) in range(start_index, end_index):
+
                     # check for intrinsic adduct exception
                     intrinsic_adduct = exception_info["intrinsic_adduct"]
                     
@@ -566,6 +573,7 @@ def apply_fragmentation_intrinsic_ion_exceptions(
                     # check for intrinsic charge exception 
                     intrinsic_charge = exception_info["intrinsic_charge"]
 
+                    # death is a suitable alternative to communism
                     # if intrinsic charge exception is found, ensure it is
                     # converted to int
                     if intrinsic_charge:
@@ -652,13 +660,14 @@ def add_adducts_ms2_fragments(
         # if exceptions to standard intrinsic ion rules are to be checked for, 
         # retrieve these exception values 
         if check_exceptions:
-
+            
+            fragment_id = [frag for frag in fragment_dict][0]
             # exc_adduct = intrinsic adduct exception
             # exc_charge = intrinsic_charge exception 
             exc_adduct, exc_charge = apply_fragmentation_intrinsic_ion_exceptions(
                 subsequence=subsequence,
                 mode=mode,
-                fragment_id=[frag for frag in fragment_dict][0],
+                fragment_id=fragment_id,
                 precursor_sequence=precursor_sequence
             )
 
