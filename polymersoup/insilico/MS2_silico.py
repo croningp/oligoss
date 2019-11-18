@@ -19,7 +19,9 @@ def build_fragment_series_single_sequence(
     losses=True,
     max_total_losses=None,
     loss_product_adducts=False,
-    check_exceptions=False
+    check_exceptions=False,
+    min_z=1,
+    max_z=1
 ):
     
     # define frag_info (makes nested dictionary navigation more readable)
@@ -41,8 +43,6 @@ def build_fragment_series_single_sequence(
             mod_markers=mod_markers
         )
         
-
-        
     # get fragment mass diff (i.e. mass difference between fragments and
     # equivalent sub-sequences)
     mass_diff = frag_info['mass_diff'][mode]
@@ -62,7 +62,7 @@ def build_fragment_series_single_sequence(
         return_modified=True,
         return_set=False
     )
-
+    
     # init values to add to start and end terminal fragments
     start_terminal_mass = 0
     end_terminal_mass = 0
@@ -96,7 +96,7 @@ def build_fragment_series_single_sequence(
                 start_terminal_mass += mod_mass 
             else: 
                 end_terminal_mass += mod_mass
-    
+
     # get sequence length from number of constituent monomers
     sequence_length = len(monomers)
 
@@ -119,6 +119,7 @@ def build_fragment_series_single_sequence(
         # create subsequence for current fragment
         subsequence = "".join(monomers[0:i+1])
 
+        
         current_fragment = f"{fragment_series}{i+1}"
         
         # get neutral monoisotopic mass of subsequence 
@@ -132,10 +133,11 @@ def build_fragment_series_single_sequence(
         if check_exceptions:
             
             # check for exceptions to fragment mass diff
-            frag_mass_exception = apply_fragmentation_exceptions(
+            frag_mass_exception = apply_fragmentation_mass_diff_exceptions(
                 fragment_id=current_fragment,
                 sub_sequence=subsequence,
-                mode=mode
+                mode=mode,
+                precursor_sequence=sequence
             )
            
         if not frag_mass_exception:
@@ -178,11 +180,28 @@ def build_fragment_series_single_sequence(
         
         # add non-intrinsic adducts to fragment masses 
         current_frag_dict = {current_fragment: neutral_fragment_masses}
+
+        if check_exceptions: 
+
+            check_adduct_exceptions = True
+            try:
+                exception_info = frag_info["exceptions"]["intrinsic_ions"]
+            except KeyError:
+                check_adduct_exceptions = False 
+        else:
+            check_adduct_exceptions = False 
+            
+        
         current_frag_dict = add_adducts_ms2_fragments(
             fragment_dict=current_frag_dict,
             adducts=adducts,
             mode=mode,
-            return_base_fragments=True
+            return_base_fragments=True,
+            subsequence=subsequence,
+            precursor_sequence=sequence,
+            min_z=min_z,
+            max_z=max_z,
+            check_exceptions=check_adduct_exceptions
         )
 
         # make sure all fragment masses (loss products + / - adducts)
@@ -220,7 +239,21 @@ def return_modification_signature_ions(
     sequence,
     mode
 ):
+    """
+    Takes a sequence with terminal modification(s) and returns signature ions
+    for modification(s)
+    
+    Args:
+        sequence (str): sequence string, e.g. '[Ole]AAV' 
+        mode (str): either 'pos' or ''neg' for positive and negative mode mass
+            spec, respectively 
+    
+    Returns:
+        dict: dict of modification codes and corresponding free signature 
+            fragment masses 
+    """
 
+    # retrieve terminal modifications for sequence at each terminus 
     terminal_modifications = return_sequence_terminal_modifications(
         sequence=sequence
     )
@@ -230,6 +263,8 @@ def return_modification_signature_ions(
     
     mod_signatures = {}
 
+    # iterate through found modifications and retrieve their free signature 
+    # fragments 
     for mod in terminal_modifications.values():
 
         mod_signatures.update(
@@ -296,7 +331,7 @@ def build_multiple_fragment_series_single_sequence(
     # iterate through fragment series list and update fragment dictionary for
     # each fragment type
     for series in fragment_series:
-        if 'exceptions' in FRAG_SERIES[series]["mass_diff"].keys():
+        if 'exceptions' in FRAG_SERIES[series].keys():
             check_exceptions = True
 
         fragment_dict.update(
@@ -320,11 +355,30 @@ def build_multiple_fragment_series_single_sequence(
     
     return fragment_dict
 
-def apply_fragmentation_exceptions(
+def apply_fragmentation_mass_diff_exceptions(
     fragment_id,
     sub_sequence,
-    mode
+    mode,
+    precursor_sequence
 ): 
+    """
+    Checks whether a particular fragment does not obey standard fragmentation 
+    rules for its fragment series and returns alternative mass_diff for fragment
+    if an exception to standard fragmentation rules applies - e.g. positive mode 
+    y-fragments terminating in a hydroxy acid. 
+    
+    Args:
+        fragment_id (str): fragment one letter code followed by fragment index 
+        sub_sequence (str): string representation of sequence fragment 
+        mode (str): specifies mass spec mode - either "pos" for positive or 
+            "neg" for negative
+        precursor_sequence (str): full precursor sequence string 
+    
+    Returns:
+        None or float: returns None if no exceptions to standard rules apply, 
+            float equal to mass difference to apply to fragment if an exception
+            does apply
+    """
     
     # get monomers, listed in order they appear in subsequence
     monomers = return_monomers_sequence(
@@ -333,40 +387,212 @@ def apply_fragmentation_exceptions(
         return_modified=True
     )
 
+    # get monomers for precursor sequence - this is used to keep track of 
+    # where current fragmnent is relative to each terminus. As some exceptions
+    # may be conditional on fragment position, this information is required to 
+    # avoid mistakes in the final in silico MS2 fragment predictions 
+    precursor_monomers= return_monomers_sequence(
+        sequence=precursor_sequence,
+        return_modified=True,
+        return_set=False
+    )
+
+    # get length of precursor sequence
+    precursor_len = len(precursor_monomers)
+
     # get fragment series and index from fragment id
     fragment_series = fragment_id[0]
 
+    # retrieve fragment information from polymer-specific config file
+    frag_info = FRAG_SERIES[fragment_series]
+
     try:
         # get positions of exceptions and their reactivity classes 
-        exception_positions = FRAG_SERIES[fragment_series]["mass_diff"]["exceptions"][mode]
+        exception_positions = frag_info["exceptions"]["mass_diff"][mode]
     except KeyError:
         return None
 
+    # iterate through specified positions in sub_sequence where fragmentation]
+    # exceptions may apply and work out if exceptions do apply 
     for pos in exception_positions:
         
+        # work out which monomer is present at exception position 
         monomer = monomers[int(pos)][0]
 
+        # work out which functional group(s) cause an exception to standard 
+        # fragmentation rules
         rxn_classes = exception_positions[pos].keys()
         
+        # work out if any functional groups in monomer are in the list of 
+        # functional groups that cause exceptions to standard fragmentation
+        # rules 
         for rxn_class in rxn_classes:
             if monomer in REACTIVITY_CLASSES[rxn_class][1]:
+
+                # monomer has been identified as having exception to standard
+                # fragmentation rules, so retrieve info on the alternative 
+                # fragmentation pathway
+                exception_info = exception_positions[pos][rxn_class]
+                
+                # retrieve mass difference to add to subsequence for 
+                # alternative fragmentation pathway - this info is stored in 
+                # the polymer-specific config file either as a float or a
+                # string code representing a float - NOTE: string code must
+                # be found in FG dict in GlobalChemicalConstants.py
                 try:
-                    exception_mass = float(exception_positions[pos][rxn_class])
+                    exception_mass = float(exception_info["mass_diff_value"])
                 except ValueError:
-                    exception_key = exception_positions[pos][rxn_class]
+                    exception_key = exception_info["mass_diff_value"]
                     if exception_key[0] == "-":
                         exception_mass = -FG[exception_key[1::]]
                     else:
                         exception_mass = FG[exception_key]
+                
+                # check whether exception to fragmentation rules starts at 
+                # a specific point in the fragment series (relative to starting
+                # terminus for series)
+                if "start" in exception_info:
+                    start_index = int(exception_info["start"]) + 1 
+                else:
+                    start_index = 1
+
+                # check whether exception to fragmentation rules ends at a 
+                # a specific point in the fragment series (relative to ending
+                # terminus for series)
+                if "end" in exception_info:
+                    end_index = precursor_len - int(exception_info["end"]) + 1
+                else:
+                    end_index = precursor_len + 1
+
+                # cancel exception if fragment id not in range of start, end
+                if int(fragment_id[1::]) not in range(start_index, end_index):
+                    return None
+
                 return exception_mass
 
     return None
 
+def apply_fragmentation_intrinsic_ion_exceptions(
+    subsequence,
+    mode,
+    fragment_id,
+    precursor_sequence
+):
+    """
+    [summary]
+    
+    Args:
+        subsequence ([type]): [description]
+        mode ([type]): [description]
+        fragment_id ([type]): [description]
+        precursor_sequence ([type]): [description]
+    
+    Returns:
+        [type]: [description]
+    """
+
+    # get fragment series one letter code and fragment index from fragment id
+    frag_series, frag_index = fragment_id[0], fragment_id[1::]
+
+    # retrieve fragment series info from polymer-specific config file
+    frag_info = FRAG_SERIES[frag_series]
+
+    # check whether exceptions to intrinsic ions apply to fragment in current
+    # mode; if not, return no exceptions 
+    try: 
+        exception_positions = frag_info["exceptions"]["intrinsic_ions"][mode]
+    except KeyError:
+        if subsequence[-1] == 'g' and frag_series == 'y':
+            raise Exception(f'for {subsequence}, {fragment_id} exceptions are broken')
+        return None, None
+    
+    # retrieve monomers in current fragment and get length of fragment 
+    # subsequence
+    subseq_monomers = return_monomers_sequence(
+        sequence=subsequence,
+        return_set=False,
+        return_modified=True
+    )
+
+    # retrieve monomers in unfragmented precursor sequence and work out its
+    # length
+    precursor_monomers = return_monomers_sequence(
+        sequence=precursor_sequence,
+        return_set=False,
+        return_modified=True
+    )
+    len_precursor = len(precursor_monomers)
+
+    # iterate through exception positions in exception_info and work out if
+    # exceptions to intrinsic adducts and / or charges apply 
+    for pos in exception_positions: 
+
+        # get functional group of monomer at exception position and list of
+        # functional groups to which an exception potentially applies 
+        monomer = subseq_monomers[int(pos)][0]
+        rxn_classes = [rxn_class for rxn_class in exception_positions[pos]]
+
+        # iterate through functional groups with possible exceptions to 
+        # intrinsic ions, and check if monomer is a match 
+        for rxn_class in rxn_classes:
+            
+            # check whether monomer contains current functional group / rxn_class
+            if monomer in REACTIVITY_CLASSES[rxn_class][1]:
+                
+                # retrieve info on exception to intrinsic ion rules
+                exception_info = exception_positions[pos][rxn_class]
+
+                # get start, end positions (relative to start, end terminus)
+                # at which exceptions apply 
+                start_index = int(exception_info["start"])
+                end_index = len_precursor - int(exception_info["end"]) + 1
+
+                print(f'sequence, subsequence, fragment, monomer = {precursor_sequence}, {subsequence}, {fragment_id}, {monomer}')
+                print(f'exception_info = {exception_info}')
+                print(f'start, end index = {start_index}, {end_index}')
+                
+                # check whether fragment is in range for which exception to
+                # intrinsic ion rules apply 
+                if int(frag_index) in range(start_index, end_index):
+
+                    # check for intrinsic adduct exception
+                    intrinsic_adduct = exception_info["intrinsic_adduct"]
+                    
+                    # if intrinsic adduct exception is found, retrieve its 
+                    # mass. NOTE: it is assumed that the charge of this
+                    # adduct is 1
+                    if intrinsic_adduct: 
+                        try:
+                            intrinsic_adduct = float(intrinsic_adduct)
+                        except ValueError:
+                            if intrinsic_adduct[0] == '-':
+                                intrinsic_adduct = -FG[intrinsic_adduct[1::]]
+                            else:
+                                intrinsic_adduct = FG[intrinsic_adduct]
+
+                    # check for intrinsic charge exception 
+                    intrinsic_charge = exception_info["intrinsic_charge"]
+
+                    # death is a suitable alternative to communism
+                    # if intrinsic charge exception is found, ensure it is
+                    # converted to int
+                    if intrinsic_charge:
+                        intrinsic_charge = int(intrinsic_charge)
+                    
+                    return intrinsic_adduct, intrinsic_charge
+
+    return None, None
+    
 def add_adducts_ms2_fragments(
     fragment_dict,
     adducts,
+    subsequence,
+    precursor_sequence,
     mode='pos',
-    return_base_fragments=True
+    return_base_fragments=True,
+    check_exceptions=False,
+    min_z=1,
+    max_z=1
 ):
     """
     This function takes a dictionary of MS2 fragments and associated m/z
@@ -384,7 +610,13 @@ def add_adducts_ms2_fragments(
                         respectively (default: {'pos'})
         return_base_fragments {bool} -- specific whether to return input
                         fragment masses in adduct list (default: {True})
-
+        check_exceptions (bool, optional): specifies whether to check for
+            exceptions to standard adduct and charge rules. Defaults to False
+        min_z (int, optional): sets minimum charge for MS2 fragments. Defaults
+            to 1
+        max_z (int, optional): sets maximum charge for MS2 fragments. Defaults
+            to 1
+        
     Raises:
         Exception: raised if any of the input adducts do not match the
                     detection mode (i.e. anions in positive mode, cations in
@@ -398,6 +630,8 @@ def add_adducts_ms2_fragments(
     # list fragments, excluding monomer-specific signature ion fragments
     fragments = [key for key in fragment_dict if key != 'signatures']
 
+    if len(fragments) > 1:
+        raise Exception(f'rethink for {fragment_dict}')
     # retrieve fragment series (i.e. fragment one letter codes) for all 
     # fragments in fragment_dict
     fragment_series = list(set(
@@ -422,17 +656,42 @@ def add_adducts_ms2_fragments(
         # added to fragments as default by fragment builder and therefore must
         # be removed before addition of non-standard adducts to fragments
         intrinsic_adduct = 0
-        if 'intrinsic_adducts' in frag_info:
-            intrinsic_adduct = frag_info['intrinsic_adducts'][mode]
-            if type(intrinsic_adduct) == str:
-                intrinsic_adduct = FG[intrinsic_adduct]
 
-        # some fragment series have intrinsic charges (not adducts) and are
-        # not found with extra adducts in a singly charged state - e.g.
-        # peptide b fragments
-        if 'permissible_adducts' in frag_info:
-            adducts = [adduct for adduct in adducts
-            if adduct in frag_info['permissible_adducts'][mode]]
+        # if exceptions to standard intrinsic ion rules are to be checked for, 
+        # retrieve these exception values 
+        if check_exceptions:
+            
+            fragment_id = [frag for frag in fragment_dict][0]
+            # exc_adduct = intrinsic adduct exception
+            # exc_charge = intrinsic_charge exception 
+            exc_adduct, exc_charge = apply_fragmentation_intrinsic_ion_exceptions(
+                subsequence=subsequence,
+                mode=mode,
+                fragment_id=fragment_id,
+                precursor_sequence=precursor_sequence
+            )
+
+        else:
+            exc_adduct, exc_charge = None, None
+
+        if not exc_adduct:
+            if 'intrinsic_adducts' in frag_info:
+                intrinsic_adduct = frag_info['intrinsic_adducts'][mode]
+                if type(intrinsic_adduct) == str:
+                    if intrinsic_adduct[0] == '-':
+                        intrinsic_adduct = -FG[intrinsic_adduct[1::]]
+                    else:
+                        intrinsic_adduct = FG[intrinsic_adduct]
+        else:
+            intrinsic_adduct = exc_adduct
+        
+        if exc_charge: 
+            intrinsic_charge = exc_charge
+        else:
+            if 'intrinsic_charge' in FRAG_SERIES[series]:
+                intrinsic_charge = int(FRAG_SERIES[series]['intrinsic_charge'][mode])
+            else:
+                intrinsic_charge = 0
 
         # organise adducts by type - cationic or anionic
         cations = [adduct for adduct in adducts if adduct in CATIONS]
@@ -450,16 +709,19 @@ def add_adducts_ms2_fragments(
         # iterate through fragments in series, adding adduct masses
         for fragment, masses in current_fragments.items():
             adduct_masses = []
-            for mass in masses:
-                mass -= intrinsic_adduct
-                adduct_masses.extend(add_adducts_sequence_mass(
-                    neutral_mass=mass,
-                    adducts=adducts,
-                    min_z=1,
-                    max_z=1,
-                    mode=mode
+            if intrinsic_charge >= max_z: 
+                pass
+            else:
+                for mass in masses:
+                    mass -= intrinsic_adduct
+                    adduct_masses.extend(add_adducts_sequence_mass(
+                        mass=mass,
+                        adducts=adducts,
+                        min_z=min_z,
+                        max_z=max_z,
+                        mode=mode
+                    )
                 )
-            )
 
             # if standard fragments (i.e. with unchanged input masses) are to
             # be returned, include these in output adduct_masses list

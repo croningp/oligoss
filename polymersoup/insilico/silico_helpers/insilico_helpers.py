@@ -304,11 +304,13 @@ def return_monomers_sequence(
             sequence=sequence,
             mod_markers=mod_markers
         )
-        return list(set([c for i,c in enumerate(core_sequence)]))
+        if return_set:
+            return list(set([c for i,c in enumerate(core_sequence)]))
+        return [c for i,c in enumerate(core_sequence)]
 
     # init list to store monomers
     monomers = []
-
+    
     # init list to store indices in sequence which are part of modification
     # substrings
     mod_indices = []
@@ -335,7 +337,6 @@ def return_monomers_sequence(
             sequence = sequence[0:mod_start]
     except KeyError:
         pass
-    
     # iterate through sequence, retrieving sidechain-modified monomers and 
     # adding them to list of monomers
     for i, c in enumerate(sequence):
@@ -347,22 +348,30 @@ def return_monomers_sequence(
                 if d == mod_markers[c] and j > i
             ])
 
-            monomers.append(sequence[i-1:mod_end+1])
+            # append monomer and its index to monomers list in format [m, i]
+            # where m = monomer string and i = index of its first character in
+            # sequence
+            monomers.append([sequence[i-1:mod_end+1], i-1])
+            
+            # get indices of all characters containing modified monomer 
+            # substrings so that unmodified monomers can be identified
             mod_indices.extend([
                 x for x in range(i-1, mod_end+1)
             ])
-    
-    # add non-sidechain-modified monomers to monomers list 
-    monomers.extend(
-        [c for i,c in enumerate(sequence)
-         if i not in mod_indices]
-    )
-    
-    # sort monomers by order they appear in sequence string
+
+    # extend monomers list with non-sidechain modified monomers and the index
+    # positions in sequence    
+    monomers.extend([
+        [c, i] for i, c in enumerate(sequence)
+        if i not in mod_indices])
+
+    # sort monomers by order they appear in sequence string and remove index
+    # markers
     monomers = sorted(
-        monomers, 
-        key=lambda monomer: sequence.find(monomer)
+        monomers,
+        key=lambda x: x[1]
     )
+    monomers = [x[0] for x in monomers]
     
     # return list of unique monomers if return_set is set to True
     if return_set:
@@ -511,17 +520,19 @@ def return_core_sequence(
     return core_sequence
 
 def add_adducts_sequence_mass(
-    neutral_mass,
+    mass,
     adducts,
     min_z=1,
     max_z=None,
-    mode='pos'
+    mode='pos',
+    incoming_charge=0
 ):
     """
     This functions adds charged adducts to a neutral sequence mass.
 
     Arguments:
-        neutral_mass (float) -- neutral monoisotopic mass of sequence.
+        mass (float) -- neutral monoisotopic mass of sequence OR m/z if 
+            incoming_charge > 0.
         adducts (list) -- list of adduct strings. All adducts must be found
                         in either ANIONS or CATIONS dicts in
                         GlobalChemicalConstants.py.
@@ -532,6 +543,9 @@ def add_adducts_sequence_mass(
                         state of adduct ions (default: {None}).
         mode (str) -- either 'pos' or 'neg' for positive and negative mode
                         mass spectrometry, respectively (default: {'pos'}).
+        incoming_charge (int, optional): specifies charge associated with 
+            input mass. This will only be greater than 0 for MS2 fragments 
+            with intrinsic charges (e.g. peptide b fragments). Defaults to 0.
     Returns:
         charged_sequence_masses (list) -- list of m/z values for charged sequences
                         with adducts.
@@ -540,19 +554,21 @@ def add_adducts_sequence_mass(
     anions = [adduct for adduct in adducts if adduct in ANIONS]
     cations = [adduct for adduct in adducts if adduct in CATIONS]
 
-    if type(neutral_mass) != list:
-        neutral_mass = [neutral_mass]
+    if type(mass) != list:
+        masses = [mass]
+    else:
+        masses = mass
 
     # check whether counterions need to be considered for adducts which have the
     # opposite charge from mode. If so, return charged adducts from adduct_complex
     # function
     if (mode == 'pos' and len(anions) > 0) or (mode == 'neg' and len(cations) > 0):
         charged_sequence_masses = add_adduct_complexes_sequence_mass(
-            sequence,
-            neutral_mass,
-            adducts,
-            min_z,
-            max_z)
+            sequence='',
+            neutral_mass=mass,
+            adducts=adducts,
+            min_z=min_z,
+            max_z=max_z)
         return charged_sequence_masses
 
     # retrieve adduct masses and charges from GlobalChemicalConstants
@@ -582,7 +598,7 @@ def add_adducts_sequence_mass(
 
         for i in range(min_z, max_z+1):
             charged_sequence_masses.extend(
-                [(mass+adduct_mass)/i for mass in neutral_mass])
+                [(mass+adduct_mass)/i for mass in masses])
 
     #finally, return list of charged sequence m/z values
     return sorted(list(set(

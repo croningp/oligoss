@@ -124,7 +124,7 @@ def add_adducts_ms1_massdict(
     # adduct_massdict
     for sequence, neutral_mass in massdict.items():
         adduct_massdict[sequence] = add_adducts_sequence_mass(
-            neutral_mass=neutral_mass,
+            mass=neutral_mass,
             adducts=adducts,
             min_z=min_z,
             max_z=max_z,
