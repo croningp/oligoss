@@ -479,16 +479,32 @@ def apply_fragmentation_intrinsic_ion_exceptions(
     precursor_sequence
 ):
     """
-    [summary]
+    Works out if an MS2 fragment does not follow standard ionization rules for
+    its polymer type and / or fragment series. This is done for: 
+
+        1. Intrinsic adducts - i.e. exchangable ions which, by default, are 
+            associated with a given fragment series (e.g. '+H' adducts for
+            peptide y fragments in positive mode)
+        2. Intrinsic charge - i.e. non-exchangable charge states which are 
+            inherent to fragments formed in a given series (e.g. positively
+            charged C=O acylium ions in peptide b fragments)
     
+    If fragment obeys standard rules for intrinsic adducts and charges None, 
+    None is returned. Otherwise, the non-standard values are returned 
     Args:
-        subsequence ([type]): [description]
-        mode ([type]): [description]
-        fragment_id ([type]): [description]
-        precursor_sequence ([type]): [description]
+        subsequence (str): string representation of sequence fragment
+        mode (str): either 'pos' or 'neg' to specify positive and negative mode
+            mass spectrometry, respectively
+        fragment_id (str): fragment one letter code followed by string of its
+            index (e.g. 'b12', 'y3' etc...)
+        precursor_sequence (str): string representation of precursor sequence
+            that has been fragmented 
     
     Returns:
-        [type]: [description]
+       float, int or float, None or None, int or None, None : non-standard 
+        valyues for intrinsic adduct and intrinsic adduct if found. If standard
+        values are to be used for one or more of these properties, None is
+        returned
     """
 
     # get fragment series one letter code and fragment index from fragment id
@@ -546,10 +562,6 @@ def apply_fragmentation_intrinsic_ion_exceptions(
                 # at which exceptions apply 
                 start_index = int(exception_info["start"])
                 end_index = len_precursor - int(exception_info["end"]) + 1
-
-                print(f'sequence, subsequence, fragment, monomer = {precursor_sequence}, {subsequence}, {fragment_id}, {monomer}')
-                print(f'exception_info = {exception_info}')
-                print(f'start, end index = {start_index}, {end_index}')
                 
                 # check whether fragment is in range for which exception to
                 # intrinsic ion rules apply 
@@ -604,6 +616,9 @@ def add_adducts_ms2_fragments(
                             of associated masses. See function:
                             build_fragment_series_single_sequence.
         adducts (list) -- list of adducts to be added to MS2 fragments.
+        subsequence (str): string representation of sequence fragment
+        precursor_sequence (str): string representation of precursor sequence
+            that has been fragmented
 
     Keyword Arguments:
         mode {str} -- either 'pos' or 'neg' for positive and negative mode,
@@ -625,7 +640,11 @@ def add_adducts_ms2_fragments(
 
     Returns:
         adduct_fragdict -- dictionary of fragment string codes and associated
-                        m/z value lists with adducts. ALL IN +1 CHARGE STATE.
+                        m/z value lists with adducts.   NOTE: extra adducts will
+                        not be added to fragments with intrinsic charges (e.g. 
+                        peptide b fragments in positive mode) unless combined
+                        charge of intrinsic charge and adduct in range of
+                        (min_z, max_z)
     """
     # list fragments, excluding monomer-specific signature ion fragments
     fragments = [key for key in fragment_dict if key != 'signatures']
