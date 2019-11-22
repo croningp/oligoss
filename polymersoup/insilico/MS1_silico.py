@@ -389,7 +389,6 @@ def generate_ms1_mass_dictionary_adducts_losses(
     else:
         MS1_neutral = MS1_neutral
 
-    
     MS1_adduct_dict = add_adducts_ms1_massdict(
         massdict=MS1_neutral,
         adducts=adducts,

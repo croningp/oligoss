@@ -583,23 +583,32 @@ def add_adducts_sequence_mass(
     # iterate through adducts and return m/z values of charged species
     # include multiply charged species that fit within constrains of min_z, max_z
     # and ion oxidation states given in GlobalChemicalConstants
+    
     for adduct in adducts:
+        
         adduct_mass = ions[adduct][0]
-        min_charge = ions[adduct][1]
-        max_charge = ions[adduct][2]
-
+        min_charge = int(ions[adduct][1])
+        max_charge = int(ions[adduct][2])
+    
+            
         # get maximum and minimum charge - either specified or use default
         # minimum and maximum charge states of adducts from
         # GlobalChemicalConstants
+        
         if not max_z:
-            max_z = max_charge
-        # add more comments
-        min_z, max_z = max([min_z, min_charge]), min([max_z, max_charge])
+            maximum_charge = max_charge
+        else:
+            maximum_charge = min([int(max_z), max_charge])
 
-        for i in range(min_z, max_z+1):
+        # add more comments
+        min_z = max([min_z, min_charge])
+
+        for i in range(min_z, maximum_charge+1):
+            
             charged_sequence_masses.extend(
                 [(mass+adduct_mass)/i for mass in masses])
 
+    
     #finally, return list of charged sequence m/z values
     return sorted(list(set(
                 [float(f"{mass:0.4f}")
