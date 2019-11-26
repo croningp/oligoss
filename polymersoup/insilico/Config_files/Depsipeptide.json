@@ -237,7 +237,7 @@
         },
         "Pal": {
             "mass": 256.24024,
-            "terminus": [0],
+            "termini": [0],
             "side chain attachments": ["K", "R"],
             "free_mod_fragments": {
                 "pos": [239.2375],
@@ -251,7 +251,7 @@
         },
         "Ace": {
             "mass": 60.02114,
-            "terminus": [0],
+            "termini": [0],
             "side chain attachments": ["K", "R"],
             "free_mod_fragmnts": {
                 "pos": [],
@@ -265,7 +265,7 @@
         },
         "Fmc": {
             "mass": 240.07866,
-            "terminus": [-1],
+            "termini": [-1],
             "side chain attachments": ["D", "E"],
             "free_mod_fragments": {
                 "pos": [],
@@ -279,7 +279,7 @@
         },
         "Tbu": {
             "mass": 74.07317,
-            "terminus": null,
+            "termini": null,
             "side chain attachments": [],
             "free_mod_fragments": {
                 "pos": [],
@@ -293,7 +293,7 @@
         },
         "Trt": {
             "mass": 260.12012,
-            "terminus": null,
+            "termini": null,
             "side chain attachments": ["S", "T"],
             "free_mod_fragments": {
                 "pos": [],
@@ -307,7 +307,7 @@
         },
         "Boc": {
             "mass": 118.06301,
-            "terminus": [0],
+            "termini": [0],
             "side chain attachments": [],
             "free_mod_fragments": {
                 "pos": [],
@@ -321,7 +321,7 @@
         },
         "Bnz": {
             "mass": 108.05751,
-            "terminus": null,
+            "termini": null,
             "side chain attachments": ["E", "D"],
             "free_mod_fragments": {
                 "pos": [105.03349],
@@ -335,7 +335,7 @@
         },
         "Tfa": {
             "mass": 113.99287,
-            "terminus": null,
+            "termini": null,
             "side chain attachments": ["K", "R"],
             "free_mod_fragments": {
                 "pos": [96.99012],
