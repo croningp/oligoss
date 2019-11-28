@@ -453,7 +453,7 @@ FRAG_SERIES_PY = {
             "neg": ELONGATION_UNIT
         },
         "start": 0,
-        "end": 0,
+        "end": 1,
         "permissible_adducts": {
             "pos": [],
             "neg": []
