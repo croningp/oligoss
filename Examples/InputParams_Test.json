@@ -97,7 +97,6 @@
         "ms2_Rt_flexible": true,
         "min_viable_confidence": 40,
         "min_relative_intensity": null,
-        "plot_EICs": true,
 
         "cyclic_parameters": {
             "min_shifted_fragments": 0,
