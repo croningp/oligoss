@@ -331,7 +331,7 @@ def assign_confidence_sequence(
     Returns:
         confidence (float): final confidence assignment (in %).
     """
-    print(f"in silico fragments = {insilico_fragments}")s
+    print(f"in silico fragments = {insilico_fragments}")
     print(f"confirmed fragments = {confirmed_fragments}")
     
     if type(insilico_fragments) == dict:
