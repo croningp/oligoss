@@ -20,7 +20,8 @@
         "V": [117.07899, [["amine", 1], ["carboxyl", 1]]],
         "W": [204.08989, [["amine", 1], ["carboxyl", 1]]],
         "Y": [181.07391, [["amine", 1], ["carboxyl", 1]]],
-        "g": [76.01606, [["hydroxyA", 1], ["carboxyl", 1]]]
+        "g": [76.01606, [["hydroxyA", 1], ["carboxyl", 1]]],
+        "c": [169.00449, [["amine", 1], "carboxyl", 1]]
 
     },
 
