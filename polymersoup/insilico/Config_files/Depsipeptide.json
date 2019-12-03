@@ -51,7 +51,8 @@
         "N" : ["NH3", "H2O"],
         "R": ["NH3"],
         "K": ["NH3"],
-        "Q" : ["NH3"]
+        "Q" : ["NH3"],
+        "c": ["H2O"]
     },
 
     "IONIZABLE_SIDECHAINS": {
