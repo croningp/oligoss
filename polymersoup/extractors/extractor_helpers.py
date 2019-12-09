@@ -558,32 +558,78 @@ def filter_monomer_fingerprints(
     # Return results
     return spectra
 
-def find_common_peaks_massdiff_spectra(
-    spectral_assignments
-):
+def find_common_peaks_massdiff_spectra(spectral_assignments: dict) -> dict:
+    """
+    This function takes a dict of spectral assignments, with spectra identified
+    as containing monomer-specific mass differences and / or signature ions and
+    finds peaks that match potential ladders for two or more monomers. 
+    NOTE: for full format of this dict, see output of 
+    'filter_monomer_fingerprints' function (also in extractor_helpers.py). 
+    
+    Args:
+        spectral_assignments (dict): dict of spectrum ids and associated 
+            monomer massdiffs and / or signatures that have been identified
+            from 'filter_monomer_fingerprints' function. Format: 
+            {
+                'spectrum_id': {
+                    'retention_time': retention_time (float),
+                    'precursor': precursor (float),
+                    'monomer1': {
+                        'signatures': [peak (float),...]
+                        'mass_diffs': [peak (float),...]
+                    },
+                    'monomer2': {
+                        'signatures': [peak (float),...],
+                        'mass_diffs': [peak (float),...]
+                    },
+                    ... 
+                },
+                ...
+            }
+            where signatures list contains specific signature ions identified 
+            for monomer and mass_diffs list contains peaks which are separated
+            from one or more peak by a mass corresponding to target monomer. 
+    
+    Returns:
+        dict: dict of spectral assignments, with an extra key-value pair added
+            for peaks in 'mass_diffs' list which are common to two or more 
+            monomers
+    """
 
+    # iterate through spectra and their monomer fingerprint assignments 
     for spectrum_id, mdiffs in spectral_assignments.items():
         
-        print(f'mdiffs = {mdiffs}')
+        # identify mass_diff peaks for eahc monomer 
         monomer_massdiffs = {
             monomer: sorted(list(set(mdiffs[monomer]['mass_diffs'])), reverse=True)
             for monomer in mdiffs
             if monomer != 'retention_time' and monomer != 'precursor'}
 
+        # init lists to store ALL identified peaks for all monomers and peaks 
+        # that are common to two or more monomers
         all_peaks, common_peaks = [], []
         
+        # check whether info for more than one monomer has been found; if not,
+        # no common peaks will be found so pass
         if len([key for key in monomer_massdiffs]) == 1:
             pass 
         else:
+
+            # iterate through mass diff peaks for each monomer and add to list
+            # of ALL peaks
             for peaks in monomer_massdiffs.values():
                 all_peaks.extend(peaks)
             
+            # for each peak, check whether it occurs more than once; if so, it
+            # must be found in mass diffs for more than one monomer - add to
+            # common peaks list 
             for peak in all_peaks: 
                 if all_peaks.count(peak) > 1: 
                     common_peaks.append(peak)
-            
+        
+        # update input dict with 'common_peaks' and list of common peaks
         spectral_assignments[spectrum_id].update(
-            {'common_peaks': sorted(common_peaks, reverse=True)})
+            {'common_peaks': list(set(sorted(common_peaks, reverse=True)))})
 
     return spectral_assignments 
 
