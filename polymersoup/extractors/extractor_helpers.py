@@ -452,7 +452,6 @@ def filter_monomer_fingerprints(
     dominant_signatures = monomer_massdiffs['dominant_signatures']
     monomer_massdiffs.pop('dominant_signatures')
 
-    print(f'monomer_massdiffs = {monomer_massdiffs}')
     # Iterate through each spectrum
     for spec_id, spectrum in msdata.items():
 
@@ -475,8 +474,6 @@ def filter_monomer_fingerprints(
 
         # Get spectrum peaks, sorted form the most intense
         spectrum_peaks = _sort_spectrum_peaks_by_intensity(spectrum)
-
-        print(f'10 spectrum peaks = {spectrum_peaks[0:10]}')
 
         # Go through each monomer fingerprint and identify diagnostic
         # signature ions and / or massdiffs between peaks to indicate monomer
@@ -536,6 +533,7 @@ def filter_monomer_fingerprints(
                     # combine matches 
                     matches = match1
                     matches.extend(match2)
+                    matches.append(peak_mass)
                     matches = sorted(list(set(matches)), reverse=True)
 
                     # if matches for monomer massdiff have been found, update
@@ -627,9 +625,12 @@ def find_common_peaks_massdiff_spectra(spectral_assignments: dict) -> dict:
                 if all_peaks.count(peak) > 1: 
                     common_peaks.append(peak)
         
+        # remove duplicates from common peaks and sort in descending order 
+        common_peaks = sorted(list(set(common_peaks)), reverse=True)
+
         # update input dict with 'common_peaks' and list of common peaks
         spectral_assignments[spectrum_id].update(
-            {'common_peaks': list(set(sorted(common_peaks, reverse=True)))})
+            {'common_peaks': common_peaks})
 
     return spectral_assignments 
 
@@ -640,7 +641,9 @@ def _sort_spectrum_peaks_by_intensity(spectrum: dict) -> list:
         spectrum (dict): Spectra information.
 
     Returns:
-        List[float]: List of peaks sorted by the most intense.
+        List[list]: List of peaks sorted by the most intense. NOTE: peaks are
+            in format [mz, I] where mz, I = m/z and intensity value of peak
+
     """
 
     # Get the mass list from the spectrum and convert to 4pt float

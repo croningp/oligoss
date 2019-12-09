@@ -106,10 +106,14 @@ def get_subsequence_coverage(
             confirmed_indeces
         )
 
-        # calculate percentage of sequence covered by confirmed fragments in
-        # this core series
-        sequence_coverage = (obs_sequence_coverage/max_sequence_coverage)*100
-
+        if obs_sequence_coverage > 0: 
+            
+            # calculate percentage of sequence covered by confirmed fragments in
+            # this core series
+            sequence_coverage = (obs_sequence_coverage/max_sequence_coverage)*100
+        else:
+            sequence_coverage = 0
+            
         # add sequence coverage of this core series to coverage_dict
         coverage_dict[core_series] = sequence_coverage
 

@@ -751,14 +751,18 @@ def fingerprint_screen_MSn_from_bpc_precursors(
         err_abs=err_abs,
         ms_level=ms_level)
 
+    # init dict to store spectral hits for monomer fingerprints, and add silico
+    # info containing theoretical monomer signatures and massdiffs for reference]
+    monomer_hits = {'silico_info': silico_info}
+
     # screen MSn spectra for monomer fingerprints and / or massdiffs 
-    monomer_hits = filter_monomer_fingerprints(
+    monomer_hits.update(filter_monomer_fingerprints(
         msdata=filtered_msdata,
         monomer_massdiffs=silico_info,
         total_comparisons=comparisons_per_spectrum,
         err=err,
         err_abs=err_abs,
-        ms_level=ms_level)
+        ms_level=ms_level))
     
     # return monomer massdiff / signature ion hits 
     return monomer_hits
