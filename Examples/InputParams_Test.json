@@ -10,10 +10,10 @@
         "mode": "pos",
 
         "MS1": {
-            "monomers": ["H", "g", "N"],
+            "monomers": ["e", "o"],
             "max_length": 11,
             "min_length": 1,
-            "ms1_adducts": ["H", "Na", "Fe"],
+            "ms1_adducts": ["H", "Na"],
             "min_z": 1,
             "max_z": null,
             "losses": true,
@@ -54,16 +54,17 @@
     },
  
 "extractor_parameters":
-    {   "error": 25,
-        "err_abs": false,
-        "min_ms2_peak_abundance": 90,
+    {   "error": 0.01,
+        "err_abs": true,
+        "min_ms2_peak_abundance": 0,
         "pre_run_filter": true,
         
         "min_MS1_total_intensity": null,
         "min_MS2_total_intensity": null,
-        "min_MS1_max_intensity": 1E3,
+        "min_MS1_max_intensity": null,
         "min_MS2_max_intensity": null,
         "filter" : true,
+        "N_bpc_peaks": 10,
         
         "pre_screen_filters": {
             "min_rt": 0,
@@ -75,7 +76,7 @@
             "ms2_precursors": null,
             "min_MS1_total_intensity": null,
             "min_MS2_total_intensity": null,
-            "min_MS1_max_intensity": 1E7,
+            "min_MS1_max_intensity": 1E5,
             "min_MS2_max_intensity": null
         }
 
@@ -107,8 +108,8 @@
     },
 
 "directories":
-    {   "ripper_folder": "Z:/group/Sakthi Raje/Data/Mass-Spec/Exp-1/Depsipeptide/Script test/ripper_json/Hg",
-        "output_folder": "C:/Users/group/Documents/MSAnalysis/Sakthi-Hg",
+    {   "ripper_folder": "C:/Users/group/Documents/MSAnalysis/temp/Polyimine-temp/eo/ripper",
+        "output_folder": "C:/Users/group/Documents/MSAnalysis/temp/Polyimine-temp/eo/out",
         "polymer_type": "Depsipeptide"
     }
 
