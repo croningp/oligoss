@@ -20,7 +20,7 @@ INSTRUMENT_STANDARDS = {
             "pre_run_filter": True,
             "min_MS1_total_intensity": None,
             "min_MS2_total_intensity": None,
-            "min_MS1_max_intensity": 1E7,
+            "min_MS1_max_intensity": 1E5,
             "min_MS2_max_intensity": None,
 
             "pre_screen_filters": {
@@ -80,5 +80,6 @@ DATA_EXTRACTION_PARAMETERS = [
     "min_MS2_total_intensity",
     "min_MS1_max_intensity",
     "min_MS2_max_intensity",
-    "pre_screen_filters"
+    "pre_screen_filters",
+    "N_bpc_peaks"
 ]

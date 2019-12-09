@@ -1240,11 +1240,7 @@ def add_modification_sequence_mass_list(
     # masses
     modified_masses.extend(mass_list)
 
-    return list(
-        set(
-            [round(mass, 4) for mass in modified_masses]
-        )
-    )
+    return list(set([round(mass, 4) for mass in modified_masses]))
 
 def add_terminal_modification_sequence_string(
     sequence,
@@ -1274,13 +1270,109 @@ def add_terminal_modification_sequence_string(
         
         modified_sequences = [
             f"[{mod}]{sequence}"
-            for mod in terminal_modification
-        ]
+            for mod in terminal_modification]
         
     elif str(terminus) == "-1":        
         modified_sequences = [
             f"{sequence}[{mod}]"
-            for mod in terminal_modification
-        ]
+            for mod in terminal_modification]
     
     return list(set(modified_sequences))
+
+def generate_monomer_massdiff_signature_fingerprints(
+    monomers,
+    losses=True,
+    signature_types=None
+):
+    """
+    Takes a list of target monomers and outputs dict of mass differences 
+    and associated signature ions associated with monomers. NOTE: this function
+    will be used in fingerprint screening of monomer-containing spectra 
+    where standard, exhaustive screening using full in silico fragmentation 
+    is not possible and / or impractical (e.g. when trying to identify 
+    unknown fragmentation pathways)
+    
+    Args:
+        monomers (list): list of monomer one-letter codes 
+        losses (bool, optional): specifies whether to add monomer-specific 
+            neutral losses to monomer massdiffs. Defaults to True.
+        signature_types (list or None, optional): list of signature ion types;
+        if None are specified, ALL possible signature ions are included in 
+        output fingerprint dict. Defaults to None.
+    
+    Returns:
+        dict: dict of monomers and associated massdiff and signature ion 
+            fingerprints. Format: 
+            {
+                'monomer_n': {
+                    'massdiffs': [mass,...]
+                    'signature_ions': [m/z,...]
+                },
+                'dominant_signatures': [monomer_n,...]
+            }
+    """
+    # create dict of monomers and associated massdiffs expected 
+    massdiff_dict = {
+        monomer: [float(MONOMERS[monomer][0]) - float(MASS_DIFF)]
+        for monomer in monomers}
+    
+    # check whether sidechain-specific neutral loss products are to be 
+    # incorporated into monomer massdiff fingerprints 
+    if losses: 
+        for monomer, massdiffs in massdiff_dict.items():
+
+            loss_product_masses = []
+            if monomer in LOSS_PRODUCTS:
+
+                for loss in LOSS_PRODUCTS[monomer]: 
+                    loss_product_masses.extend(
+                        [massdiff-loss for massdiff in massdiffs])
+            print(f'for {monomer}, entry = {massdiff_dict[monomer]}')
+            print(f'loss product masses = {loss_product_masses}')
+            massdiff_dict[monomer].extend(loss_product_masses)
+    
+    # round massdiff values to 4 decimal places for later readability 
+    massdiff_dict = {
+        monomer: [round(mass, 4) for mass in massdiff_dict[monomer]]
+        for monomer in massdiff_dict}
+    
+    # add monomer-specific massdiffs to output fingerprint dict 
+    fingerprint_dict = {
+        monomer: {'massdiffs': massdiff_dict[monomer]}
+        for monomer in massdiff_dict}
+
+
+    # check whether specific subsets of signatures have been specified; if not,
+    # look for ALL potential monomer-specific signature ions 
+    if not signature_types: 
+        signature_types = [
+            sig for sig in MS2_SIGNATURE_IONS if sig != 'dominant']
+    
+    # iterate through monomers, adding monomer-specific signature ions to 
+    # output massdiff_dict 
+    for monomer in massdiff_dict: 
+        signature_ions = []
+        for sig in signature_types:
+            if monomer in [info[0] for info in MS2_SIGNATURE_IONS[sig]]: 
+                signature_ions.extend(
+                    info[1::] for info in MS2_SIGNATURE_IONS[sig]
+                    if info[0] == monomer)
+
+        # also round signature ions down to 4 decimal places for later readability 
+        fingerprint_dict[monomer].update(
+            {'signatures': [
+                round(float(sig_mass), 4) for sig_mass in signature_ions]})
+    
+    # add list of monomers with expected dominant signature ions to fingerprint
+    # fingerprint dict 
+    fingerprint_dict.update(
+        {'dominant_signatures': [
+            x for x in monomer 
+            if monomer in MS2_SIGNATURE_IONS["dominant"]]})
+
+    # return dict of monomer-specific mass differences and signature ions 
+    return fingerprint_dict 
+
+
+            
+

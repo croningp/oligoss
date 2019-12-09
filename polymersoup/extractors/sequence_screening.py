@@ -606,6 +606,163 @@ def confirm_fragments_sequence_dict(
     # return dictionary of sequences with confirmed fragments
     return confirmed_fragment_dict
 
+def generate_bpc(
+    msdata,
+    N_peaks_per_spectrum,
+    ms_level=1,
+    min_intensity=0
+):
+    """
+    Screens mass spectra dict in mzml_ripper format and returns base peak 
+    chromatogram (bpc) at specified ms level, along with info on most intense
+    peaks in data
+    
+    Args:
+        msdata (dict): dict of mass spectra in mzml ripper format. NOTE: this
+            can either be dict of ALL ms levels or specified target ms level
+        N_peaks_per_spectrum (int): number of most intense peaks to keep 
+            track of per spectrum for  'intense_peaks' list in bpc_dict. 
+        ms_level (int, optional): specifies which ms level is to be used to
+            generate bpc. Defaults to 1.
+        min_intensity (int, optional): minimum absolute intensity for peaks to 
+            be added to 'intense_peaks' list in bpc dict. Defaults to 0.
+    
+    Returns:
+        dict: bpc dict in format: 
+            {   
+                'intense_peaks': [[mz, I]...]
+                'spectrum_id': {
+                    'retention_time': retention_time,
+                    'peaks' [[mz, I]...]
+                },
+                ...
+            }
+            where mz, I = m/z, intensity of peaks. 
+            N most intense peaks of each spectrum (N is specified by 
+            N_peaks_per_spectrum arg) are stored for each spectrum and added
+            to both spectrum subdict and 'intense_peaks' list 
+    """
+
+    # remove all data in ripper dict except relevant MS level
+    if f'ms{ms_level}' in msdata:
+        msdata = msdata[f'ms{ms_level}']
+
+    # init list to store most intense peaks from each spectrum
+    intense_peaks = []
+
+    # init dict to store bpc
+    bpc_dict = {}
+
+    # iterate through spectra, retrieving most intense peaks
+    for spectrum_id, spectrum_info in msdata.items():
+
+        # check whether current dict item is a spectrum with relevant info
+        if not spectrum_id.startswith('spectrum_'):
+            pass
+        else: 
+            
+            # find N most intense peaks in current spectrum and add to list
+            # of most intense peaks in format [[mz, I]...] where mz, I = 
+            # m/z and intensity of peaks, respectively 
+            spectrum_peaks = return_most_intense_peaks_spectrum(
+                spectrum=spectrum_info,
+                N_peaks=N_peaks_per_spectrum)
+
+            # add spectrum peaks to most intense peaks 
+            intense_peaks.extend(spectrum_peaks)
+
+            # remove duplicate peaks and ensure all peaks meet minimum 
+            # intensity threshold
+            intense_peaks = list(set(
+                [peak for peak in intense_peaks
+                if float(peak[1]) >= min_intensity]))
+            
+            # add spectrum retention time and peaks to bpc_dict
+            bpc_dict[spectrum_id] = {
+                'retention_time': spectrum_info['retention_time'],
+                'peaks': spectrum_peaks
+            }
+    
+    # add most intense peaks across all data to bpc
+    bpc_dict['intense_peaks'] = intense_peaks
+    
+    return bpc_dict
+
+def fingerprint_screen_MSn_from_bpc_precursors(
+    bpc_dict,
+    msdata,
+    silico_info,
+    err,
+    err_abs,
+    ms_level=2,
+    comparisons_per_spectrum=20
+):
+    """
+    This function takes info from a base peak chromatogram (bpc) and screens 
+    MSn spectra for fragments of precursors in bpc that match fingerprints for
+    specific monomers. Fingerprints can be for mass differences between MSn 
+    product ion peaks that correspond to potential monomer mass ladders or
+    single MSn product ion peaks that correspond to monomer-specific signature 
+    ions. 
+
+    Args:
+        bpc_dict (dict): base peak chromatogram info. For format see function: 
+            'generate_bpc' (in sequence_screening.py)
+        msdata (dict): mass spectra in mzml ripper format 
+        silico_info (dict): dictionary of monomers, associateed massdiffs and 
+            signature ions 
+        err (float): error threshold for matching signature ions and massdiffs 
+            in spectra. Units can either be in ppm or absolute mass units 
+        err_abs (bool): specifies whether err is in units of ppm or absolute
+            mass units; if True, units = absolute mass units; if False, units =
+            ppm
+        ms_level (int, optional): specifies ms level to screen for massdiffs
+            and signatures in product ions. NOTE: this MUST be greater than 1.
+            Defaults to 2. 
+        comparisons_per_spectrum (int, optional): specifies N most intense peaks
+            to use for massdiff comparison in target spectra. Defaults to 20.
+    
+    Returns:
+        dict: dict of spectral ids and associated hits for monomer signature 
+            ions and / or massdiffs. Format: 
+            {
+                'spectrum_id': {
+                    'X': {
+                        'mass_diffs': [m/z,...],
+                        'signatures': [m/z,...]
+                    }
+                },
+                ...
+            }
+        where 'X' = monomer one-letter code, m/z = m/z value of peaks that 
+        match signatures for 'X' or are separated from other peaks by massdiff
+        of 'X'
+    """
+
+    # get list of precrusor ions of interest for filtering MSn spectra further 
+    precursors = [
+        float(peak[0]) for peak in bpc_dict['intense_peaks']]
+    
+    # remove MSn spectra that do not have precursors of interest 
+    filtered_msdata = filter_parent_ion(
+        msdata=msdata,
+        parent_ions=precursors,
+        err=err,
+        err_abs=err_abs,
+        ms_level=ms_level)
+
+    # screen MSn spectra for monomer fingerprints and / or massdiffs 
+    monomer_hits = filter_monomer_fingerprints(
+        msdata=filtered_msdata,
+        monomer_massdiffs=silico_info,
+        total_comparisons=comparisons_per_spectrum,
+        err=err,
+        err_abs=err_abs,
+        ms_level=ms_level)
+    
+    # return monomer massdiff / signature ion hits 
+    return monomer_hits
+    
 def extract_MS1(
     silico_dict,
     extractor_parameters,
