@@ -149,3 +149,72 @@ def find_Rt_I_sequences(
             final_Rt_Is[seq] = write_list
 
     return final_Rt_Is
+
+def postprocess_massdiff_spectral_assignments(
+    spectral_assignment_dict,
+    ripper_dict,
+    ms_level=2
+):
+    """
+    Summarises monomer fingerprint and massdiff assignments to spectra. Summary
+    output: N total spectra / N spectra assigned to fingerprint and/or massdiff,
+    % assigned spectra in which base peak (dominant ion) has been assigned to
+    either a signature ion or found within a mass ladder for one or more 
+    target monomers. NOTE: this function is be to used in the 
+    mass_difference_screen
+    
+    Args:
+        spectral_assignment_dict (dict): dict of spectrum ids and associated
+            assignments for monomer-specific signatures and / or fingerprints.
+            For format of this dict, see function: 
+            'fingerprint_screen_MSn_from_bpc_precursors' in extractor_helpers.py
+        ripper_dict (dict): mass spec data dict in mzml ripper format 
+        ms_level (int, optional): specifies MSn level of spectra that have
+            been screened and assigned to monomer signatures and / or 
+            massdiffs. Defaults to 2.
+    
+    Returns:
+        dict: summary of monomer fingerprint assignments for spectra. Format:
+            {
+                'N_total
+            }
+    """
+
+    # filter out relevant msdata from full ripper dict and count number of 
+    # recorded MSn spectra (where n = ms_level)
+    msdata = ripper_dict[f'ms{ms_level}']
+    n_total_spectra = len(msdata.keys())
+
+    # count number of MSn spectra that have been assigned to one or more 
+    # monomer-specific fingerprint and / or mass ladder 
+    n_assigned_spectra = len([
+        key for key in spectral_assignment_dict
+        if key.find('spectrum') > -1])
+
+    # count number of assigned MSn spectra with a base peak accounted for by
+    # monomer fingerprints and / or mass ladders 
+    n_base_peak_assignments = len([
+        spectrum for spectrum in spectral_assignment_dict.values()
+        if 'base_peak' in spectrum and spectrum['base_peak_assigned']])
+
+    # work out % assigned spectra 
+    if n_assigned_spectra > 0: 
+        assigned_spectra = (n_assigned_spectra/n_total_spectra)*100
+    else:
+        assigned_spectra = 0 
+
+    # work out % assigned spectra that have base peak accounted for 
+    if n_base_peak_assignments > 0: 
+        bp_assignments = (n_base_peak_assignments/n_assigned_spectra)*100 
+    else:
+        bp_assignments = 0
+
+    # return summary of spectral assignment info 
+    return {
+        'N_total_spectra': n_total_spectra,
+        'total_assigned_spectra': n_assigned_spectra,
+        '%_assigned_spectra': assigned_spectra,
+        'N_basepeak_assignments': n_base_peak_assignments,
+        '%_basepeak_assignments': bp_assignments 
+    }
+    

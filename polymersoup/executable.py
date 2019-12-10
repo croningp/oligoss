@@ -184,6 +184,21 @@ def mass_difference_screen(parameters_dict):
     # generate dictionary of MS2 signature ion masses for each monomer
     monomer_list = silico_params["MS1"]["monomers"]
 
+    # write csv to store summary info for spectral assignments for ALL input
+    # samples
+    summary_csv = os.path.join(output_folder, 'massdiff_screen_summary.csv')
+    write_new_csv(
+        csv_file=summary_csv,
+        headers=[
+            'Sample',
+            'N_total_spectra', 
+            'total_assigned_spectra', 
+            '%_assigned_spectra',
+            'N_basepeak_assignments',
+            '%_basepeak_assignments'])
+
+    # iterate through rippers and make monomer-specific spectral fingerprint
+    # assignments, generate base peak chromatograms (bpcs)
     for ripper_json in filtered_rippers:
 
         # find ripper name
@@ -208,8 +223,8 @@ def mass_difference_screen(parameters_dict):
             losses=True,
             signature_types=None)
 
+        # check whether precursors are to be filtered by bpc
         if not extractor_params["massdiff_bpc_filter"]:
-            
             bpc_dict = None
         else:
             bpc_dict = ms1_bpc
@@ -231,6 +246,23 @@ def mass_difference_screen(parameters_dict):
             output_json=os.path.join(
                 output_folder, 
                 f'{ripper_name}_mass_difference_screen.json'))
+
+        # summarise monomer fingerprint assignments for sample
+        summary_info = postprocess_massdiff_spectral_assignments(
+            spectral_assignment_dict=fingerprint_spectra,
+            ripper_dict=ripper_dict
+        )
+
+        # add summary of fingerprint spectral assignments to summary csv
+        append_csv_row(
+            csv_file=summary_csv,
+            append_list=[
+            ripper_name,
+            summary_info['N_total_spectra'], 
+            summary_info['total_assigned_spectra'], 
+            summary_info['%_assigned_spectra'],
+            summary_info['N_basepeak_assignments'],
+            summary_info['%_basepeak_assignments']])
 
         # init string to generat bpc file name and write ms1 bpc to json file
         bpc_string = f'_bpc_{extractor_params["N_bpc_peaks"]}peaks_per_spectrum'

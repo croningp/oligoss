@@ -1,6 +1,7 @@
 """
 This file contains core operations required by postprocessing module
 """
+import os
 import json
 
 

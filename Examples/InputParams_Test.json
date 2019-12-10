@@ -10,7 +10,7 @@
         "mode": "pos",
 
         "MS1": {
-            "monomers": ["e", "o"],
+            "monomers": ["e", "o", "eo", "eoe", "oeo"],
             "max_length": 11,
             "min_length": 1,
             "ms1_adducts": ["H", "Na"],
@@ -64,8 +64,10 @@
         "min_MS1_max_intensity": null,
         "min_MS2_max_intensity": null,
         "filter" : true,
-        "N_bpc_peaks": 10,
-        
+        "N_bpc_peaks": 1,
+        "massdiff_bpc_filter": false,
+        "massdiff_precursor_exclusion": 5,
+        "abs_precursor_exclusion": false,
         "pre_screen_filters": {
             "min_rt": 0,
             "max_rt": 1E6,
@@ -76,7 +78,7 @@
             "ms2_precursors": null,
             "min_MS1_total_intensity": null,
             "min_MS2_total_intensity": null,
-            "min_MS1_max_intensity": 1E5,
+            "min_MS1_max_intensity": null,
             "min_MS2_max_intensity": null
         }
 
@@ -108,8 +110,8 @@
     },
 
 "directories":
-    {   "ripper_folder": "C:/Users/group/Documents/MSAnalysis/temp/Polyimine-temp/eo/ripper",
-        "output_folder": "C:/Users/group/Documents/MSAnalysis/temp/Polyimine-temp/eo/out",
+    {   "ripper_folder": "Z:/group/David Doran/Data/DBD216/Nanomate_Orbi_run1/Sequencing/ripper_jsons/eo/eo_2_2",
+        "output_folder": "Z:/group/David Doran/Data/DBD216/Nanomate_Orbi_run1/Sequencing/massdiff_results_run2/eo",
         "polymer_type": "Depsipeptide"
     }
 
