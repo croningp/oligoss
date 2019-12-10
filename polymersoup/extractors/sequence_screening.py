@@ -610,7 +610,9 @@ def generate_bpc(
     msdata,
     N_peaks_per_spectrum,
     ms_level=1,
-    min_intensity=0
+    min_intensity=0,
+    dymanic_exclusion_window=None,
+    abs_precursor_exclusion=False
 ):
     """
     Screens mass spectra dict in mzml_ripper format and returns base peak 
@@ -695,7 +697,7 @@ def fingerprint_screen_MSn_from_bpc_precursors(
     err,
     err_abs,
     ms_level=2,
-    comparisons_per_spectrum=20
+    comparisons_per_spectrum=50
 ):
     """
     This function takes info from a base peak chromatogram (bpc) and screens 
@@ -739,18 +741,24 @@ def fingerprint_screen_MSn_from_bpc_precursors(
         of 'X'
     """
 
-    # get list of precrusor ions of interest for filtering MSn spectra further 
-    precursors = [
-        float(peak[0]) for peak in bpc_dict['intense_peaks']]
-    
-    # remove MSn spectra that do not have precursors of interest 
-    filtered_msdata = filter_parent_ion(
-        msdata=msdata,
-        parent_ions=precursors,
-        err=err,
-        err_abs=err_abs,
-        ms_level=ms_level)
+    if bpc_dict:
 
+        # get list of precrusor ions of interest for filtering MSn spectra further 
+        precursors = [
+            float(peak[0]) for peak in bpc_dict['intense_peaks']]
+    
+        # remove MSn spectra that do not have precursors of interest 
+        filtered_msdata = filter_parent_ion(
+            msdata=msdata,
+            parent_ions=precursors,
+            err=err,
+            err_abs=err_abs,
+            ms_level=ms_level)
+    
+    else:
+        filtered_msdata = {ms: msinfo for ms, msinfo in msdata.items()}
+        
+        
     # init dict to store spectral hits for monomer fingerprints, and add silico
     # info containing theoretical monomer signatures and massdiffs for reference]
     monomer_hits = {'silico_info': silico_info}

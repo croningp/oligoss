@@ -208,9 +208,15 @@ def mass_difference_screen(parameters_dict):
             losses=True,
             signature_types=None)
 
+        if not extractor_params["massdiff_bpc_filter"]:
+            
+            bpc_dict = None
+        else:
+            bpc_dict = ms1_bpc
+        
         # identify spectra with monomer fingerprints 
         fingerprint_spectra = fingerprint_screen_MSn_from_bpc_precursors(
-            bpc_dict=ms1_bpc,
+            bpc_dict=bpc_dict,
             silico_info=monomer_fingerprints,
             err=extractor_params['error'],
             err_abs=extractor_params['err_abs'],

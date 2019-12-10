@@ -81,5 +81,6 @@ DATA_EXTRACTION_PARAMETERS = [
     "min_MS1_max_intensity",
     "min_MS2_max_intensity",
     "pre_screen_filters",
-    "N_bpc_peaks"
+    "N_bpc_peaks",
+    "massdiff_bpc_filter"
 ]

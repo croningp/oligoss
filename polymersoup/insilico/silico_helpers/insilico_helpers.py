@@ -1311,9 +1311,11 @@ def generate_monomer_massdiff_signature_fingerprints(
                 'dominant_signatures': [monomer_n,...]
             }
     """
+
+
     # create dict of monomers and associated massdiffs expected 
     massdiff_dict = {
-        monomer: [float(MONOMERS[monomer][0]) - float(MASS_DIFF)]
+        monomer: [find_sequence_mass(monomer) - float(MASS_DIFF)]
         for monomer in monomers}
     
     # check whether sidechain-specific neutral loss products are to be 
