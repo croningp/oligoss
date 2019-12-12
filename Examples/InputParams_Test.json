@@ -10,9 +10,9 @@
         "mode": "pos",
 
         "MS1": {
-            "monomers": ["e", "o", "eo", "eoe", "oeo"],
-            "max_length": 11,
-            "min_length": 1,
+            "monomers": ["e", "t", "et", "ete", "tet"],
+            "max_length": 20,
+            "min_length": 2,
             "ms1_adducts": ["H", "Na"],
             "min_z": 1,
             "max_z": null,
@@ -110,8 +110,8 @@
     },
 
 "directories":
-    {   "ripper_folder": "Z:/group/David Doran/Data/DBD216/Nanomate_Orbi_run1/Sequencing/ripper_jsons/eo/eo_2_2",
-        "output_folder": "Z:/group/David Doran/Data/DBD216/Nanomate_Orbi_run1/Sequencing/massdiff_results_run2/eo",
+    {   "ripper_folder": "Z:/group/David Doran/Data/DBD216/Nanomate_Orbi_run2/Sequencing/ripper_jsons/et",
+        "output_folder": "Z:/group/David Doran/Data/DBD216/Nanomate_Orbi_run2/Sequencing/massdiff_output/et",
         "polymer_type": "Depsipeptide"
     }
 

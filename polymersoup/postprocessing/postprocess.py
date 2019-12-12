@@ -195,7 +195,7 @@ def postprocess_massdiff_spectral_assignments(
     # monomer fingerprints and / or mass ladders 
     n_base_peak_assignments = len([
         spectrum for spectrum in spectral_assignment_dict.values()
-        if 'base_peak' in spectrum and spectrum['base_peak_assigned']])
+        if 'base_peak' in spectrum and spectrum['base_peak_assignment']])
 
     # work out % assigned spectra 
     if n_assigned_spectra > 0: 

@@ -1327,10 +1327,13 @@ def generate_monomer_massdiff_signature_fingerprints(
             if monomer in LOSS_PRODUCTS:
 
                 for loss in LOSS_PRODUCTS[monomer]: 
-                    loss_product_masses.extend(
-                        [massdiff-loss for massdiff in massdiffs])
-            print(f'for {monomer}, entry = {massdiff_dict[monomer]}')
-            print(f'loss product masses = {loss_product_masses}')
+                    try: 
+                        loss = float(loss)
+                    except ValueError:
+                        loss = FG[loss]
+
+                    loss_product_masses.extend([massdiff-loss for massdiff in massdiffs])
+        
             massdiff_dict[monomer].extend(loss_product_masses)
     
     # round massdiff values to 4 decimal places for later readability 
@@ -1355,11 +1358,13 @@ def generate_monomer_massdiff_signature_fingerprints(
     for monomer in massdiff_dict: 
         signature_ions = []
         for sig in signature_types:
-            if monomer in [info[0] for info in MS2_SIGNATURE_IONS[sig]]: 
-                signature_ions.extend(
-                    info[1::] for info in MS2_SIGNATURE_IONS[sig]
-                    if info[0] == monomer)
-
+            monomer_sigs = [
+                info[1::] for info in MS2_SIGNATURE_IONS[sig]
+                if info[0] == monomer]
+            if monomer_sigs: 
+                signature_ions.extend(monomer_sigs[0])
+            
+        print(f'signature masses = {signature_ions}')
         # also round signature ions down to 4 decimal places for later readability 
         fingerprint_dict[monomer].update(
             {'signatures': [
@@ -1374,7 +1379,3 @@ def generate_monomer_massdiff_signature_fingerprints(
 
     # return dict of monomer-specific mass differences and signature ions 
     return fingerprint_dict 
-
-
-            
-

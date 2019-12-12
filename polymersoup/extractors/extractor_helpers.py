@@ -52,8 +52,7 @@ def find_target(
     # find candidates that match target within error threshold
     matches = list(filter(
         lambda x: x >= min_hit and x <= max_hit,
-        candidates
-    ))
+        candidates))
 
     # finally, return candidates that match target within error threshold
     return matches
@@ -406,208 +405,6 @@ def find_ms2_signature_ions(
     return confirmed_monomers
 
 
-def filter_monomer_fingerprints(
-        msdata: dict,
-        monomer_massdiffs: dict,
-        total_comparisons: int,
-        err: float,
-        err_abs=True,
-        ms_level=2,
-        single_spectrum=False,
-        single_spectra_id=None,
-        find_common_peaks=True,
-        min_ms2_intensity=0.01
-    ) -> dict:
-    """ Filters the spectra based on the mass difference between peaks.
-    Scans through a list of monomer mass differences and check for peaks that
-    match the difference.
-
-    Args:
-        msdata (dict): full mass spec data JSON (in mzml ripper format) OR
-            subset of mzml ripper dict for one ms level.
-        monomer_massdiffs (dict): monomers and their associated mass differences.
-        total_comparisons (int): total number of comparisons to perform.
-        target_func (Callable): find target function.
-        err (float): error threshold for screening - either in absolute mass
-            units or ppm.
-        err_abs (bool): specifies whether err units are absolute mass units
-            or ppm.
-        ms_level(int):specifies ms_level for spectra being screened (default: 2).
-        single_spectrum (bool): specifies if data is single spectrum or not
-            (default: False).
-        spectra_id (str): spectra id string of single spectrum data (default: None).
-        find_common_peaks (bool, optional): specifies whether to identify peaks
-            that are common to two or more mass ladders for monomers (default: 
-            True).
-        min_ms2_intensity (float, optional): minimum MS2 peak intensity as a 
-            decimal fraction of dominant ion. Peaks with an intensity below
-            this value will be discarded from consideration. (default: 0.01).
-            NOTE: must be in range 0 -> 1. 
-
-    Returns:
-        dict: Spectra IDs with found monomers.
-    """
-
-    # checks whether input is full ripper dict or just one ms level
-    if f'ms{ms_level}' in msdata:
-        msdata = msdata[f'ms{ms_level}']
-
-    # Create output map
-    spectra = {}
-
-    # identify monomers with specific signature ions expected to ALWAYS show
-    # up in MSn spectra
-    dominant_signatures = monomer_massdiffs['dominant_signatures']
-    monomer_massdiffs.pop('dominant_signatures')
-
-    # Iterate through each spectrum
-    for spec_id, spectrum in msdata.items():
-        
-        # find most intense peak in spectrum and use it to set minimum MS2 
-        # intensity threshold for all other peaks to be considered 
-        most_intense_peak = return_most_intense_peaks_spectrum(
-            spectrum=spectrum, 
-            N_peaks=1)
-
-        min_ms2_intensity = most_intense_peak[0][1]*min_ms2_intensity
-
-        # init list to store matches for all matches for all monomers in 
-        # spectrum
-        all_matches = []
-
-        # get mass list for spectrum, filtering out peaks that are below 
-        # threshold relative intensity of MS2 base peak
-        mass_list = [
-            float(mass) for mass, intensity in spectrum.items()
-            if (mass not in ["parent", "mass_list", "retention_time"]
-            and intensity >= min_ms2_intensity)]
-
-        # Get spectrum peaks, sorted form the most intense
-        spectrum_peaks = _sort_spectrum_peaks_by_intensity(spectrum)
-
-        # Go through each monomer fingerprint and identify diagnostic
-        # signature ions and / or massdiffs between peaks to indicate monomer
-        # presence 
-        for monomer, fingerprints in monomer_massdiffs.items():
-            
-            # check whether monomer has any associated signature ions; if so, 
-            # look for these in spectrum 
-            if fingerprints['signatures']:
-                signature_matches = find_multiple_targets(
-                    targets=fingerprints['signatures'],
-                    candidates=[peak[0] for peak in spectrum_peaks],
-                    err=err,
-                    err_abs=err_abs)
-            else:
-                signature_matches = []
-
-            # do not look for monomer massdiffs if signature ions are expected
-            # and not found - this is used for monomers with predominant 
-            # signatures which should ALWAYS be present
-            if monomer in dominant_signatures and not signature_matches: 
-                break 
-            
-            # get monomer massdiffs from fingerprint info
-            massdiffs = fingerprints['massdiffs']
-
-            # init list to store massdiff matches for monomer in spectrum
-            matches = []
-
-            # Check every peak in the spectrum, up to total comparisons
-            for peak in spectrum_peaks[:total_comparisons]:
-                
-                # get m/z of peak 
-                peak_mass = float(peak[0])
-
-                # Go through each mass difference product
-                for mdiff in massdiffs:
-                    
-                    mdiff_matches = []
-                    # Get the peak plus/minus the mass difference
-                    minus, plus = peak_mass - mdiff, peak_mass + mdiff
-
-                    # Check if minus product found
-                    match1 = find_target(
-                        target=minus,
-                        candidates=mass_list,
-                        err=err,
-                        err_abs=err_abs)
-                        
-                    # No minus product, check plus product
-                    match2 = find_target(
-                        target=plus,
-                        candidates=mass_list,
-                        err=err,
-                        err_abs=err_abs)
-
-                    # combine matches 
-                    if match1: 
-                        mdiff_matches.extend(match1)
-                    if match2:
-                        mdiff_matches.extend(match2)
-                    if mdiff_matches:
-                        mdiff_matches.append(peak_mass)
-                        matches.extend(mdiff_matches)
-
-            # if matches for monomer massdiff have been found, update
-            # spectra dict 
-            if matches or signature_matches: 
-                
-                # remove duplicates from matching peaks for target monomer, 
-                # and add to list of all matches for ALL monomers found in 
-                # spectrum
-                matches = sorted(list(set(matches)), reverse=True)
-                all_matches.extend(matches)
-                all_matches.extend(signature_matches)
-                
-                # check whether spectrum has been partly assigned already
-                # if so, update spectral assignment; if not, add new assignment
-                if spec_id not in spectra:
-
-                    # record base info for spectrum - base peak (dominant ion),
-                    # retention time and precursor, as well as assignment 
-                    # info for target monomer(s)
-                    spectra[spec_id] = {
-                        monomer: {
-                            'signatures': signature_matches,
-                            'mass_diffs': matches 
-                        },
-                        'retention_time': spectrum['retention_time'],
-                        'precursor': spectrum['parent'],
-                        'base_peak': most_intense_peak[0]
-                    }
-                elif monomer in spectra[spec_id]:
-                    if 'mass_diffs' in spectra[spec_id][monomer]:
-                        matches.extend(spectra[spec_id][monomer]['mass_diffs'])
-                        matches = sorted(list(set(matches)), reverse=True)
-                        spectra[spec_id][monomer]['mass_diffs'] = matches
-                    else:
-                        spectra[spec_id][monomer]['mass_diffs'] = matches
-                elif monomer not in spectra[spec_id]:
-                    spectra[spec_id].update(
-                        {monomer: {'mass_diffs': matches}})
-
-        # after all monomers have been assigned, check whether base peak is
-        # found in list of ALL matches for ALL monomers
-        if spec_id in spectra:
-            if float(most_intense_peak[0][0]) in all_matches: 
-                base_peak_assignment = True
-            else:
-                base_peak_assignment = False 
-            spectra[spec_id].update({
-                'base_peak_assigned': base_peak_assignment
-            })
-            
-    # check whether common peak searching is specified; if so, update spectral
-    # assignments with lists of peaks that are common to two or more mass 
-    # ladders for target monomers
-    if find_common_peaks: 
-        return find_common_peaks_massdiff_spectra(
-            spectral_assignments=spectra)
-
-    # Return results
-    return spectra
-
 def apply_dynamic_exclusion_peaks(
     peak_list=[[200,1], [202, 2], [201, 1], [100,1], [101, 2]],
     exclusion_window=1,
@@ -704,7 +501,9 @@ def find_common_peaks_massdiff_spectra(spectral_assignments: dict) -> dict:
         
         # identify mass_diff peaks for eahc monomer 
         non_monomer_keys = [
-            'retention_time', 'precursor', 'base_peak', 'base_peak_assigned']
+            'retention_time', 'precursor', 'base_peak', 'base_peak_assignment']
+        print(f'mdiffs = {mdiffs}')
+
         monomer_massdiffs = {
             monomer: sorted(list(set(mdiffs[monomer]['mass_diffs'])), reverse=True)
             for monomer in mdiffs
@@ -767,7 +566,8 @@ def _sort_spectrum_peaks_by_intensity(spectrum: dict) -> list:
 
 def return_most_intense_peaks_spectrum(
     spectrum,
-    N_peaks,
+    N_peaks=None,
+    min_relative_intensity=0.01,
     dynamic_exclusion_window=None,
     dynamic_exclusion_abs=False
 ):
@@ -783,16 +583,22 @@ def return_most_intense_peaks_spectrum(
         list: list of most intense peaks, in descending order of intensity 
     """
     spectrum_peaks = _sort_spectrum_peaks_by_intensity(spectrum=spectrum)
+    min_abs_intensity = spectrum_peaks[0][1]*min_relative_intensity 
 
-    if N_peaks > 1 and dynamic_exclusion_window: 
+    spectrum_peaks = [
+        peak for peak in spectrum_peaks
+        if peak[1] >= min_abs_intensity]
 
+    if dynamic_exclusion_window:
         spectrum_peaks = apply_dynamic_exclusion_peaks(
             peak_list=spectrum_peaks,
             exclusion_window=dynamic_exclusion_window,
             exclusion_units_abs=dynamic_exclusion_abs)
-    
 
-    return spectrum_peaks[0:min([N_peaks, len(spectrum_peaks)])]
+    if N_peaks: 
+        spectrum_peaks = spectrum_peaks[:min([N_peaks, len(spectrum_peaks)])]
+    
+    return spectrum_peaks
     
 
 def apply_pre_screening_filters(
@@ -933,3 +739,43 @@ def apply_pre_screening_filters(
             ms_level=2
         )
     return ripper_dict
+
+def find_massdiffs_spectrum_peaks(
+    spectrum_peaks,
+    massdiffs,
+    err,
+    err_abs
+):
+
+    massdiff_matches, masses = [], [peak[0] for peak in spectrum_peaks]
+    len_masses = len(masses)
+    for massdiff in massdiffs: 
+
+        for peak in spectrum_peaks: 
+
+            high, low = float(peak[0]) + massdiff, float(peak[0]) - massdiff 
+            
+            high_matches = find_target(
+                target=high,
+                candidates=masses,
+                err=err,
+                err_abs=err_abs)
+            
+            low_matches = find_target(
+                target=low,
+                candidates=masses,
+                err=err,
+                err_abs=err_abs)
+            
+            if high_matches:
+                massdiff_matches.append(high)
+                massdiff_matches.extend(high_matches)
+            
+            if low_matches:
+                massdiff_matches.append(low)
+                massdiff_matches.extend(low_matches)
+        
+        if len(masses) != len_masses:
+            raise Exception(f'n masses has been reduced from {len_masses} to {len(masses)}')
+    
+    return sorted(list(set(massdiff_matches)), reverse=True)

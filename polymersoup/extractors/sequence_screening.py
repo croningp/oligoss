@@ -697,7 +697,7 @@ def fingerprint_screen_MSn_from_bpc_precursors(
     err,
     err_abs,
     ms_level=2,
-    comparisons_per_spectrum=50
+    comparisons_per_spectrum=None
 ):
     """
     This function takes info from a base peak chromatogram (bpc) and screens 
@@ -741,6 +741,8 @@ def fingerprint_screen_MSn_from_bpc_precursors(
         of 'X'
     """
 
+    # check whether bpc info has been input; if so, use bpc to select precursors
+    # for screening. Otherwise, screen every precursor in MSn spectra 
     if bpc_dict:
 
         # get list of precrusor ions of interest for filtering MSn spectra further 
@@ -756,16 +758,17 @@ def fingerprint_screen_MSn_from_bpc_precursors(
             ms_level=ms_level)
     
     else:
-        filtered_msdata = {ms: msinfo for ms, msinfo in msdata.items()}
-        
-        
+        filtered_msdata = {
+            ms: msinfo for ms, msinfo in msdata.items()
+            if ms == f'ms{ms_level}'}
+    
     # init dict to store spectral hits for monomer fingerprints, and add silico
     # info containing theoretical monomer signatures and massdiffs for reference]
     monomer_hits = {'silico_info': silico_info}
 
     # screen MSn spectra for monomer fingerprints and / or massdiffs 
     monomer_hits.update(filter_monomer_fingerprints(
-        msdata=filtered_msdata,
+        msdata=filtered_msdata[f'ms{ms_level}'],
         monomer_massdiffs=silico_info,
         total_comparisons=comparisons_per_spectrum,
         err=err,
@@ -774,7 +777,61 @@ def fingerprint_screen_MSn_from_bpc_precursors(
     
     # return monomer massdiff / signature ion hits 
     return monomer_hits
+
+def screen_MS1_precursors_masslib(
+    MS1_masslib,
+    extractor_parameters,
+    spectral_assignments
+):
+    print(f'extractor keys = {extractor_parameters.keys()}')
+    print(f'extractor_parameters error = {extractor_parameters["error"]}')
+    err = float(extractor_parameters["error"])
+    err_abs = extractor_parameters["err_abs"]
+
+    spectral_assignments = {
+        spectrum: spectrum_info
+        for spectrum, spectrum_info in spectral_assignments.items()
+        if spectrum.find('silico') == -1
+    }
+
+    sequence_precursor_assignments, assigned_precursors = {}, []
+
+    for sequence, masses in MS1_masslib.items():
+
+        for spectrum, spectral_assignment in spectral_assignments.items():
+
+            precursor = spectral_assignment["precursor"]
+            
+            seq_match = find_target(
+                target=precursor,
+                candidates=masses,
+                err=err,
+                err_abs=err_abs)
+            
+            if seq_match: 
+                
+                assigned_precursors.append([spectrum, precursor])
+                if sequence not in sequence_precursor_assignments:
+
+                    sequence_precursor_assignments[sequence] = [
+                        [spectrum, precursor]]
+                
+                elif sequence in sequence_precursor_assignments: 
+
+                    sequence_precursor_assignments[sequence].append([spectrum, precursor])
+    if sequence_precursor_assignments:
+        sequence_precursor_assignments.update({
+            'assigned_precursors': assigned_precursors,
+            'MS1_silico_lib': {
+                seq: MS1_masslib[seq]
+                for seq in MS1_masslib
+                if seq in sequence_precursor_assignments
+            }
+        })
     
+    
+    return sequence_precursor_assignments 
+
 def extract_MS1(
     silico_dict,
     extractor_parameters,
@@ -961,3 +1018,164 @@ def extract_MS2(
 
     # return dict of sequences and ms2 EICs
     return EIC_dict
+
+def find_monomer_fingerprints_MSn_spectrum(
+    spectrum,
+    monomer_fingerprints, 
+    min_ms2_intensity,
+    err,
+    err_abs,
+    N_peak_comparisons=None
+):
+
+    # get spectrum peaks, sorted in descending order by peak intensity (i.e.
+    # most intense first)
+    peaks = return_most_intense_peaks_spectrum(
+        spectrum=spectrum,
+        N_peaks=N_peak_comparisons,
+        min_relative_intensity=min_ms2_intensity)
+    
+    # get base peak / dominant ion (i.e. most intense peak in spectrum)
+    most_intense_peak = peaks[0]
+    
+    # init dict to store fingerprint massdiff and / or signature for target
+    # monomers 
+    monomer_assignments = {}
+    
+    # set basepeak assignment to False. This will change to True if basepeak/
+    # dominant ion is found in one or more monomer signature and / or mass 
+    # ladder 
+    basepeak_assignment = False
+
+    # iterate through monomers and their fingerprints, and identify any 
+    # found in spectrum 
+    for monomer, fingerprint_info in monomer_fingerprints.items():
+        
+        # init list to store signature matches, and populate if any are found
+        signature_matches = []
+        
+        if fingerprint_info['signatures']:
+            signature_matches = find_multiple_targets(
+                    targets=fingerprint_info['signatures'],
+                    candidates=[peak[0] for peak in peaks],
+                    err=err,
+                    err_abs=err_abs)
+        
+        # get massdiffs for monomer and check for these in spectrum 
+        massdiffs_monomer = fingerprint_info['massdiffs']
+        massdiff_hits = find_massdiffs_spectrum_peaks(
+            spectrum_peaks=peaks,
+            massdiffs=massdiffs_monomer,
+            err=err,
+            err_abs=err_abs)
+        
+        # if matches for signatures and / or massdiffs have been found in 
+        # spectrum, add spectrum peak assignments for monomer to 
+        # monomer_assignments dict 
+        if signature_matches or massdiff_hits: 
+            
+            massdiff_hits = [round(hit, 4) for hit in massdiff_hits]
+            signature_matches = [round(match, 4) for match in signature_matches]
+
+            # check whether most intense ion / basepeak has been assigned to
+            # monomer mass ladder(s) and / or signature ions
+            if round(float(most_intense_peak[0]), 4) in massdiff_hits or signature_matches:
+                basepeak_assignment=True
+           
+            # get full assignment info for monomer fingerprints in spectrum, 
+            # including basepeak assignments 
+            monomer_assignments[monomer] = {
+                'signatures': signature_matches,
+                'mass_diffs': massdiff_hits
+            }
+
+    if monomer_assignments:
+        monomer_assignments.update(
+            {
+                'base_peak': most_intense_peak,
+                'base_peak_assignment': basepeak_assignment
+            }
+        )
+    # return monomer assignments 
+    return monomer_assignments 
+
+def filter_monomer_fingerprints(
+        msdata: dict,
+        monomer_massdiffs: dict,
+        total_comparisons: int,
+        err: float,
+        err_abs=True,
+        ms_level=2,
+        single_spectrum=False,
+        single_spectra_id=None,
+        find_common_peaks=True,
+        min_ms2_intensity=0.1
+    ) -> dict:
+    """ Filters the spectra based on the mass difference between peaks.
+    Scans through a list of monomer mass differences and check for peaks that
+    match the difference.
+
+    Args:
+        msdata (dict): full mass spec data JSON (in mzml ripper format) OR
+            subset of mzml ripper dict for one ms level.
+        monomer_massdiffs (dict): monomers and their associated mass differences.
+        total_comparisons (int): total number of comparisons to perform.
+        target_func (Callable): find target function.
+        err (float): error threshold for screening - either in absolute mass
+            units or ppm.
+        err_abs (bool): specifies whether err units are absolute mass units
+            or ppm.
+        ms_level(int):specifies ms_level for spectra being screened (default: 2).
+        single_spectrum (bool): specifies if data is single spectrum or not
+            (default: False).
+        spectra_id (str): spectra id string of single spectrum data (default: None).
+        find_common_peaks (bool, optional): specifies whether to identify peaks
+            that are common to two or more mass ladders for monomers (default: 
+            True).
+        min_ms2_intensity (float, optional): minimum MS2 peak intensity as a 
+            decimal fraction of dominant ion. Peaks with an intensity below
+            this value will be discarded from consideration. (default: 0.01).
+            NOTE: must be in range 0 -> 1. 
+
+    Returns:
+        dict: Spectra IDs with found monomers.
+    """
+
+    # checks whether input is full ripper dict or just one ms level
+    if f'ms{ms_level}' in msdata:
+        msdata = msdata[f'ms{ms_level}']
+
+    # init dict to store spectral assignments for monomer fingerprints 
+    assigned_spectra = {}
+
+    # get info on monomer fingerprints, excluding list of expected dominant
+    # signatures 
+    monomer_fingerprint_info = {
+            k: v 
+            for k,v in monomer_massdiffs.items()
+            if k.find('dominant') == -1}
+
+    # Iterate through each spectrum
+    for spec_id, spectrum in msdata.items():
+        
+        monomer_fingerprint_hits = find_monomer_fingerprints_MSn_spectrum(
+            spectrum=spectrum,
+            monomer_fingerprints=monomer_fingerprint_info,
+            err=err,
+            err_abs=err_abs,
+            min_ms2_intensity=min_ms2_intensity,
+            N_peak_comparisons=total_comparisons)
+        
+        
+        if monomer_fingerprint_hits:
+            monomer_fingerprint_hits.update({'precursor': spectrum['parent']})
+            assigned_spectra[spec_id] = monomer_fingerprint_hits
+    # check whether common peak searching is specified; if so, update spectral
+    # assignments with lists of peaks that are common to two or more mass 
+    # ladders for target monomers
+    if find_common_peaks: 
+        return find_common_peaks_massdiff_spectra(
+            spectral_assignments=assigned_spectra)
+
+    # Return results
+    return assigned_spectra

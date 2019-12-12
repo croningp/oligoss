@@ -186,7 +186,7 @@ def mass_difference_screen(parameters_dict):
 
     # write csv to store summary info for spectral assignments for ALL input
     # samples
-    summary_csv = os.path.join(output_folder, 'massdiff_screen_summary.csv')
+    summary_csv = os.path.join(output_folder, f'{monomer_list}_massdiff_screen_summary.csv')
     write_new_csv(
         csv_file=summary_csv,
         headers=[
@@ -195,12 +195,14 @@ def mass_difference_screen(parameters_dict):
             'total_assigned_spectra', 
             '%_assigned_spectra',
             'N_basepeak_assignments',
-            '%_basepeak_assignments'])
+            '%_basepeak_assignments',
+            '%_assigned_precursors',
+            'N_assigned_precursors'])
 
     # iterate through rippers and make monomer-specific spectral fingerprint
     # assignments, generate base peak chromatograms (bpcs)
     for ripper_json in filtered_rippers:
-
+        
         # find ripper name
         start = ripper_json.find('filtered_rippers') + 17
         end = ripper_json.find('.json', start)
@@ -214,8 +216,7 @@ def mass_difference_screen(parameters_dict):
         ms1_bpc = generate_bpc(
             msdata=ripper_dict,
             N_peaks_per_spectrum=extractor_params["N_bpc_peaks"],
-            ms_level=1
-        )
+            ms_level=1)
         
         # retrieve monomer massdiff and signature ion fingerprints 
         monomer_fingerprints = generate_monomer_massdiff_signature_fingerprints(
@@ -223,6 +224,34 @@ def mass_difference_screen(parameters_dict):
             losses=True,
             signature_types=None)
 
+        amines, aldehydes = ['x', 'p', 'e'], ['h', 'o', 't']
+
+        MS1_dict = generate_ms1_mass_dictionary_adducts_losses(
+            monomers=[monomer for monomer in monomer_list if len(monomer)==1],
+            adducts=silico_params["MS1"]["ms1_adducts"],
+            monomer_modifications_dict={},
+            mode='pos',
+            min_length=silico_params["MS1"]["min_length"],
+            max_length=silico_params["MS1"]["max_length"],
+            universal_monomer_modification=False,
+            universal_terminal_modification=False,
+            min_z=1,
+            max_z=None,
+            sequencing=False,
+            terminal_modifications_dict={},
+            max_total_losses=2)
+        
+        MS1_dict = {
+            seq: seq_masses
+            for seq, seq_masses in MS1_dict.items()
+            if (
+                abs(
+                    len([c for i, c in enumerate(seq) if c in amines])
+                    -len([c for i, c in enumerate(seq) if c in aldehydes]))
+                <= 1)
+        }
+
+        
         # check whether precursors are to be filtered by bpc
         if not extractor_params["massdiff_bpc_filter"]:
             bpc_dict = None
@@ -236,8 +265,25 @@ def mass_difference_screen(parameters_dict):
             err=extractor_params['error'],
             err_abs=extractor_params['err_abs'],
             ms_level=2,
-            comparisons_per_spectrum=20,
+            comparisons_per_spectrum=None,
             msdata=ripper_dict)
+
+        precursor_assignments = screen_MS1_precursors_masslib(
+            MS1_masslib=MS1_dict,
+            extractor_parameters=extractor_params,
+            spectral_assignments=fingerprint_spectra)
+        
+        if "assigned_precursors" in precursor_assignments:
+            N_precursor_assignments = len(precursor_assignments["assigned_precursors"])
+            precursor_assignment_pc = (N_precursor_assignments/(len(fingerprint_spectra)-1))*100
+        else:
+            N_precursor_assignments, precursor_assignment_pc = 0, 0
+
+        write_to_json(
+            write_dict=precursor_assignments,
+            output_json=os.path.join(
+                output_folder,
+                f'{ripper_name}_precursor_assignments.json'))
 
         # write spectral assignments with identified monomer fingerprints to 
         # json file
@@ -250,8 +296,7 @@ def mass_difference_screen(parameters_dict):
         # summarise monomer fingerprint assignments for sample
         summary_info = postprocess_massdiff_spectral_assignments(
             spectral_assignment_dict=fingerprint_spectra,
-            ripper_dict=ripper_dict
-        )
+            ripper_dict=ripper_dict)
 
         # add summary of fingerprint spectral assignments to summary csv
         append_csv_row(
@@ -262,7 +307,9 @@ def mass_difference_screen(parameters_dict):
             summary_info['total_assigned_spectra'], 
             summary_info['%_assigned_spectra'],
             summary_info['N_basepeak_assignments'],
-            summary_info['%_basepeak_assignments']])
+            summary_info['%_basepeak_assignments'],
+            precursor_assignment_pc,
+            N_precursor_assignments])
 
         # init string to generat bpc file name and write ms1 bpc to json file
         bpc_string = f'_bpc_{extractor_params["N_bpc_peaks"]}peaks_per_spectrum'
