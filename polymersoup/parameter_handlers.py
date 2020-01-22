@@ -281,6 +281,7 @@ def generate_parameters_dict(
         parameters_dict (dict): dictionary of all parameters relevant for
             executing de novo sequencing experiments.
     """
+
     # load parameters relevant for in silico operations
     silico_dict = return_silico_parameters(parameters_file)
 
@@ -301,14 +302,15 @@ def generate_parameters_dict(
     # combine all above into a final parameters_dict that can be read by
     # the executable
     parameters_dict.update(
-        {
+        {   
             "silico_parameters": silico_dict,
             "extractor_parameters": extractors_dict,
             "postprocessing_parameters": postprocess_dict,
             "directories": directories_dict,
             "screening_method": read_parameters["screening_method"],
             "data_extraction": read_parameters["data_extraction"],
-            "postprocess": read_parameters["postprocess"]
+            "postprocess": read_parameters["postprocess"],
+            "perform_silico":read_parameters["perform_silico"]
         }
     )
 
