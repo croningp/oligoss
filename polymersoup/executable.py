@@ -79,7 +79,7 @@ def exhaustive_screen(parameters_dict):
         write_dict=parameters_dict,
         output_json=os.path.join(output_folder, 'run_parameters.json'))
 
-    if parameters_dict["perform_silico"]:
+    if parameters_dict['perform_silico']:
         print(f'generating MS1 silico dict')
         # generate compositional silico dict for screening MS1 EICs
         compositional_silico_dict = generate_MS1_compositional_dict(silico_params)
@@ -117,10 +117,6 @@ def exhaustive_screen(parameters_dict):
             os.path.join(output_folder, subdir) 
             for subdir in os.listdir(output_folder)
             if not os.path.isfile(subdir)]
-
-        extracted_data_dirs = [
-            os.path.join(data_dir, 'extracted')
-            for data_dir in extracted_data_dirs]
         
         extracted_data_dirs = list(
             filter(
