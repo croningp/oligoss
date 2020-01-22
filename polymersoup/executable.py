@@ -65,8 +65,7 @@ def exhaustive_screen(parameters_dict):
 
     write_to_json(
         write_dict=parameters_dict,
-        output_json=os.path.join(output_folder, 'run_parameters.json')
-    )
+        output_json=os.path.join(output_folder, 'run_parameters.json'))
 
     # load parameters for postprocessing operations
     postprocess_parameters = parameters_dict["postprocessing_parameters"]
@@ -78,11 +77,19 @@ def exhaustive_screen(parameters_dict):
     
     write_to_json(
         write_dict=parameters_dict,
-        output_json=os.path.join(output_folder, 'run_parameters.json')
-    )
+        output_json=os.path.join(output_folder, 'run_parameters.json'))
 
-    # generate compositional silico dict for screening MS1 EICs
-    compositional_silico_dict = generate_MS1_compositional_dict(silico_params)
+    if parameters_dict["perform_silico"]:
+        print(f'generating MS1 silico dict')
+        # generate compositional silico dict for screening MS1 EICs
+        compositional_silico_dict = generate_MS1_compositional_dict(silico_params)
+    else:
+        
+        MS1_s_json = os.path.join(output_folder, 'extracted', 'MS1_pre_Screening.json')
+        try: 
+            compositional_silico_dict = open_json(MS1_s_json)
+        except IOError: 
+            raise Exception(f'the file {MS1_s_json} does not exist. Please check whether you already have this data')
 
     # if data extraction set to False, make sure not to accidentally call 
     # data filters 
@@ -92,8 +99,7 @@ def exhaustive_screen(parameters_dict):
     # apply any pre-filtering steps to ripper data 
     filtered_rippers = apply_filters(
         extractor_parameters=extractor_params,
-        ripper_folder=ripper_folder
-    )
+        ripper_folder=ripper_folder)
 
     # if data_extraction set to True, extract data 
     if parameters_dict['data_extraction']:
@@ -103,28 +109,23 @@ def exhaustive_screen(parameters_dict):
             output_folder=output_folder,
             silico_parameters=silico_params,
             compositional_silico_dict=compositional_silico_dict,
-            extractor_parameters=extractor_params
-        )
+            extractor_parameters=extractor_params)
 
     else:
 
         extracted_data_dirs = [
             os.path.join(output_folder, subdir) 
             for subdir in os.listdir(output_folder)
-            if not os.path.isfile(subdir) 
-        ]
+            if not os.path.isfile(subdir)]
 
         extracted_data_dirs = [
             os.path.join(data_dir, 'extracted')
-            for data_dir in extracted_data_dirs
-        ]
+            for data_dir in extracted_data_dirs]
         
         extracted_data_dirs = list(
             filter(
                 lambda x: x.find('run_parameters') == -1, 
-                extracted_data_dirs
-            )
-        )
+                extracted_data_dirs))
 
         print(f'extracted data dirs = {extracted_data_dirs}')
     
@@ -134,8 +135,7 @@ def exhaustive_screen(parameters_dict):
 
             standard_postprocess(
                 extracted_data_folder=extracted_data,
-                postprocess_parameters=postprocess_parameters
-            )
+                postprocess_parameters=postprocess_parameters)
 
 def mass_difference_screen(parameters_dict): 
     """ This function screens for mass differences based on input monomers and
@@ -172,14 +172,12 @@ def mass_difference_screen(parameters_dict):
     # write run parameters to .json
     write_to_json(
         write_dict=parameters_dict,
-        output_json=os.path.join(output_folder, 'run_parameters.json')
-    )
+        output_json=os.path.join(output_folder, 'run_parameters.json'))
 
     # apply any pre-filtering steps to ripper data 
     filtered_rippers = apply_filters(
         extractor_parameters=extractor_params,
-        ripper_folder=ripper_folder
-    )
+        ripper_folder=ripper_folder)
 
     # generate dictionary of MS2 signature ion masses for each monomer
     monomer_list = silico_params["MS1"]["monomers"]
@@ -284,6 +282,12 @@ def mass_difference_screen(parameters_dict):
             output_json=os.path.join(
                 output_folder,
                 f'{ripper_name}_precursor_assignments.json'))
+
+        write_to_json(
+            write_dict=MS1_dict,
+            output_json=os.path.join(
+                output_folder,
+                f'{ripper_name}_MS1_lib.json'))
 
         # write spectral assignments with identified monomer fingerprints to 
         # json file
@@ -399,8 +403,7 @@ def standard_extraction(
         # create subfolder for this data set 
         write_folder = os.path.join(
             output_folder, 
-            os.path.basename(ripper).replace('.json', '')
-        )
+            os.path.basename(ripper).replace('.json', ''))
 
         print(f'write folder = {write_folder}')
 
@@ -425,8 +428,7 @@ def standard_extraction(
     
         write_to_json(
             write_dict=compositional_silico_dict,
-            output_json=MS1_pre_screening_file
-        )
+            output_json=MS1_pre_screening_file)
 
         # get MS1 EICs for all compositions
         MS1_EICs = extract_MS1(
@@ -458,8 +460,7 @@ def standard_extraction(
         full_MSMS_silico_dict = generate_MSMS_insilico_from_compositions(
             composition_dict=compositional_silico_dict,
             silico_parameters=silico_parameters,
-            uniques=False
-        )
+            uniques=False)
        
         # write full in silico dict to .json file
         write_pre_fragment_screen_sequence_JSON(
@@ -474,8 +475,7 @@ def standard_extraction(
         confirmed_fragment_dict = confirm_fragments_sequence_dict(
             silico_dict=full_MSMS_silico_dict,
             ripper_dict=ripper_dict,
-            extractor_parameters=extractor_parameters
-        )
+            extractor_parameters=extractor_parameters)
 
         # write confirmed fragment silico dict to .json file
         write_confirmed_fragment_dict(

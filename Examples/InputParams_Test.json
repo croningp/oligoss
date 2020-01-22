@@ -1,7 +1,9 @@
 {
-"screening_method": "mass_difference",
+"screening_method": "exhaustive",
 
-"data_extraction": true,
+"perform_silico": true,
+
+"data_extraction": false,
 
 "postprocess": true,
 
@@ -10,14 +12,14 @@
         "mode": "pos",
 
         "MS1": {
-            "monomers": ["e", "t", "et", "ete", "tet"],
-            "max_length": 20,
-            "min_length": 2,
+            "monomers": ["A", "S", "G", "N", "Q", "V"],
+            "max_length": 8,
+            "min_length": 8,
             "ms1_adducts": ["H", "Na"],
             "min_z": 1,
             "max_z": null,
             "losses": true,
-            "max_neutral_losses": null,
+            "max_neutral_losses": 3,
             "universal_rxn": true,
             "modifications": true,
             "terminal_tags": {
@@ -32,19 +34,21 @@
             },
             "terminal_modifications": {
                 "0": null,
-                "-1": null
+                "-1": ["BtA"]
             },
             "side_chain_modifications": {
+                "E": ["Bnz"],
+                "K": ["Tfa"]
             },
             "cyclic_sequences": false,
-            "isobaric_targets": null
+            "isobaric_targets": ["ASGNQVGS"]
         },
 
         "MS2": {
             "fragment_series": ["b", "y", "a"],
             "ms2_adducts": ["H", "Na"],
             "ms2_losses": true,
-            "ms2_max_neutral_losses": null,
+            "ms2_max_neutral_losses": 3,
             "ms2_loss_products_adducts": null,
             "add_signatures": true,
             "signatures": null,
@@ -54,8 +58,8 @@
     },
  
 "extractor_parameters":
-    {   "error": 0.01,
-        "err_abs": true,
+    {   "error": 25,
+        "err_abs": false,
         "min_ms2_peak_abundance": 0,
         "pre_run_filter": true,
         
@@ -78,7 +82,7 @@
             "ms2_precursors": null,
             "min_MS1_total_intensity": null,
             "min_MS2_total_intensity": null,
-            "min_MS1_max_intensity": null,
+            "min_MS1_max_intensity": 1E3,
             "min_MS2_max_intensity": null
         }
 
@@ -110,8 +114,8 @@
     },
 
 "directories":
-    {   "ripper_folder": "Z:/group/David Doran/Data/DBD216/Nanomate_Orbi_run2/Sequencing/ripper_jsons/et",
-        "output_folder": "Z:/group/David Doran/Data/DBD216/Nanomate_Orbi_run2/Sequencing/massdiff_output/et",
+    {   "ripper_folder": "C:/Users/group/Documents/temp/MS/hsc/ripper",
+        "output_folder": "C:/Users/group/Documents/temp/MS/hsc/out",
         "polymer_type": "Depsipeptide"
     }
 
