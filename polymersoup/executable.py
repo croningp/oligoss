@@ -81,8 +81,11 @@ def exhaustive_screen(parameters_dict):
 
     if parameters_dict['perform_silico']:
         print(f'generating MS1 silico dict')
+        
         # generate compositional silico dict for screening MS1 EICs
         compositional_silico_dict = generate_MS1_compositional_dict(silico_params)
+        MS1_file = os.path.join(output_folder, 'extracted', 'MS1_pre_Screening.json')
+        write_to_json(compositional_silico_dict, MS1_file)
     else:
         
         MS1_s_json = os.path.join(output_folder, 'extracted', 'MS1_pre_Screening.json')
@@ -153,7 +156,6 @@ def mass_difference_screen(parameters_dict):
     # load parameters for data extraction operations
     extractor_params = parameters_dict['extractor_parameters']
 
-    print(f'{extractor_params.keys()}')
     # load important file paths from parameters_dict
     directories = parameters_dict['directories']
 
@@ -215,9 +217,9 @@ def mass_difference_screen(parameters_dict):
         # retrieve monomer massdiff and signature ion fingerprints 
         monomer_fingerprints = generate_monomer_massdiff_signature_fingerprints(
             monomers=monomer_list,
-            losses=True,
+            losses=silico_params["MS2"]["ms2_losses"],
             signature_types=None)
-
+        
         amines, aldehydes = ['x', 'p', 'e'], ['h', 'o', 't']
 
         MS1_dict = generate_ms1_mass_dictionary_adducts_losses(
@@ -233,7 +235,9 @@ def mass_difference_screen(parameters_dict):
             max_z=None,
             sequencing=False,
             terminal_modifications_dict={},
-            max_total_losses=2)
+            max_total_losses=silico_params["MS1"]["max_neutral_losses"],
+            losses=silico_params["MS1"]["losses"],
+            isobaric_targets=silico_params["MS1"]["isobaric_targets"])
         
         MS1_dict = {
             seq: seq_masses
@@ -242,8 +246,7 @@ def mass_difference_screen(parameters_dict):
                 abs(
                     len([c for i, c in enumerate(seq) if c in amines])
                     -len([c for i, c in enumerate(seq) if c in aldehydes]))
-                <= 1)
-        }
+                <= 1)}
 
         
         # check whether precursors are to be filtered by bpc
@@ -419,12 +422,6 @@ def standard_extraction(
         ripper_dict = open_json(ripper)
 
         print(f'getting MS1 EICs for {len(compositional_silico_dict)} compositions')
-
-        MS1_pre_screening_file = os.path.join(write_folder, "MS1_pre_Screening.json")
-    
-        write_to_json(
-            write_dict=compositional_silico_dict,
-            output_json=MS1_pre_screening_file)
 
         # get MS1 EICs for all compositions
         MS1_EICs = extract_MS1(
