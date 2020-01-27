@@ -27,7 +27,7 @@
             "terminus": 0,
             "mass_diff": {
                 "pos": "-H2O",
-                "neg": null,
+                "neg": null
             },
             "fragmentation_unit": {
                 "pos": "FRAGMENTATION_UNIT",
@@ -45,7 +45,7 @@
             "terminus": 0,
             "mass_diff": {
                 "pos": ["-H2O", "+2H"],
-                "neg": null,
+                "neg": null
             },
             "fragmentation_unit": {
                 "pos": "FRAGMENTATION_UNIT",
@@ -63,7 +63,7 @@
             "terminus": 0,
             "mass_diff": {
                 "pos": ["-H2O", "-2H"],
-                "neg": null,
+                "neg": null
             },
             "fragmentation_unit": {
                 "pos": "FRAGMENTATION_UNIT",
@@ -81,7 +81,7 @@
             "terminus": 0,
             "mass_diff": {
                 "pos": "-NH4",
-                "neg": null,
+                "neg": null
             },
             "fragmentation_unit": {
                 "pos": "FRAGMENTATION_UNIT",
@@ -99,7 +99,7 @@
             "terminus": 0,
             "mass_diff": {
                 "pos": ["-NH4", "-2H"],
-                "neg": null,
+                "neg": null
             },
             "fragmentation_unit": {
                 "pos": "FRAGMENTATION_UNIT",
@@ -117,7 +117,7 @@
             "terminus": -1,
             "mass_diff": {
                 "pos": ["-CH2O"],
-                "neg": null,
+                "neg": null
             },
             "fragmentation_unit": {
                 "pos": "FRAGMENTATION_UNIT",
