@@ -84,7 +84,11 @@ def exhaustive_screen(parameters_dict):
         
         # generate compositional silico dict for screening MS1 EICs
         compositional_silico_dict = generate_MS1_compositional_dict(silico_params)
-        MS1_file = os.path.join(output_folder, 'extracted', 'MS1_pre_Screening.json')
+        
+        extracted_folder = os.path.join(output_folder, 'extracted')
+        if not os.path.exists(extracted_folder):
+            os.mkdir(extracted_folder)
+        MS1_file = os.path.join(extracted_folder, 'MS1_pre_Screening.json')
         write_to_json(compositional_silico_dict, MS1_file)
     else:
         
