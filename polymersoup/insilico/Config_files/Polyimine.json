@@ -1,0 +1,134 @@
+{
+    "MONOMERS": {
+        "x": [136.10005, [["amine",2]]],
+        "p": [108.06875, ["amine", 2]],
+        "e": [60.06875, ["amine", 2]],
+        "h": [134.03678, ["aldehyde", 2]],
+        "o": [58.00548, ["aldehyde", 2]],
+        "t": [100.05243, ["aldehyde", 2]]
+    },
+
+    "MASS_DIFF": "H2O",
+
+    "ELONGATION_UNIT": 1,
+
+    "REACTIVITY_CLASSES": {
+        "amine": [["aldehyde"], ["x", "p", "e"]],
+        "aldehyde": [["amine"], ["h", "o", "t"]]
+    },
+
+    "SYMMETRY": false, 
+
+    "LOSS_PRODUCTS": {},
+
+    "FRAG_SERIES": {
+
+        "a": {
+            "terminus": 0,
+            "mass_diff": {
+                "pos": "-H2O",
+                "neg": null
+            },
+            "fragmentation_unit": {
+                "pos": "FRAGMENTATION_UNIT",
+                "neg": "FRAGMENTATION_UNIT"
+            },
+            "start": 0,
+            "end": 0,
+            "intrinsic_adducts": {
+                "pos": "H",
+                "neg": null 
+            }
+        },
+
+        "b": {
+            "terminus": 0,
+            "mass_diff": {
+                "pos": ["-H2O", "+2H"],
+                "neg": null
+            },
+            "fragmentation_unit": {
+                "pos": "FRAGMENTATION_UNIT",
+                "neg": "FRAGMENTATION_UNIT"
+            },
+            "start": 0,
+            "end": 0,
+            "intrinsic_adducts": {
+                "pos": "H",
+                "neg": null 
+            }
+        },
+
+        "c": {
+            "terminus": 0,
+            "mass_diff": {
+                "pos": ["-H2O", "-2H"],
+                "neg": null
+            },
+            "fragmentation_unit": {
+                "pos": "FRAGMENTATION_UNIT",
+                "neg": "FRAGMENTATION_UNIT"
+            },
+            "start": 0,
+            "end": 0,
+            "intrinsic_adducts": {
+                "pos": "H",
+                "neg": null 
+            }
+        },
+
+        "d": {
+            "terminus": 0,
+            "mass_diff": {
+                "pos": "-NH4",
+                "neg": null
+            },
+            "fragmentation_unit": {
+                "pos": "FRAGMENTATION_UNIT",
+                "neg": "FRAGMENTATION_UNIT"
+            },
+            "start": 0,
+            "end": 0,
+            "intrinsic_adducts": {
+                "pos": "H",
+                "neg": null 
+            }
+        },
+
+        "e": {
+            "terminus": 0,
+            "mass_diff": {
+                "pos": ["-NH4", "-2H"],
+                "neg": null
+            },
+            "fragmentation_unit": {
+                "pos": "FRAGMENTATION_UNIT",
+                "neg": "FRAGMENTATION_UNIT"
+            },
+            "start": 0,
+            "end": 0,
+            "intrinsic_adducts": {
+                "pos": "H",
+                "neg": null 
+            }
+        },
+
+        "z": {
+            "terminus": -1,
+            "mass_diff": {
+                "pos": ["-CH2O"],
+                "neg": null
+            },
+            "fragmentation_unit": {
+                "pos": "FRAGMENTATION_UNIT",
+                "neg": "FRAGMENTATION_UNIT"
+            },
+            "start": 0,
+            "end": 0,
+            "intrinsic_adducts": {
+                "pos": "H",
+                "neg": null 
+            }
+        }
+    }
+}
