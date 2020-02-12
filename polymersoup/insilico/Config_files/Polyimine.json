@@ -1,6 +1,6 @@
 {
     "MONOMERS": {
-        "x": [136.10005, [["amine",2]]],
+        "x": [136.10005, [["amine", 2]]],
         "p": [108.06875, ["amine", 2]],
         "e": [60.06875, ["amine", 2]],
         "h": [134.03678, ["aldehyde", 2]],
@@ -19,14 +19,24 @@
 
     "SYMMETRY": false, 
 
+    "ELONGATION": 1,
+
+    "CHAIN_TERMINATORS": [],
+
+    "IONIZABLE_SIDECHAINS": null,
+
     "LOSS_PRODUCTS": {},
+
+    "INTRINSICALLY_CHARGE_MONOMERS": null,
+
+    "MODIFICATIONS": null,
 
     "FRAG_SERIES": {
 
         "a": {
             "terminus": 0,
             "mass_diff": {
-                "pos": "-H2O",
+                "pos": -17.00274,                
                 "neg": null
             },
             "fragmentation_unit": {
@@ -38,13 +48,16 @@
             "intrinsic_adducts": {
                 "pos": "H",
                 "neg": null 
+            },
+            "exceptions": {
+
             }
         },
 
         "b": {
             "terminus": 0,
             "mass_diff": {
-                "pos": ["-H2O", "+2H"],
+                "pos": -19.0184,
                 "neg": null
             },
             "fragmentation_unit": {
@@ -56,13 +69,18 @@
             "intrinsic_adducts": {
                 "pos": "H",
                 "neg": null 
+            },
+            "exceptions": {
+                "pos": {
+                    
+                }
             }
         },
 
         "c": {
             "terminus": 0,
             "mass_diff": {
-                "pos": ["-H2O", "-2H"],
+                "pos": -14.98709,
                 "neg": null
             },
             "fragmentation_unit": {
@@ -80,7 +98,7 @@
         "d": {
             "terminus": 0,
             "mass_diff": {
-                "pos": "-NH4",
+                "pos": -17.02654,
                 "neg": null
             },
             "fragmentation_unit": {
@@ -98,7 +116,7 @@
         "e": {
             "terminus": 0,
             "mass_diff": {
-                "pos": ["-NH4", "-2H"],
+                "pos": -19.0422,
                 "neg": null
             },
             "fragmentation_unit": {
@@ -116,7 +134,7 @@
         "z": {
             "terminus": -1,
             "mass_diff": {
-                "pos": ["-CH2O"],
+                "pos": -29.00274,
                 "neg": null
             },
             "fragmentation_unit": {
@@ -130,5 +148,19 @@
                 "neg": null 
             }
         }
+    },
+
+    "IMMONIUM_IONS": "MS2_SIGNATURE_IONS",
+
+    "MS2_SIGNATURE_IONS":
+
+    {
+        "Im": [
+            ["x", 135.09167], ["p", 109.07602], 
+            ["e", 59.06037] 
+        ],
+
+        "dominant": []
+
     }
 }
