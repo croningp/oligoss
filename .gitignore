@@ -12,3 +12,4 @@ build/
 !Documentation/build/
 dist/
 .csv
+.lnk
