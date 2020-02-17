@@ -2,7 +2,7 @@
 
 PolymerMassSpec is a python project designed to enable _de novo_ sequencing and
 analysis of highly heterogeneous mixtures of small to medium-sized linear
-polymers from mass spectrometry data.
+oligomers from mass spectrometry data.
 
 __Note__: proper use of this package requires a decent working knowledge of
 both the chemistry and analytical methods used to obtain results. It is
