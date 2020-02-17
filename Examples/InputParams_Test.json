@@ -3,7 +3,7 @@
 
 "perform_silico": true,
 
-"data_extraction": false,
+"data_extraction": true,
 
 "postprocess": true,
 
@@ -12,36 +12,29 @@
         "mode": "pos",
 
         "MS1": {
-            "monomers": ["A", "S", "G", "N", "Q", "V"],
-            "max_length": 8,
-            "min_length": 8,
+            "monomers": ["V", "g", "N"],
+            "max_length": 5,
+            "min_length": 1,
             "ms1_adducts": ["H", "Na"],
             "min_z": 1,
             "max_z": null,
             "losses": true,
-            "max_neutral_losses": 3,
+            "max_neutral_losses": 1,
             "universal_rxn": true,
-            "modifications": true,
-            "terminal_tags": {
-                "0": null,
-                "-1": null
-            },
             "universal_sidechain_modifications": true,
-            "universal_terminal_modifications": true,
+            "universal_terminal_modifications": false,
             "terminal_monomer_tags": {
                 "0": null,
                 "-1": null
             },
             "terminal_modifications": {
-                "0": null,
-                "-1": ["BtA"]
+                "0": ["Ole"],
+                "-1": null 
             },
             "side_chain_modifications": {
-                "E": ["Bnz"],
-                "K": ["Tfa"]
             },
             "cyclic_sequences": false,
-            "isobaric_targets": ["ASGNQVGS"]
+            "isobaric_targets": null 
         },
 
         "MS2": {
@@ -58,9 +51,9 @@
     },
  
 "extractor_parameters":
-    {   "error": 25,
-        "err_abs": false,
-        "min_ms2_peak_abundance": 0,
+    {   "error": 0.01,
+        "err_abs": true,
+        "min_ms2_peak_abundance": 100,
         "pre_run_filter": true,
         
         "min_MS1_total_intensity": null,
@@ -114,8 +107,8 @@
     },
 
 "directories":
-    {   "ripper_folder": "C:/Users/group/Documents/temp/MS/hsc/ripper",
-        "output_folder": "C:/Users/group/Documents/temp/MS/hsc/out",
+    {   "ripper_folder": "Z:/group/David Doran/Collaborations/PolymerSoup_Guest_Test/data_sets/Bruker/Depsipeptide_Fatty_Acid_Hybrids/V+g+N+Ole",
+        "output_folder": "C:/Users/group/Documents/out",
         "polymer_type": "Depsipeptide"
     }
 
