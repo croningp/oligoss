@@ -12,4 +12,5 @@ build/
 !Documentation/build/
 dist/
 .csv
-.lnk
+*.lnk
+*shortcut*
