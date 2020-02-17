@@ -38,7 +38,7 @@ http://datalore.chem.gla.ac.uk/Origins/mzmlripper.git
 Repo can be cloned from:
 
 ```
-http://datalore.chem.gla.ac.uk/DBD/polymermassspec.git
+https://gitlab.com/croningroup/origins/polymermassspec.git
 
 ```
 
