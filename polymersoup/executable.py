@@ -439,12 +439,11 @@ def standard_extraction(
             input_data_file=ripper,
             output_folder=write_folder,
             EICs=MS1_EICs,
-            ms_level=1
-        )
+            ms_level=1)
 
         # remove compositions that are not present at sufficient abundance
         # from in silico compositional dict
-        compositional_silico_dict = {
+        confirmed_compositions = {
             composition: compositional_silico_dict[composition]
             for composition in MS1_EICs
             if composition.find('retention') == -1
@@ -455,7 +454,7 @@ def standard_extraction(
         # generate full insilico fragmentation MSMS data for all possible
         # sequences that match compositions found in MS1 EICs
         full_MSMS_silico_dict = generate_MSMS_insilico_from_compositions(
-            composition_dict=compositional_silico_dict,
+            composition_dict=confirmed_compositions,
             silico_parameters=silico_parameters,
             uniques=False)
        
