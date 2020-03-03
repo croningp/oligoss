@@ -457,7 +457,7 @@ def standard_extraction(
             composition_dict=confirmed_compositions,
             silico_parameters=silico_parameters,
             uniques=False)
-       
+
         # write full in silico dict to .json file
         write_pre_fragment_screen_sequence_JSON(
             input_data_file=ripper,

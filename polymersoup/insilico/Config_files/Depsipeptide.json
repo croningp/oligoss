@@ -30,6 +30,39 @@
         "t": [100.05243, ["aldehyde", 2]]
     },
 
+    "SIDE_CHAIN_CROSSLINKS": {
+        "C": {
+            "monomers": ["C"],
+            "crosslink_massdiff": "-2H",
+            "permissible_crosslink_charges": [0],
+            "disrupt_ms2": true
+        },
+        "K": {
+            "monomers": ["E", "D"],
+            "crosslink_massdiff": "-H2O",
+            "permissible_crosslink_charges": [0],
+            "disrupt_ms2": false
+        },
+        "R": {
+            "monomers": ["E", "D"],
+            "crosslink_massdiff": "-H2O",
+            "permissible_crosslink_charges": [0],
+            "disrupt_ms2": false
+        },
+        "D": {
+            "monomers": ["K", "R"],
+            "crosslink_massdiff": "-H2O",
+            "permissible_crosslink_charges": [0],
+            "disrupt_ms2": false
+        },
+        "E": {
+            "monomers": ["K", "R"],
+            "crosslink_massdiff": "-H2O",
+            "permissible_crosslink_charges": [0],
+            "disrupt_ms2": false
+        }
+    },
+
     "MASS_DIFF": "H2O",
 
     "ELONGATION": 1,
