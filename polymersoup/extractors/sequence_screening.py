@@ -48,6 +48,93 @@ def generate_EIC(
                 where Rt = retention time (float) and I = intensity of all
                 species that match target ions at that retention time.
     """
+    ripper_dict_at_ms_level = ripper_dict[f'ms{ms_level}']
+    eic = []
+
+    # Get error thresholds
+    if err_abs:
+        errs = [float(err) for ion in ions]
+    else:
+        errs = [((ion * err) * 10**-6) for ion in ions]
+
+    # Establish target thresholds before entering loops
+    target_ion_limits = [
+        (ion, ion - errs[i], ion + errs[i])
+        for i, ion in enumerate(ions)
+    ]
+
+    # Sum intensities
+    for spectrum_info in ripper_dict_at_ms_level.values():
+        intensity = 0
+        for mass in spectrum_info['mass_list']:
+            for ion, min_target, max_target in target_ion_limits:
+                if min_target <= mass <= max_target:
+                    mass_key = f'{mass:.4f}'
+                    intensity += spectrum_info[mass_key]
+        if intensity > 0:
+            eic.append(
+                [float(spectrum_info['retention_time']), float(intensity)]
+            )
+
+    eic = sorted(eic, key=lambda item: item[1])
+
+    # Return empty list if max intensity is below min_max_intensity
+    if min_max_intensity and eic:
+        # EIC already sorted so just check last element
+        if eic[-1][1] < min_max_intensity:
+            return []
+
+    # Return empty list if sum of intensities is less than min_total_intensity
+    if min_total_intensity and eic:
+        if sum([item[1] for item in eic]) < min_total_intensity:
+            return []
+
+    return eic
+
+
+def generate_EIC_deprecated(
+    ions,
+    ms_level,
+    ripper_dict,
+    err,
+    err_abs=True,
+    min_max_intensity=None,
+    min_total_intensity=None,
+    precursors=None,
+    mapi=0,
+    peak_list=None
+):
+    """
+    Takes a list of ions (m/z values) and generates a combined extracted ion
+    chromatogram (EIC) of those ions from mass spectra in mzml ripper format
+    (ripper_dict).
+
+    Args:
+        ions (list of floats): list of target ion m/z values.
+        ms_level (int): MS level at which to screen for ions.
+        ripper_dict (dict): mzml ripper mass spectrometry data dictionary.
+        err (float): error tolerance for matching target ions to masses found
+                in spectra; units either in absolute mass units or ppm.
+        err_abs (bool, optional): specifies whether err is in absolute mass
+                units or ppm; if True, err is in absolute mass units.
+                Defaults to True.
+        min_max_intensity (float, optional): minimum maximum intensity of EIC
+                for it to be returned. Defaults to None.
+        min_total_intensity (float, optional): maximum total intensity of EIC
+                for it to be returned. Defaults to None.
+        precursors (list of floats, optional): list of precursor ions for
+                matching to parents/precursors of MSn spectra.
+        mapi (optional, float): minimum annotated peak intensity (in % of most
+                intense peak), specifies minimum relative intensity of most
+                intense peak associated with a sequence for spectra to be used
+                in screening.
+        peak_list (optional, list of floats): list of ALL ions associated with
+                targets, not just ions used in generating EIC.
+    Returns:
+        EIC (list of lists): extracted ion chromatogram in format: [[Rt, I]..]
+                where Rt = retention time (float) and I = intensity of all
+                species that match target ions at that retention time.
+    """
 
     # extract spectra at target ms level
     ripper_dict = ripper_dict[f'ms{ms_level}']
