@@ -1,0 +1,21 @@
+stages:
+  - "lint"
+  - "test"
+  # - "deploy"
+
+
+lint:
+  stage: "lint"
+  image: "python:3.8"
+
+  variables:
+    FLAKE8_EXCLUDE: venv,*__init__.py
+    FLAKE8_MAX_LINE_LENGTH: 80
+    FLAKE8_IGNORE: E302,W503
+    FLAKE8_PER_FILE_IGNORE: tests/*:T001
+
+  script:
+    - pip install flake8
+    - pip install flake8-print
+    - flake8 . --max-line-length=$FLAKE8_MAX_LINE_LENGTH --ignore=$FLAKE8_IGNORE --per-file-ignores=$FLAKE8_PER_FILE_IGNORE --exclude=$FLAKE8_EXCLUDE
+
