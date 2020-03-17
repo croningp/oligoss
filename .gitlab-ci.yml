@@ -13,6 +13,7 @@ lint:
     FLAKE8_MAX_LINE_LENGTH: 80
     FLAKE8_IGNORE: E302,W503
     FLAKE8_PER_FILE_IGNORE: tests/*:T001
+    FLAKE8_EXCLUDE: polymersoup/
 
   script:
     - pip install flake8
