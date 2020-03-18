@@ -14,3 +14,4 @@ dist/
 .csv
 *.lnk
 *shortcut*
+!*.flake8.*
