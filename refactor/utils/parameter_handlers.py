@@ -10,7 +10,7 @@ silico_type_dict = {
     "optional": None,
 
     "MS1": {
-        "ms1_adducts": List[float],
+        "ms1_adducts": List[str],
         "min_z": int,
         "max_z": int,
         "losses": bool,
@@ -74,7 +74,19 @@ def generate_params_dict(params_file):
     return load
 
 def generate_silico_params(params_dict):
+    """
+    Generates and formats parameters relevant to building in silico libraries
+    for a screening experiment
+    Args:
+        params_dict (dict): dict read from user input parameters file
 
+    Raises:
+        Exception: 
+        Exception:
+    
+    Returns:
+        silico_params (dict): [description]
+    """
     silico_params = params_dict["silico_parameters"]
 
     for param, param_value in silico_params.items():

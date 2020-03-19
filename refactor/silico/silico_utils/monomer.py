@@ -6,7 +6,7 @@ class Monomer:
         self,
         monomer_id: str,
         neutral_mass: float,
-        functional_groups: List[str, float],
+        functional_groups: List[object],
         neutral_losses: List[float],
         intrinsic_charge: Optional[int]
     ):
