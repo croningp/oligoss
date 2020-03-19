@@ -1,7 +1,7 @@
-from backbone import Backbone
 from monomer import Monomer
 
-class Polymer(Backbone, Monomer):
+from typing import List
 
-    def __init__(self):
-        super().__init__(locals())
+class PolymerGenerator:
+    def __init__(self, monomers: List[Monomer]):
+        self.monomers = monomers

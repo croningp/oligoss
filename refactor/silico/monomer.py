@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-class Monomer():
+class Monomer:
 
     def __init__(
         self,
