@@ -1,11 +1,13 @@
-from typing import List
+from typing import List, Optional
 
 class Monomer():
 
     def __init__(
         self,
-        id: str,
+        monomer_id: str,
         neutral_mass: float,
-        functional_groups: List[str, float]
+        functional_groups: List[str, float],
+        neutral_losses: List[float],
+        intrinsic_charge: Optional[int]
     ):
         pass

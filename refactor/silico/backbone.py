@@ -1,7 +1,6 @@
 from typing import List
-from monomer import Monomer
 
-class Polymer(Monomer):
+class Backbone():
 
     def __init__(
         self,
@@ -9,7 +8,6 @@ class Polymer(Monomer):
         min_length: int,
         max_length: int,
         reactivity_classes: List[str, float],
-        symmetry: bool,
-        **kwargs
+        symmetry: bool
     ) -> None:
-        super().__init__(locals())
+        pass
