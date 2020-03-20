@@ -1,6 +1,4 @@
 from silico_utils.monomer import Monomer
-from silico_utils.backbone import Backbone
-from silico_utils.modification import Modification
 
 from typing import List
 
