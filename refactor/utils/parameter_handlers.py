@@ -142,7 +142,16 @@ def load_instrumentation(params_dict):
                         'or provide a valid filepath. Here are a list of pre-\n'
                         'configured aliases for mass spectrometers:\n'
                         f'{MASS_SPEC_CONFIGS.keys()}')
-            mass_spec_info = load(instrument_info["mass_spec"])
+            mass_spec_info = load(MASS_SPEC_CONFIGS[instrument_info["mass_spec"]])
+        if "chromatography" in instrument_info:
+            if (instrument_info["chromatography"].lower().replace(".json", "")
+                    not in CHROMATOGRAPHY_CONFIGS):
+                if not os.path.isfile(instrument_info["mass_spec"]):
+                    raise Exception(f'file path to chromatography config file\n'
+                                    f'is invalid. Please enter a valid chromatography\n'
+                                    f'alias or a filepath to a valid chromatography config\n'
+                                    f'file. Here are a list of pre-configured aliases for\n'
+                                    f'chromatography separations: {CHROMATOGRAPHY_CONFIGS.keys()}')
 
 def generate_extractor_params(params_dict):
     """[summary]
