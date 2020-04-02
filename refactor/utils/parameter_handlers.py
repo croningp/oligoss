@@ -3,8 +3,6 @@ import json
 from typing import List, Dict, Optional
 from global_chemical_constants import FUNCTIONAL_GROUPS
 from instrument_handlers import (
-    MASS_SPEC_INST_PARAMS,
-    CHROMATOGRAPHY_INST_PARAMS,
     MASS_SPEC_CONFIGS,
     CHROMATOGRAPHY_CONFIGS)
 
@@ -135,34 +133,28 @@ def load_instrumentation(params_dict):
             if (instrument_info["mass_spec"].lower().replace(".json", "")
                     not in MASS_SPEC_CONFIGS):
                 if not os.path.isfile(instrument_info["mass_spec"]):
-                    raise Exception(f'filepath to mass spectrometer config file\n'
-                        f'({instrument_info["mass_spec"]}) is not a valid\n'
-                        'filepath. Please enter either an alias for one of\n'
-                        'the pre-made mass spectrometer config files or\n'
-                        'or provide a valid filepath. Here are a list of pre-\n'
-                        'configured aliases for mass spectrometers:\n'
-                        f'{MASS_SPEC_CONFIGS.keys()}')
-            mass_spec_info = load(MASS_SPEC_CONFIGS[instrument_info["mass_spec"]])
+                    raise Exception(f'filepath to mass spectrometer config\n'
+                                    f'({instrument_info["mass_spec"]}) is not\n'
+                                    f'a valid filepath. Please enter an alias\n'
+                                    f'for one of the pre-made mass spect\n'
+                                    f'config files or provide a valid\n'
+                                    f'filepath. Here are a list of aliases\n'
+                                    f'for pre-configured instruments:\n'
+                                    f'{MASS_SPEC_CONFIGS.keys()}')
+            # mass_spec_info = load(
+                # MASS_SPEC_CONFIGS[instrument_info["mass_spec"]])
         if "chromatography" in instrument_info:
             if (instrument_info["chromatography"].lower().replace(".json", "")
                     not in CHROMATOGRAPHY_CONFIGS):
                 if not os.path.isfile(instrument_info["mass_spec"]):
                     raise Exception(f'file path to chromatography config file\n'
-                                    f'is invalid. Please enter a valid chromatography\n'
-                                    f'alias or a filepath to a valid chromatography config\n'
-                                    f'file. Here are a list of pre-configured aliases for\n'
-                                    f'chromatography separations: {CHROMATOGRAPHY_CONFIGS.keys()}')
+                                    f'is invalid. Please enter a valid\n'
+                                    f'alias or a filepath to a valid\n'
+                                    f'chromatography config file. Here are a\n'
+                                    f'list of aliases for pre-configured\n'
+                                    f'chromatography separations:\n'
+                                    f'{CHROMATOGRAPHY_CONFIGS.keys()}')
 
-def generate_extractor_params(params_dict):
-    """[summary]
-
-    Args:
-        params_dict ([type]): [description]
-    """
-    extractor_params = params_dict["extractor_parameters"]
-    for param in extractor_type_dict:
-        if param not in extractor_params:
-            if not extractor_params["instrument"]
 def retrieve_fg_value(param_value):
 
     if type(param_value) == str:

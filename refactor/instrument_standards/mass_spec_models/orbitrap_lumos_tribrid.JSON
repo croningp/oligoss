@@ -7,5 +7,9 @@
     "pre_screen_filters": {
         "min_MS1_max_intensity": 1E5,
         "min_MS2_max_intensity": null
-    }
+    },
+    "fragmentation": {
+        "ms1": "neutral",
+        "ms2": ["HCD", "neutral"],
+        "msn": ["HCD", "neutral"]}
 }

@@ -1,4 +1,4 @@
-import sys, os
+import os
 HERE = os.path.dirname(__file__)
 mass_specs = os.path.join(HERE, ".", "instrument_standards", "mass_specs")
 chromatography = os.path.join(
@@ -12,7 +12,8 @@ MASS_SPEC_INST_PARAMS = [
     "err_abs",
     "rt_units",
     "min_MS1_max_intensity",
-    "min_MS2_max_intensity"
+    "min_MS2_max_intensity",
+    "fragmentation"
 ]
 
 CHROMATOGRAPHY_INST_PARAMS = [
