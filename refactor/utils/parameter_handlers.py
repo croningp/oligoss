@@ -1,86 +1,21 @@
 import os
 import json
-from typing import List, Dict, Optional
+from typing import List
 from global_chemical_constants import FUNCTIONAL_GROUPS
 from instrument_handlers import (
     MASS_SPEC_CONFIGS,
     CHROMATOGRAPHY_CONFIGS)
-
-silico_type_dict = {
-    "mode": str,
-    "max_length": int,
-    "min_length": int,
-    "monomers": List[str],
-    "optional": None,
-
-    "MS1": {
-        "ms1_adducts": List[str],
-        "min_z": int,
-        "max_z": int,
-        "losses": bool,
-        "max_neutral_losses": int,
-        "universal_sidechain_modifications": bool,
-        "universal_terminal_modifications": bool,
-        "terminal_modifications": Optional[Dict[str, str]],
-        "side_chain_modifications": Optional[Dict[str, List[str]]],
-        "cyclic_sequences": bool,
-        "isomeric_targets": Optional[List[str]],
-        "optional": ["terminal_modifications", "side_chain_modifications"]
-    },
-
-    "MS2": {
-        "fragment_series": List[str],
-        "ms2_adducts": Optional[List[float]],
-        "ms2_losses": bool,
-        "add_signatures": bool,
-        "signatures": Optional[List[str]],
-        "min_z": int,
-        "max_z": int,
-        "optional": ["ms2_adducts", "signatures"]
-    }
-}
-
-extractor_type_dict = {
-    "error": float,
-    "error_units": str,
-    "min_ms2_peak_abundance": Optional[float],
-    "pre_run_filter": bool,
-    "min_ms1_total_intensity": Optional[float],
-    "min_ms1_max_intensity": Optional[float],
-    "pre_filter": bool,
-    "rt_units": str,
-    "optional": ["min_ms1_total_intensity", "min_ms1_max_intensity"],
-
-    "pre_screen_filters": {
-        "min_rt": Optional[float],
-        "max_rt": Optional[float],
-        "essential_signatures": Optional[List[float]],
-        "signature_ms_level": Optional[int],
-        "min_ms1_max_intensity": Optional[float],
-        "min_ms1_total_intensity": Optional[float],
-        "min_ms2_max_intensity": Optional[float],
-        "min_ms2_total_intensity": Optional[float],
-        "optional": "all"
-    }
-}
-
-postprocess_type_dict = {
-    "exclude_frags": Optional[List[str]],
-    "optional_core_frags": Optional[List[str]],
-    "dominant_signature_cap": float,
-    "essential_fragments": Optional[List[str]],
-    "subsequence_weights": List[float]
-}
-
-def load(json_file):
-    with open(json_file) as f:
-        return json.load(f)
+from type_dicts.parameter_type_dicts import (
+    silico_type_dict,
+    extractor_type_dict,
+    postprocess_type_dict)
 
 def generate_params_dict(params_file):
 
     with open(params_file) as f:
         load = json.load(f)
-    return load
+    silico_params = generate_silico_params(load)
+    return silico_params
 
 def generate_silico_params(params_dict):
     """
@@ -124,6 +59,18 @@ def generate_silico_params(params_dict):
     return silico_params
 
 def load_instrumentation(params_dict):
+    """[summary]
+
+    Args:
+        params_dict ([type]): [description]
+
+    Raises:
+        Exception: [description]
+        Exception: [description]
+
+    Returns:
+        [type]: [description]
+    """
     if (not params_dict["extractor_parameters"]["instruments"]
             or "instruments" not in params_dict["extractor_parameters"]):
         return None, None
@@ -156,7 +103,14 @@ def load_instrumentation(params_dict):
                                     f'{CHROMATOGRAPHY_CONFIGS.keys()}')
 
 def retrieve_fg_value(param_value):
+    """[summary]
 
+    Args:
+        param_value ([type]): [description]
+
+    Returns:
+        [type]: [description]
+    """
     if type(param_value) == str:
         if param_value[0]:
             if param_value[0] == "-":
@@ -164,7 +118,15 @@ def retrieve_fg_value(param_value):
             return FUNCTIONAL_GROUPS[param_value]
 
 def format_params(param_value, target_type):
+    """[summary]
 
+    Args:
+        param_value ([type]): [description]
+        target_type ([type]): [description]
+
+    Returns:
+        [type]: [description]
+    """
     if type(param_value) == target_type:
         return param_value
 
