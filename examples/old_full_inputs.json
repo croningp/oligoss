@@ -1,0 +1,123 @@
+{
+"screening_method": "exhaustive",
+
+"perform_silico": false,
+
+"data_extraction": false,
+
+"postprocess": true,
+
+"silico_parameters":
+    {
+        "mode": "pos",
+
+        "MS1": {
+            "monomers": ["G", "C", "H", "g"],
+            "max_length": 6,
+            "min_length": 1,
+            "ms1_adducts": ["H", "Na"],
+            "min_z": 1,
+            "max_z": null,
+            "losses": true,
+            "max_neutral_losses": 1,
+            "universal_rxn": true,
+            "universal_sidechain_modifications": true,
+            "universal_terminal_modifications": false,
+            "terminal_monomer_tags": {
+                "0": null,
+                "-1": null
+            },
+            "terminal_modifications": {
+                "0": null,
+                "-1": null 
+            },
+            "side_chain_modifications": {
+            },
+            "cyclic_sequences": false,
+            "isobaric_targets": null 
+        },
+
+        "MS2": {
+            "fragment_series": ["b", "y", "a"],
+            "ms2_adducts": ["H", "Na"],
+            "ms2_losses": true,
+            "ms2_max_neutral_losses": 1,
+            "ms2_loss_products_adducts": null,
+            "add_signatures": true,
+            "signatures": null,
+            "min_z": 1,
+            "max_z": 1
+        }
+    },
+
+"treatment_groups": {
+    "targets": ["C"],
+    "control_filenames": ["ECK2-48_1_c1_1.json", "ECK2-48_1_c1_2.json", "ECK2-48_1_c1_3.json"],
+    "non_control": {
+        "treatment_type":"crosslink_removal",
+        "identifier": "DTT",
+        "non_control_filepaths": null}
+    },
+
+"extractor_parameters":
+    {   "error": 0.01,
+        "err_abs": true,
+        "min_ms2_peak_abundance": 90,
+        "pre_run_filter": true,
+        
+        "min_MS1_total_intensity": null,
+        "min_MS2_total_intensity": null,
+        "min_MS1_max_intensity": null,
+        "min_MS2_max_intensity": null,
+        "filter" : true,
+        "N_bpc_peaks": 1,
+        "massdiff_bpc_filter": false,
+        "massdiff_precursor_exclusion": 5,
+        "abs_precursor_exclusion": false,
+        "pre_screen_filters": {
+            "min_rt": 0,
+            "max_rt": 6,
+            "essential_signatures": null,
+            "signature_types": ["Im"],
+            "signature_ms_level": 2,
+            "massdiff_bins": false,
+            "ms2_precursors": null,
+            "min_MS1_total_intensity": null,
+            "min_MS2_total_intensity": null,
+            "min_MS1_max_intensity": 1E5,
+            "min_MS2_max_intensity": null
+        }
+
+    },
+    
+"postprocessing_parameters":
+    {   "exclude_frags": null,
+        "optional_core_frags": ["b1"],
+        "core_linear_series": ["b", "y"],
+        "excluded_fragments": null,
+        "dominant_signature_cap": 0,
+        "essential_fragments": null,
+        "subsequence_weight": [0, 0.25, 0.5, 0.75, 1],
+        "min_rt": null,
+        "max_rt": null,
+        "Rt_bin": 15,
+        "backup_Rt_bin": 6,
+        "ms2_Rt_bin": 30,
+        "ms2_Rt_flexible": true,
+        "min_viable_confidence": 40,
+        "min_relative_intensity": null,
+
+        "cyclic_parameters": {
+            "min_shifted_fragments": 0,
+            "min_viable_linear_confidence": null,
+            "core_series": null,
+            "assign_cyclic_Rt": true
+        }
+    },
+
+"directories":
+    {   "ripper_folder": "Y:/Orbitrap Lumos/Emma Clarke/Peptides-Soups/12-03-20/json",
+        "output_folder": "Z:/group/Emma Clarke/Data/Peptides/Sequencing/ECK2-50/ECK2-48-2_c1",
+        "polymer_type": "Depsipeptide"
+    }
+}

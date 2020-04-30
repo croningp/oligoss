@@ -17,6 +17,7 @@
         "max_neutral_losses": 3,
         "universal_sidechain_modifications": true,
         "universal_terminal_modifications": false,
+        "fragment_series": ["b", "y"],
         "terminal_tags": {
             "0": "Ole",
             "-1": "F"
