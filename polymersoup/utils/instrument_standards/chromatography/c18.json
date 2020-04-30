@@ -1,0 +1,6 @@
+{
+    "min_rt": 2,
+    "max_rt": 26,
+    "rt_bin": 0.5,
+    "ms2_rt_bin": 0.2
+}

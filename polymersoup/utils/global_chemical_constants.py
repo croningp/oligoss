@@ -14,6 +14,7 @@ SOLVENTS = dictionary of comment neutral solvent molecules and associated
 masses
 
 """
+# Quick constants that will be used often as neutral losses and mass_diffs
 H = 1.00783
 H2O = 18.010565
 OH = 17.00274
@@ -27,7 +28,6 @@ CH3OH = 32.02622
 C2H5OH = 46.04187
 
 # Solvent Dictionary
-
 SOLVENTS = [
     H2O,  # water
     CH3CN,  # acetonitrile
@@ -35,9 +35,16 @@ SOLVENTS = [
     C2H5OH  # ethanol
 ]
 
+# Common elements and associated isotopic abundances
+COMMON_ELEMENTS = {
+    # ELEMENTAL_SYMBOL: [[mass, abundance (%)]...]
+    "H": [[1.00783, 100]],
+    "C": [[12.0, 100], [13.0336, 1.1]],
+    "N": [[14.00307, 100], [15.00011, 0.4]],
+    "O": [[15.99492, 100], [17.99916, 0.2]]
+}
 
 # Functional Group Dictionary
-
 FUNCTIONAL_GROUPS = {
     "H2O": H2O,  # water
     "h2o": H2O,  # water
