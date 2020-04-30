@@ -18,7 +18,6 @@ CORE_PARAM_TYPES = {
     "polymer_class": str
 }
 
-
 #  types for nested silico parameters
 SILICO_LIBRARY_TYPES = {
     "max_length": int,
@@ -37,25 +36,47 @@ SILICO_LIBRARY_TYPES = {
         "side_chain_modifications": Dict[str, List[str]],
         "cyclic_sequences": bool,
         "isomeric_targets": List[str],
-        "optional": ["terminal_modifications", "side_chain_modifications"]
+        "optional": ["terminal_modifications", "side_chain_modifications"],
+        "instrument_dependent": {
+            "instrument_only": {
+                "mass_spec": None,
+                "chromatography": None
+            },
+            "instrument_polymer": {
+                "mass_spec": ["max_neutral_losses", "min_z", "max_z"],
+                "chromatography": None
+            }
+        }
     },
 
     "ms2": {
         "fragment_series": List[str],
         "adducts": List[float],
         "max_neutral_losses": bool,
-        "add_signatures": bool,
         "signatures": List[str],
         "min_z": int,
         "max_z": int,
-        "optional": ["ms2_adducts", "signatures"]
+        "optional": ["ms2_adducts", "signatures"],
+        "instrument_dependent": {
+            "instrument_only": {
+                "mass_spec": None,
+                "chromatography": None
+            },
+            "instrument_polymer": [
+                "fragment_series",
+                "max_neutral_losses",
+                "signatures",
+                "min_z",
+                "max_z"
+            ]
+        }
     }
 }
-
 
 #  types for nested extractor parameters
 EXTRACTOR_TYPES = {
     "error": float,
+    "err_abs": bool,
     "error_units": str,
     "min_ms2_peak_abundance": float,
     "pre_run_filter": bool,
@@ -64,19 +85,28 @@ EXTRACTOR_TYPES = {
     "min_ms2_total_intensity": float,
     "min_ms2_max_intensity": float,
     "pre_filter": bool,
-    "rt_units": str,
     "optional": [
         "min_ms1_total_intensity",
         "min_ms1_max_intensity",
         "min_ms2_total_intensity",
         "min_ms2_max_intensity",
         "pre_screen_filters"],
-
+    "instrument_dependent": {
+        "instrument_only": [
+            "error",
+            "min_ms1_total_intensity",
+            "min_ms1_max_intensity",
+            "min_ms2_total_intensity",
+            "min_ms2_max_intensity"
+        ],
+        "instrument_polymer": [
+            "min_ms2_peak_abundance"
+        ]
+    },
     "pre_screen_filters": Dict[str, float]
 }
 
-
-#  types for nested postprocess
+#  types for nested postprocess parameters
 POSTPROCESS_TYPES = {
     "exclude_frags": List[str],
     "optional_core_frags": List[str],
@@ -86,7 +116,24 @@ POSTPROCESS_TYPES = {
     "core_linear_series": List[str],
     "rt_bin": float,
     "ms2_rt_bin": float,
-    "backup_rt_bin": float,
-    "ms2_rt_flexible": bool,
-    "min_viable_confidence": float
+    "optional": [
+        "exclude_frags",
+        "optional_core_frags",
+        "essential_fragments",
+        "subsequence_weight",
+        "rt_bin",
+        "ms2_rt_bin"
+    ],
+    "instrument_dependent": {
+        "instrument_only": {
+            "mass_spec": None,
+            "chromatography": ["rt_bin", "ms2_rt_bin"]
+        },
+        "instrument_polymer": [
+            "exclude_frags",
+            "optional_core_frags",
+            "dominant_signature_cap",
+            "core_linear_series"
+        ]
+    }
 }

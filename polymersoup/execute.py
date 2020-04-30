@@ -28,7 +28,7 @@ def run_polymersoup(input_file):
         param_classes=["silico", "extractors", "postprocess"])
 
     #  temp print of run parameters for debugging
-    print(vars(run_params))
+    print(vars(run_params.extractors))
 
 
 run_polymersoup(input_file=sys.argv[1])
