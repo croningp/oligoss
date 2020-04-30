@@ -32,13 +32,16 @@
             "adducts": null,
             "max_neutral_losses": 1
         }
-        
+
     },
     "extractors": {
         "error": "10",
+        "err_abs": true,
         "min_ms2_peak_abundance": 100,
         "min_ms1_max_intensity": null,
         "min_ms2_max_intensity": null,
+        "min_ms1_total_intensity": null,
+        "min_ms2_total_intensity": null,
         "pre_screen_filters": {
             "min_ms1_max_intensity": 1E3,
             "min_ms2_max_intensity": 0.3,
@@ -53,13 +56,7 @@
         "dominant_signature_cap": 0,
         "essential_fragments": null,
         "subsequence_weight": [0, 0.25, 0.5, 0.75, 1],
-        "min_rt": null,
-        "max_rt": null,
         "Rt_bin": 15,
-        "backup_Rt_bin": 6,
-        "ms2_Rt_bin": 30,
-        "ms2_Rt_flexible": true,
-        "min_viable_confidence": 40,
-        "min_relative_intensity": null
+        "ms2_Rt_bin": 30
     }
 }
