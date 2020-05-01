@@ -4,30 +4,40 @@ in input files must either match specified types in the appropriate type_dict
 or be convertible to this type
 """
 
-from typing import List, Dict
-from ..parameter_handlers.parameters import Parameters
+from typing import List, Dict, Optional
 
 #  types for parameters in core Parameter class
 CORE_PARAM_TYPES = {
     "mode": str,
     "monomers": List[str],
-    "silico": Parameters,
-    "extractors": Parameters,
-    "postprocess": Parameters,
+    "silico": "parameters",
+    "extractors": "parameters",
+    "postprocess": "parameters",
     "screening_method": str,
-    "polymer_class": str
+    "polymer_class": str,
+    "instrument_dependent": {
+        "instrument_only": {
+            "mass_spec": None,
+            "chromatography": None
+        },
+        "instrument_polymer": {
+            "mass_spec": None,
+            "chromatography": None
+        }
+    }
 }
 
 #  types for nested silico parameters
 SILICO_LIBRARY_TYPES = {
     "max_length": int,
     "min_length": int,
-    "optional": None,
+    "isomeric_targets": List[str],
+    "optional": ["isomeric_targets"],
 
     "ms1": {
         "adducts": List[str],
         "min_z": int,
-        "max_z": int,
+        "max_z": Optional[int],
         "losses": bool,
         "max_neutral_losses": int,
         "universal_sidechain_modifications": bool,
@@ -36,7 +46,15 @@ SILICO_LIBRARY_TYPES = {
         "side_chain_modifications": Dict[str, List[str]],
         "cyclic_sequences": bool,
         "isomeric_targets": List[str],
-        "optional": ["terminal_modifications", "side_chain_modifications"],
+        "optional": [
+            "terminal_modifications",
+            "side_chain_modifications",
+            "max_neutral_losses",
+            "min_z",
+            "max_z",
+            "universal_sidechain_modifications",
+            "universal_terminal_modifications"],
+
         "instrument_dependent": {
             "instrument_only": {
                 "mass_spec": None,
@@ -56,19 +74,22 @@ SILICO_LIBRARY_TYPES = {
         "signatures": List[str],
         "min_z": int,
         "max_z": int,
-        "optional": ["ms2_adducts", "signatures"],
+        "optional": ["signatures", "adducts"],
         "instrument_dependent": {
             "instrument_only": {
                 "mass_spec": None,
                 "chromatography": None
             },
-            "instrument_polymer": [
-                "fragment_series",
-                "max_neutral_losses",
-                "signatures",
-                "min_z",
-                "max_z"
-            ]
+            "instrument_polymer": {
+                "mass_spec": [
+                    "fragment_series",
+                    "max_neutral_losses",
+                    "signatures",
+                    "min_z",
+                    "max_z"
+                ],
+                "chromatography": None
+            }
         }
     }
 }
@@ -92,16 +113,21 @@ EXTRACTOR_TYPES = {
         "min_ms2_max_intensity",
         "pre_screen_filters"],
     "instrument_dependent": {
-        "instrument_only": [
-            "error",
-            "min_ms1_total_intensity",
-            "min_ms1_max_intensity",
-            "min_ms2_total_intensity",
-            "min_ms2_max_intensity"
-        ],
-        "instrument_polymer": [
-            "min_ms2_peak_abundance"
-        ]
+        "instrument_only": {
+            "mass_spec": [
+                "error",
+                "min_ms1_total_intensity",
+                "min_ms1_max_intensity",
+                "min_ms2_total_intensity",
+                "min_ms2_max_intensity"
+            ],
+            "chromatography": None
+        },
+        "instrument_polymer": {
+            "mass_spec": ["min_ms2_peak_abundance"],
+            "chromatography": None
+        }
+
     },
     "pre_screen_filters": Dict[str, float]
 }
@@ -122,18 +148,23 @@ POSTPROCESS_TYPES = {
         "essential_fragments",
         "subsequence_weight",
         "rt_bin",
-        "ms2_rt_bin"
+        "ms2_rt_bin",
+        "dominant_signature_cap",
+        "core_linear_series"
     ],
     "instrument_dependent": {
         "instrument_only": {
             "mass_spec": None,
             "chromatography": ["rt_bin", "ms2_rt_bin"]
         },
-        "instrument_polymer": [
-            "exclude_frags",
-            "optional_core_frags",
-            "dominant_signature_cap",
-            "core_linear_series"
-        ]
+        "instrument_polymer": {
+            "mass_spec": [
+                "exclude_frags",
+                "optional_core_frags",
+                "dominant_signature_cap",
+                "core_linear_series"
+            ],
+            "chromatography": None
+        }
     }
 }

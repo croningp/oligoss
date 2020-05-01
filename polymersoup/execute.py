@@ -24,11 +24,10 @@ def run_polymersoup(input_file):
 
     #  generate instance of Parameters class from input parameters dict
     run_params = generate_parameters(
-        params_dict=params_dict,
-        param_classes=["silico", "extractors", "postprocess"])
+        params_dict=params_dict)
 
     #  temp print of run parameters for debugging
-    print(vars(run_params.extractors))
+    print(vars(run_params))
 
 
 run_polymersoup(input_file=sys.argv[1])
