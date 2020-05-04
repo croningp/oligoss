@@ -6,6 +6,16 @@ or be convertible to this type
 
 from typing import List, Dict, Optional
 
+#  keys in type_dicts which are not used to directly set attributes in instance
+#  of Parameters class
+NON_ATTR_KEYS = [
+    "instrument_only",
+    "instrument_polymer",
+    "instrument_dependent",
+    "optional",
+    "core"
+]
+
 #  types for parameters in core Parameter class
 CORE_PARAM_TYPES = {
     "mode": str,
@@ -15,6 +25,8 @@ CORE_PARAM_TYPES = {
     "postprocess": "parameters",
     "screening_method": str,
     "polymer_class": str,
+    "instrument": str,
+    "chromatography": str,
     "instrument_dependent": {
         "instrument_only": {
             "mass_spec": None,
@@ -24,7 +36,8 @@ CORE_PARAM_TYPES = {
             "mass_spec": None,
             "chromatography": None
         }
-    }
+    },
+    "optional": ["instrument", "chromatography"]
 }
 
 #  types for nested silico parameters
@@ -38,14 +51,11 @@ SILICO_LIBRARY_TYPES = {
         "adducts": List[str],
         "min_z": int,
         "max_z": Optional[int],
-        "losses": bool,
         "max_neutral_losses": int,
         "universal_sidechain_modifications": bool,
         "universal_terminal_modifications": bool,
         "terminal_modifications": Dict[str, str],
         "side_chain_modifications": Dict[str, List[str]],
-        "cyclic_sequences": bool,
-        "isomeric_targets": List[str],
         "optional": [
             "terminal_modifications",
             "side_chain_modifications",
@@ -74,7 +84,14 @@ SILICO_LIBRARY_TYPES = {
         "signatures": List[str],
         "min_z": int,
         "max_z": int,
-        "optional": ["signatures", "adducts"],
+        "optional": [
+            "signatures",
+            "adducts",
+            "fragment_series",
+            "min_z",
+            "max_z",
+            "signatures"
+        ],
         "instrument_dependent": {
             "instrument_only": {
                 "mass_spec": None,
@@ -97,15 +114,13 @@ SILICO_LIBRARY_TYPES = {
 #  types for nested extractor parameters
 EXTRACTOR_TYPES = {
     "error": float,
-    "err_abs": bool,
     "error_units": str,
+    "rt_units": str,
     "min_ms2_peak_abundance": float,
-    "pre_run_filter": bool,
     "min_ms1_total_intensity": float,
     "min_ms1_max_intensity": float,
     "min_ms2_total_intensity": float,
     "min_ms2_max_intensity": float,
-    "pre_filter": bool,
     "optional": [
         "min_ms1_total_intensity",
         "min_ms1_max_intensity",
@@ -119,7 +134,8 @@ EXTRACTOR_TYPES = {
                 "min_ms1_total_intensity",
                 "min_ms1_max_intensity",
                 "min_ms2_total_intensity",
-                "min_ms2_max_intensity"
+                "min_ms2_max_intensity",
+                "rt_units"
             ],
             "chromatography": None
         },
@@ -127,14 +143,13 @@ EXTRACTOR_TYPES = {
             "mass_spec": ["min_ms2_peak_abundance"],
             "chromatography": None
         }
-
     },
     "pre_screen_filters": Dict[str, float]
 }
 
 #  types for nested postprocess parameters
 POSTPROCESS_TYPES = {
-    "exclude_frags": List[str],
+    "exclude_fragments": List[str],
     "optional_core_frags": List[str],
     "dominant_signature_cap": float,
     "essential_fragments": List[str],
@@ -143,7 +158,7 @@ POSTPROCESS_TYPES = {
     "rt_bin": float,
     "ms2_rt_bin": float,
     "optional": [
-        "exclude_frags",
+        "exclude_fragments",
         "optional_core_frags",
         "essential_fragments",
         "subsequence_weight",

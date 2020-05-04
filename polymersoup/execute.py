@@ -24,7 +24,7 @@ def run_polymersoup(input_file):
         params_json=params_json)
 
     #  temp print of run parameters for debugging
-    print(vars(run_params))
+    print(vars(run_params.extractors))
 
 
 run_polymersoup(input_file=sys.argv[1])

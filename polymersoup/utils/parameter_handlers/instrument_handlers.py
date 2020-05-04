@@ -5,6 +5,10 @@ data for PolymerSoup
 """
 import os
 import json
+
+from .polymer_param_handlers import POLYMER_ALIASES
+from ..errors import InvalidMSFragmentation
+
 HERE = os.path.dirname(__file__)
 INSTRUMENT_STANDARDS = os.path.join(
     os.path.dirname(HERE), "instrument_standards")
@@ -78,7 +82,7 @@ def check_instrument_info(params_dict):
 
 def retrieve_instrument_alias_info(params_dict, inst_key, configs):
     """
-    |Takes alias of mass spec or chromatography instrument and retrieves
+    Takes alias of mass spec or chromatography instrument and retrieves
     default parameters defined in instrument config file
 
     Args:
@@ -108,3 +112,85 @@ def retrieve_instrument_alias_info(params_dict, inst_key, configs):
                     'create a new instrument config file. Valid aliases:\n'
                     f'{configs.keys}')
     return {}
+
+def sanity_check_silico_fragmentation(
+    silico_params,
+    polymer_class,
+    ms_level,
+    instrument_info,
+    fragmentation_method='default'
+):
+    """
+    Checks that silico fragmentation parameters are compatible with chosen
+    polymer_class and mass spec instrumentation - i.e. makes sure all proposed
+    fragments could exist in a real mass spec!
+
+    Args:
+        silico_params (dict): parameters dict for relevant silico params
+        polymer_class (str): polymer class alias
+        ms_level (int): ms level to check fragmentation
+        instrument_info (dict): dict of mass spec parameters
+        fragmentation_method (str, optional): type of fragmentation method that
+            is being used. If "default", it is assumed that the fragmentation
+            method could be any valid method for instrument.
+            Defaults to 'default'.
+
+    Raises:
+        InvalidMSFragmentation (Exception): raised if any fragments are
+            incompatible with instrument and polymer class in any way
+    """
+
+    #  retrieve polymer config file by looking up polymer alias in
+    #  polymer_configs folder
+    polymer_config = POLYMER_ALIASES[polymer_class]
+
+    with open(polymer_config) as f:
+        polymer_config = json.load(f)
+    #  get available fragmentation methods for instrument at chosen ms level
+    valid_fragmentations = instrument_info["fragmentation"][f'ms{ms_level}']
+
+    #  confirm that chosen fragmentation method is available in instrument
+    if fragmentation_method == "default":
+        pass
+    elif fragmentation_method not in valid_fragmentations:
+        raise Exception(
+            f'Fragmentation via {fragmentation_method} is not available\n'
+            'on your mass spectrometer. Please choose one of the\n'
+            f'following: {valid_fragmentations.keys()}')
+    else:
+        valid_fragmentations = [fragmentation_method]
+
+    #  check that neutral losses are permitted
+    if "neutral" not in valid_fragmentations:
+        if silico_params["max_neutral_losses"]:
+            raise InvalidMSFragmentation(
+                frag_method=valid_fragmentations,
+                neutral_invalid=True)
+    valid_fragmentations.remove("neutral")
+
+    #  get available fragmentation pathways for chosen polymer class
+    polymer_frags = polymer_config["FRAG_SERIES"]
+
+    #  get compatible fragmentation pathways that can induce fragmentations in
+    #  chosen polymer class
+    permissible_fragment_pathways = polymer_frags["default_linear"]
+
+    #  check that chosen fragment series are available for polymer class
+    for series in silico_params["fragment_series"]:
+        if series not in polymer_frags:
+            raise InvalidMSFragmentation(
+                frag_method=valid_fragmentations,
+                fragment_series=series)
+
+        #  check that fragmentation method(s) are also compatible with polymer
+        for frag_method in valid_fragmentations:
+            if frag_method not in permissible_fragment_pathways:
+                raise InvalidMSFragmentation(
+                    frag_method=frag_method)
+
+            #  check that each fragment series is compatible with the chosen
+            #  combination(s) of polymer and fragmentation method
+            if series not in permissible_fragment_pathways[frag_method]:
+                raise InvalidMSFragmentation(
+                    frag_method=frag_method,
+                    fragment_series=series)

@@ -27,17 +27,24 @@ SILICO_LIBRARY_FALLBACKS = {
         "terminal_modifications": None
     },
     "ms2": {
-        "min_z": 1,
-        "max_z": None,
         "adducts": None
     }
 }
 
 #  fallbacks for nested extractor parameters
-EXTRACTOR_FALLBACKS = None
+EXTRACTOR_FALLBACKS = {
+    "pre_screen_filters": None,
+    "min_ms1_total_intensity": None,
+    "min_ms2_total_intensity": None,
+    "min_ms1_max_intensity": 1000,
+    "min_ms2_max_intensity": None
+}
 
 #  fallbacks for nested postprocess parameters
-POSTPROCESS_FALLBACKS = None
+POSTPROCESS_FALLBACKS = {
+    "essential_fragments": None,
+    "exclude_fragments": None
+}
 
 # list of parameters which must ALWAYS be supplied in input file
 ESSENTIAL_CORE_PARAMS = [
@@ -47,7 +54,8 @@ ESSENTIAL_CORE_PARAMS = [
     "extractors",
     "screening_method",
     "postprocess",
-    "polymer_class"
+    "polymer_class",
+    "instrument"
 ]
 
 #  ids for parameter subobjects
