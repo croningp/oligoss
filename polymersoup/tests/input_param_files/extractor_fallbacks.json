@@ -30,8 +30,6 @@
         "error": "5",
         "error_units": "ppm",
         "min_ms2_peak_abundance": "100",
-        "min_ms1_total_intensity": null,
-        "min_ms2_total_intensity": null,
         "pre_screen_filters": {
             "min_ms1_max_intensity": 1E3,
             "min_ms2_max_intensity": "0.3",

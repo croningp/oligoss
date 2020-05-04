@@ -71,7 +71,20 @@ def generate_param_subobject(params_dict, param_class):
             params_dict=params_dict,
             params_class=param_class)
 
-    #  return instance of Parameters for silico parameters
-    return Parameters(
+    #  generate instance of Parameters class for silico parameters
+    silico = Parameters(
         params_dict=params_dict,
         params_class="silico")
+
+    #  set silico.ms1 to instance of Parameters class for silico ms1 parameters
+    silico.ms1 = Parameters(
+        params_dict=params_dict,
+        params_class="silico_ms1")
+
+    #  set silico.ms2 to instance of Parameters class for silico ms2 parameters
+    silico.ms2 = Parameters(
+        params_dict=params_dict,
+        params_class="silico_ms2")
+
+    #  return silico parameters
+    return silico

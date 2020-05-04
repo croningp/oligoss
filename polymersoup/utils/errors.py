@@ -64,3 +64,31 @@ class MissingParameterValue(Exception):
             'file or by default instrument values. Please check instrument\n'
             f'defaults and {self.param_class} parameters'
         )
+
+class InvalidMSFragmentation(Exception):
+    def __init__(
+        self,
+        frag_method,
+        instrument=None,
+        fragment_series=None,
+        neutral_invalid=False
+    ):
+        self.frag_method = frag_method
+        self.instrument = instrument
+        self.fragment_series = fragment_series
+        self.neutral_invalid = neutral_invalid
+
+    def __str__(self):
+        error_str = f'{self.frag_method} is not valid'
+
+        if self.instrument:
+            error_str += f'using {self.instrument}\n'
+        if self.fragment_series:
+            error_str += f'with {self.fragment_series} fragments\n'
+        if self.neutral_invalid:
+            neutral_str = 'neutral loss fragments'
+            if self.fragment_series:
+                neutral_str = 'and' + neutral_str
+            error_str += neutral_str
+
+        return error_str

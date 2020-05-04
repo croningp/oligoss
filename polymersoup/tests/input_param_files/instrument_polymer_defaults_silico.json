@@ -11,18 +11,12 @@
         "min_length": 3,
         "isomeric_targets": ["CBA", "BBA"],
         "ms1": {
-            "min_z": 1,
-            "max_z": null,
             "adducts": ["H", "Na"],
-            "max_neutral_losses": 3,
             "universal_sidechain_modifications": true,
             "universal_terminal_modifications": false
-        },
+        }, 
         "ms2": {
-            "min_z": 1,
-            "max_z": 1,
-            "adducts": null,
-            "max_neutral_losses": 1
+            "adducts": null
         }
 
     },

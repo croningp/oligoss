@@ -1,7 +1,7 @@
 {
     "error": 5,
-    "err_abs": false,
-    "units": "min",
+    "error_units": "ppm",
+    "rt_units": "min",
     "min_ms1_max_intensity": 1E5,
     "min_ms2_max_intensity": 1E3,
     "pre_screen_filters": {
@@ -13,7 +13,29 @@
     "fragmentation": {
         "ms1": "neutral",
         "ms2": ["HCD", "neutral"],
-        "msn": ["HCD", "neutral"],
-        "incompatible": [["ETD", "HCD"]],
-        "capabilities": ["neutral", "HCD", "ETD"]}
+        "msn": ["HCD", "neutral"]
+    },
+    "polymer_classes": {
+        "depsipeptide": {
+            "silico_ms1": {
+                "min_z": 1,
+                "max_z": null,
+                "max_neutral_losses": 3
+            },
+            "silico_ms2": {
+                "min_z": 1,
+                "max_z": 1,
+                "max_neutral_losses": 1,
+                "fragment_series": ["b", "y", "a"]
+            }
+        },
+        "extractors": {
+            "min_ms2_peak_abundance": 100
+        },
+        "postprocess": {
+            "optional_core_fragments": ["b1"],
+            "core_linear_series": ["b", "y"],
+            "dominant_signature_cap": 70
+        }
+    }
 }

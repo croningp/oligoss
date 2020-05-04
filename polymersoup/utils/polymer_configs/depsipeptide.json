@@ -121,7 +121,10 @@
         "default_core": {
             "CID": ["b", "y"],
             "HCD": ["b", "y"]
-        }
+        },
+        "signatures": {
+            "CID": ["Im"],
+            "HCD": ["Im"]
         },
         "a": {
             "terminus": 0,
@@ -248,8 +251,7 @@
             },
             "start": 0,
             "end": 1
-        }
-    },
+        },
 
     "IMMONIUM_IONS": "MS2_SIGNATURE_IONS",
 
@@ -413,4 +415,4 @@
             "universal_ms2_shift": false
         }
     }
-}
+}}

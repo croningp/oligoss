@@ -22,30 +22,26 @@
             "min_z": 1,
             "max_z": 1,
             "adducts": null,
-            "max_neutral_losses": 1
+            "max_neutral_losses": 1,
+            "fragment_series": ["b", "y", "a"]
         }
 
     },
     "extractors": {
-        "min_ms2_peak_abundance": 100,
-        "min_ms1_max_intensity": null,
-        "min_ms2_max_intensity": null,
+        "min_ms2_peak_abundance": "100",
         "min_ms1_total_intensity": null,
         "min_ms2_total_intensity": null,
         "pre_screen_filters": {
             "min_ms1_max_intensity": 1E3,
-            "min_ms2_max_intensity": 0.3,
+            "min_ms2_max_intensity": "0.3",
             "ms2_precursors": null
         }
     },
     "postprocess": {
-        "exclude_frags": null,
+        "exclude_fragments": null,
         "optional_core_frags": ["b1"],
         "core_linear_series": ["b", "y"],
         "dominant_signature_cap": 0,
-        "essential_fragments": null,
-        "subsequence_weight": [0, 0.25, 0.5, 0.75, 1],
-        "Rt_bin": 15,
-        "ms2_Rt_bin": 30
+        "subsequence_weight": [0, 0.25, 0.5, 0.75, 1]
     }
 }

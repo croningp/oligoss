@@ -1,11 +1,14 @@
 from typing import List, Dict
-from .instrument_handlers import check_instrument_info
+from .instrument_handlers import (
+    check_instrument_info,
+    sanity_check_silico_fragmentation)
 from ..errors import InputTypeError, TypeDictKeyError, MissingParameterValue
 from ..type_dicts.parameter_type_dicts import (
     CORE_PARAM_TYPES,
     SILICO_LIBRARY_TYPES,
     EXTRACTOR_TYPES,
-    POSTPROCESS_TYPES
+    POSTPROCESS_TYPES,
+    NON_ATTR_KEYS
 )
 from..type_dicts.parameter_fallbacks import (
     CORE_PARAM_FALLBACKS,
@@ -72,6 +75,7 @@ class Parameters():
 
         #  read params dict and set parameter attributes
         self.set_parameter_attributes()
+        self.final_attrs_check()
 
     def get_param_associations(
         self,
@@ -79,25 +83,30 @@ class Parameters():
         fallbacks=PARAM_FALLBACK_ASSOCIATIONS
     ):
         """
-        Retrieve type dict and fallbacks for paramerer group
+        Retrieve type dict and fallbacks for parameter group
 
         Args:
             type_associations (Dict[str, dict], optional): dict of parameter
                 group ids and associated type_dicts.
                 Defaults to PARAM_TYPE_ASSOCIATIONS.
-
+            fallbacks (Dict[str, dict], optional): dict of parameter group ids
+                and associated fallback dicts for defining parameter values not
+                supplied in input file or retrieved from instrument defaults
         Raises:
             Exception: raised if self.params_class not in
                 PARAM_TYPE_ASSOCIATIONS
 
         Returns:
-            dict, dict: type_dict, fallbacks for parameter group
+            dict, dict, dict: type_dict, fallbacks, params for parameter group
         """
+
+        #  check whether parameter group id is valid
         if self.params_class not in type_associations:
             raise Exception(
                 f'{self.params_class} not a valid parameter group\n'
                 f'please choose from: {type_associations}')
 
+        #  retrieve parameters relevant to parameter group from input file
         if self.params_class in ["silico", "extractors", "postprocess"]:
             params = self.params_dict[self.params_class]
         elif self.params_class == "silico_ms1":
@@ -110,23 +119,21 @@ class Parameters():
             raise Exception(
                 f'{self.params_class} not a valid parameter group')
 
+        #  get type_dict, fallbacks for relevant parameters
         type_dict = type_associations[self.params_class]
         param_fallbacks = fallbacks[self.params_class]
 
+        #  return: type_dict, fallbacks and params (parameters relevant to
+        #  parameter group)
         return type_dict, param_fallbacks, params
 
-    def set_parameter_attributes(self, temp_props=TEMP_PROPS):
+    def set_parameter_attributes(self):
         """
         Set attributes of Parameters depending on what set of parameter inputs
         the Parameters class is to be an instance of (silico, postprocess, core
         etc...)
 
         Args:
-            temp_props (List[str], optional): list of names for attributes
-                required to create instance of Parameters but which are then
-                removed during cleanup to make Parameters easier to read and
-                debug when used in later PolymerSoup workflows.
-                Defaults to TEMP_PROPS.
 
         Raises:
             MissingParameterValue: raised if the value for an essential
@@ -140,6 +147,9 @@ class Parameters():
         #  Finally, set each of these parameters as attributes in instance of
         #  Parameters class
         for k, v in self.sub_params.items():
+            if k not in self.type_dict and k not in NON_ATTR_KEYS:
+                raise Exception(
+                    f'{k} not a valid parameter for {self.params_class}')
             if not v:
                 if k not in self.type_dict["optional"]:
                     raise MissingParameterValue(
@@ -157,23 +167,28 @@ class Parameters():
                                 type_dict=self.type_dict,
                                 instrument_fallback=True,
                                 param_class=self.params_class)
-            try:
-                if v:
+            if v:
+                try:
                     if self.params_class != "core":
-                        v = self.format_params_attr(k, v)
-            except TypeError:
-                raise InputTypeError(
-                    key=k,
-                    value=v,
-                    expected_type=self.type_dict[k]
-                )
-            if k != "core":
-                setattr(self, k, v)
+                        self.sub_params[k] = self.format_params_attr(k, v)
+                except TypeError:
+                    raise InputTypeError(
+                        key=k, value=v, expected_type=self.type_dict[k])
 
-        #  remove attributes which were required to instantiate Parameters but
-        #  are no longer needed in later workflows
-        for prop in temp_props:
-            delattr(self, prop)
+        #  iterate through type_dict and fill in any further missing parameters
+        #  with fallbacks and instrument defaults
+        for k, v in self.type_dict.items():
+            if k not in NON_ATTR_KEYS:
+                if k not in self.sub_params:
+                    if self.fallbacks and k in self.fallbacks:
+                        self.sub_params[k] = self.fallbacks[k]
+                    elif self.check_instrument_default_parameter(k):
+                        self.sub_params[k] = (
+                            self.check_instrument_default_parameter(k))
+
+        #  set attributes for parameters
+        for k, v in self.sub_params.items():
+            setattr(self, k, v)
 
     def check_instrument_default_parameter(self, parameter_key):
         """
@@ -209,12 +224,17 @@ class Parameters():
         #  if so, check whether value for parameter is given in active
         # instruments
         for device in self.active_instruments:
-            if self.params_dict["polymer_class"] in self.active_instruments[
-                    device]:
-                polymer_specified = self.active_instruments[self.params_dict[
-                    "polymer_class"]]
-                if parameter_key in polymer_specified:
-                    return polymer_specified[parameter_key]
+            if "polymer_classes" in self.active_instruments[device]:
+                polymer_inst_info = self.active_instruments[
+                    device]["polymer_classes"]
+            if self.params_dict["polymer_class"] in polymer_inst_info:
+                polymer_specified = polymer_inst_info[
+                    self.params_dict["polymer_class"]]
+                if self.params_class in polymer_specified:
+                    if parameter_key in polymer_specified[self.params_class]:
+                        return polymer_specified[
+                            self.params_class][parameter_key]
+
         return None
 
     def format_params_attr(self, parameter_key, parameter_value):
@@ -238,7 +258,6 @@ class Parameters():
         try:
             expected_type = self.type_dict[parameter_key.lower()]
         except KeyError:
-            raise Exception(self.params_class, parameter_key, self.type_dict)
             raise TypeDictKeyError(
                 key=parameter_key,
                 type_dict=self.type_dict)
@@ -288,6 +307,17 @@ class Parameters():
             if value}
 
     def format_value(self, value, expected_type):
+        """
+        Checks the value of an individual parameter and tries to convert it to
+        expected type for that value.
+
+        Args:
+            value (): value for parameter
+            expected_type (): expected typing for value based on self.type_dict
+
+        Returns:
+            [type]: [description]
+        """
         if expected_type in [str, int, float]:
             return expected_type(value)
 
@@ -297,3 +327,48 @@ class Parameters():
                 subtype(elm) for elm in value
                 if elm]
         return value
+
+    def final_attrs_check(self, temp_props=TEMP_PROPS):
+        """
+        Performs final check and cleanup of class attributes. Removes temp
+        props and checks that no parameters are missing or potentially
+        incorrect.
+
+        Args:
+            temp_props (List[str], optional): list of names for attributes
+                required to create instance of Parameters but which are then
+                removed during cleanup to make Parameters easier to read and
+                debug when used in later PolymerSoup workflows.
+                Defaults to TEMP_PROPS.
+
+        Raises:
+            Exception: raises Exception if parameters are missing.
+        """
+
+        #  get list of temporary properties and type_dict keys that should
+        #  be removed from instance of Parameters class
+        temp_props.extend(NON_ATTR_KEYS)
+
+        #  get list of parameters that are missing and raise Exception if
+        #  there are any missing parameters
+        missing_params = [
+            param for param in self.type_dict
+            if (param not in self.__dict__.keys()
+                and param not in temp_props
+                and param not in self.type_dict["optional"])]
+        if missing_params:
+            raise Exception(
+                f'the following parameters are missing: {missing_params}')
+
+        if self.params_class == "silico_ms2":
+            sanity_check_silico_fragmentation(
+                silico_params=self.sub_params,
+                polymer_class=self.params_dict["polymer_class"],
+                ms_level=2,
+                instrument_info=self.active_instruments["mass_spec"])
+
+        #  remove any remaining temp_prop attributes. This is just for
+        #  readability and easier debugging in later workflows
+        for prop in temp_props:
+            if prop in self.__dict__.keys():
+                delattr(self, prop)
