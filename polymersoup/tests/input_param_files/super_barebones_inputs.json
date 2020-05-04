@@ -1,0 +1,8 @@
+{
+    "screening_method": "exhaustive",
+    "mode": "pos",
+    "instrument": "orbitrap",
+    "polymer_class": "depsipeptide",
+    "chromatography": "c18",
+    "monomers": ["A", "B", "C"]
+}

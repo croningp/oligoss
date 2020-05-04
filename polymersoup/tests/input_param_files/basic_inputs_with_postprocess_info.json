@@ -1,0 +1,32 @@
+{
+    "screening_method": "exhaustive",
+    "mode": "pos",
+    "instrument": "orbitrap",
+    "polymer_class": "depsipeptide",
+    "chromatography": "c18",
+    "monomers": ["A", "B", "C"],
+    "postprocess_parameters": {
+        "exclude_frags": null,
+        "optional_core_frags": ["b1"],
+        "core_linear_series": ["b", "y"],
+        "excluded_fragments": null,
+        "dominant_signature_cap": 0,
+        "essential_fragments": null,
+        "subsequence_weight": [0, 0.25, 0.5, 0.75, 1],
+        "min_rt": null,
+        "max_rt": null,
+        "Rt_bin": 15,
+        "backup_Rt_bin": 6,
+        "ms2_Rt_bin": 30,
+        "ms2_Rt_flexible": true,
+        "min_viable_confidence": 40,
+        "min_relative_intensity": null,
+
+        "cyclic_parameters": {
+            "min_shifted_fragments": 0,
+            "min_viable_linear_confidence": null,
+            "core_series": null,
+            "assign_cyclic_Rt": true
+        }
+    }
+}

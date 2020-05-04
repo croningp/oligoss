@@ -1,0 +1,31 @@
+{
+    "screening_method": "exhaustive",
+    "mode": "pos",
+    "instrument": "orbitrap",
+    "polymer_class": "depsipeptide",
+    "chromatography": "c18",
+    "monomers": ["A", "B", "C"],
+    "silico_parameters": {
+        "max_length": 5,
+        "min_length": 3,
+        "min_z_ms1": 1,
+        "max_z_ms1": 3,
+        "min_z_ms2": 1,
+        "max_z_ms2": 1,
+        "ms1_adducts": ["H", "Na"],
+        "ms2_adducts": null,
+        "max_neutral_losses": 3,
+        "universal_sidechain_modifications": true,
+        "universal_terminal_modifications": false,
+        "fragment_series": ["b", "y"],
+        "terminal_tags": {
+            "0": "Ole",
+            "-1": "F"
+        },
+        "side_chain_tags": {
+            "C": "Zmx"
+        },
+        "cyclic_sequences": false,
+        "isomeric_targets": ["CBA", "BBA"]
+    }
+}

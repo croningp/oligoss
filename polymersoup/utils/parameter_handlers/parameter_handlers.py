@@ -2,19 +2,21 @@
 This file contains functions for reading parameters from input files and
 creating instance of Parameters class for use in PolymerSoup workflows
 """
+import json
 from .parameters import Parameters
 from ..type_dicts.parameter_fallbacks import ESSENTIAL_CORE_PARAMS, CORE_CLASSES
 
 def generate_parameters(
-    params_dict,
+    params_json,
     param_classes=CORE_CLASSES
 ):
     """
     Generates instance of Parameters class
 
     Args:
-        params_dict (dict): dict of parameters and associated values
-        param_classes (List[str]): list of parameter subclasses
+        params_json (str): full file path of input parameters file
+        param_classes (List[str], Optional): list of parameter subclasses.
+            Defaults to CORE_CLASSES
 
     Raises:
         Exception: exception raised for missing essential parameters
@@ -22,6 +24,10 @@ def generate_parameters(
     Returns:
         Parameters: instance of Parameters class
     """
+
+    # read params file as dict
+    with open(params_json) as f:
+        params_dict = json.load(f)
 
     #  init dict to store formatted parameters dict, ready to be passed into
     #  Parameters

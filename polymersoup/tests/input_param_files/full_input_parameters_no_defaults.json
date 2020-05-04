@@ -27,6 +27,8 @@
 
     },
     "extractors": {
+        "error": "5",
+        "err_abs": true,
         "min_ms2_peak_abundance": 100,
         "min_ms1_max_intensity": null,
         "min_ms2_max_intensity": null,

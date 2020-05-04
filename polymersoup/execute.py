@@ -6,7 +6,6 @@ Artificial Life Team, Cronin Group, 2020
 """
 import os
 import sys
-import json
 from .utils.parameter_handlers.parameter_handlers import generate_parameters
 
 def run_polymersoup(input_file):
@@ -19,12 +18,10 @@ def run_polymersoup(input_file):
 
     #  open input parameters file as dict
     params_json = os.path.abspath(input_file)
-    with open(params_json) as f:
-        params_dict = json.load(f)
 
     #  generate instance of Parameters class from input parameters dict
     run_params = generate_parameters(
-        params_dict=params_dict)
+        params_json=params_json)
 
     #  temp print of run parameters for debugging
     print(vars(run_params))

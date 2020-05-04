@@ -25,11 +25,11 @@ class Parameters():
     #  be removed during cleanup
     TEMP_PROPS = [
         "type_dict",
-        "active_instruments",
         "params_dict",
         "fallbacks",
         "params_class",
-        "sub_params"
+        "sub_params",
+        "active_instruments"
     ]
 
     #  dict of parameter class ids and associated type_dicts for checking
@@ -167,7 +167,8 @@ class Parameters():
                     value=v,
                     expected_type=self.type_dict[k]
                 )
-            setattr(self, k, v)
+            if k != "core":
+                setattr(self, k, v)
 
         #  remove attributes which were required to instantiate Parameters but
         #  are no longer needed in later workflows
