@@ -12,7 +12,8 @@ CORE_PARAM_FALLBACKS = {
     "instrument_dependent": {
         "mass_spec": None,
         "chromatography": None
-    }
+    },
+    "chromatography": None
 }
 
 #  fallbacks for nested silico parameters
@@ -27,7 +28,8 @@ SILICO_LIBRARY_FALLBACKS = {
         "terminal_modifications": None
     },
     "ms2": {
-        "adducts": None
+        "adducts": None,
+        "signatures": None
     }
 }
 

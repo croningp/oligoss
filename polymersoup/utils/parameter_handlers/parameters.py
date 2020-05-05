@@ -354,8 +354,7 @@ class Parameters():
         missing_params = [
             param for param in self.type_dict
             if (param not in self.__dict__.keys()
-                and param not in temp_props
-                and param not in self.type_dict["optional"])]
+                and param not in temp_props)]
         if missing_params:
             raise Exception(
                 f'the following parameters are missing: {missing_params}')

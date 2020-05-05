@@ -55,10 +55,10 @@ SILICO_LIBRARY_TYPES = {
         "universal_sidechain_modifications": bool,
         "universal_terminal_modifications": bool,
         "terminal_modifications": Dict[str, str],
-        "side_chain_modifications": Dict[str, List[str]],
+        "sidechain_modifications": Dict[str, List[str]],
         "optional": [
             "terminal_modifications",
-            "side_chain_modifications",
+            "sidechain_modifications",
             "max_neutral_losses",
             "min_z",
             "max_z",
@@ -150,7 +150,7 @@ EXTRACTOR_TYPES = {
 #  types for nested postprocess parameters
 POSTPROCESS_TYPES = {
     "exclude_fragments": List[str],
-    "optional_core_frags": List[str],
+    "optional_core_fragments": List[str],
     "dominant_signature_cap": float,
     "essential_fragments": List[str],
     "subsequence_weight": List[float],
@@ -159,7 +159,7 @@ POSTPROCESS_TYPES = {
     "ms2_rt_bin": float,
     "optional": [
         "exclude_fragments",
-        "optional_core_frags",
+        "optional_core_fragments",
         "essential_fragments",
         "subsequence_weight",
         "rt_bin",
@@ -175,7 +175,7 @@ POSTPROCESS_TYPES = {
         "instrument_polymer": {
             "mass_spec": [
                 "exclude_frags",
-                "optional_core_frags",
+                "optional_core_fragments",
                 "dominant_signature_cap",
                 "core_linear_series"
             ],

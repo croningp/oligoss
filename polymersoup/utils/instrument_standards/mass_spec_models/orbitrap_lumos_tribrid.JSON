@@ -27,15 +27,15 @@
                 "max_z": 1,
                 "max_neutral_losses": 1,
                 "fragment_series": ["b", "y", "a"]
+            },
+            "extractors": {
+                "min_ms2_peak_abundance": 100
+            },
+            "postprocess": {
+                "optional_core_fragments": ["b1"],
+                "core_linear_series": ["b", "y"],
+                "dominant_signature_cap": 70
             }
-        },
-        "extractors": {
-            "min_ms2_peak_abundance": 100
-        },
-        "postprocess": {
-            "optional_core_fragments": ["b1"],
-            "core_linear_series": ["b", "y"],
-            "dominant_signature_cap": 70
         }
     }
 }
