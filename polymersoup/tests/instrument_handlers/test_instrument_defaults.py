@@ -63,3 +63,16 @@ def test_invalid_silico_instruemntation():
         parameters = generate_parameters(
             params_json=input_json)
         assert parameters.silico.ms2.fragment_series == ["c", "x"]
+
+@pytest.mark.unit
+def test_postprocess_default_instrumentation():
+
+    input_json = os.path.join(
+        INPUTS_FOLDER,
+        "instrument_polymer_postprocessing_defaults.json")
+    parameters = generate_parameters(
+        params_json=input_json)
+
+    assert parameters.postprocess.core_linear_series == ["b", "y"]
+    assert parameters.postprocess.dominant_signature_cap == 80
+    assert parameters.postprocess.optional_core_fragments == ["b1"]
