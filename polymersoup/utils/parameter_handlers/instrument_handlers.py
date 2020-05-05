@@ -6,7 +6,7 @@ data for PolymerSoup
 import os
 import json
 
-from .polymer_param_handlers import POLYMER_ALIASES
+from .polymer_param_handlers import load_polymer_info
 from ..errors import InvalidMSFragmentation
 
 HERE = os.path.dirname(__file__)
@@ -142,10 +142,8 @@ def sanity_check_silico_fragmentation(
 
     #  retrieve polymer config file by looking up polymer alias in
     #  polymer_configs folder
-    polymer_config = POLYMER_ALIASES[polymer_class]
+    polymer_config = load_polymer_info(polymer_class)
 
-    with open(polymer_config) as f:
-        polymer_config = json.load(f)
     #  get available fragmentation methods for instrument at chosen ms level
     valid_fragmentations = instrument_info["fragmentation"][f'ms{ms_level}']
 

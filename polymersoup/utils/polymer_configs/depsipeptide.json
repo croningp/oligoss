@@ -251,7 +251,8 @@
             },
             "start": 0,
             "end": 1
-        },
+        }
+    },
 
     "IMMONIUM_IONS": "MS2_SIGNATURE_IONS",
 
@@ -306,7 +307,7 @@
             "mass": 60.02114,
             "termini": [0],
             "side chain attachments": ["K", "R"],
-            "free_mod_fragmnts": {
+            "free_mod_fragments": {
                 "pos": [],
                 "neg": []
             },
@@ -415,4 +416,4 @@
             "universal_ms2_shift": false
         }
     }
-}}
+}
