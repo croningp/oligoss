@@ -4,7 +4,6 @@ from ...utils.parameter_handlers.parameter_handlers import generate_parameters
 from ...utils.type_dicts.parameter_fallbacks import EXTRACTOR_FALLBACKS
 
 HERE = os.path.abspath(os.path.dirname(__file__))
-DATA_FOLDER = os.path.join(HERE, '..', 'data_sets')
 INPUTS_FOLDER = os.path.join(HERE, '..', 'input_param_files')
 
 @pytest.mark.unit

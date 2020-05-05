@@ -92,3 +92,27 @@ class InvalidMSFragmentation(Exception):
             error_str += neutral_str
 
         return error_str
+
+class InvalidMonomerId(Exception):
+    def __init__(
+        self,
+        monomer_id,
+        polymer_class=None,
+        available_monomers=None
+    ):
+        self.monomer = monomer_id
+        self.polymer_alias = polymer_class
+        self.available_monomers = available_monomers
+
+    def __str__(self):
+        err_str = (
+            f'{self.monomer} is invalid ')
+        if self.polymer_alias:
+            err_str += f'for {self.polymer_alias} polymers.\n'
+        if self.available_monomers:
+            if type(self.available_monomers) == dict:
+                self.available_monomers = self.available_monomers.keys()
+            err_str += (
+                'Here are the valid monomer one letter codes for\n'
+                f'{self.polymer_class}: {self.available_monomers}')
+        return err_str
