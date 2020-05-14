@@ -1,5 +1,5 @@
-from filters import mzml_to_json, prefilter_all, return_jsons
-from data_extraction import standard_extraction
+from .filters import mzml_to_json, prefilter_all, return_jsons
+from .data_extraction import standard_extraction
 
 def full_extraction(
         extractor_parameters,

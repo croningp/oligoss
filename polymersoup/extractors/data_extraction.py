@@ -1,9 +1,9 @@
-from general_functions import os, logging, open_json, write_to_json
+from .general_functions import os, logging, open_json, write_to_json
 from bisect import bisect_left, bisect_right
-from filters import ripper_dict, find_precursors, min_total_intensity_filter
+from .filters import ripper_dict, find_precursors, min_total_intensity_filter
 
 logging.basicConfig(
-    format=f'%(message)s - %(asctime)s',
+    format='%(message)s - %(asctime)s',
     datefmt='%H:%M:%S %m/%d/%Y ',
     level=logging.INFO)
 
@@ -104,8 +104,8 @@ def match_mass(spectrum, mass_range):
 
     # find closest values to min and max mass in mass list
     mass_list = spectrum['mass_list']
-    min_match = bisect_right(mass_list, mass_range[0])
-    max_match = bisect_left(mass_list, mass_range[1])
+    min_match = bisect_left(mass_list, mass_range[0])
+    max_match = bisect_right(mass_list, mass_range[1])
 
     # find matches within mass range
     try:
@@ -184,7 +184,8 @@ def min_ms2_peak_abundance_filter(
 
     Arguments:
         spectra {dict} -- dictionary of MS2 spectra to be filtered.
-        peak_list {list} -- list of all peaks associated with a given sequence.
+        peak_list {list} -- list of all peaks (floats) associated with a given
+        sequence.
 
     Keyword Arguments:
         min_ms2_peak_abundance {int} -- minimum percentage of ms2 peak abundance
