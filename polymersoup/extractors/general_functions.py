@@ -4,7 +4,7 @@ import logging
 
 # configure info logging
 logging.basicConfig(
-    format=f'%(message)s - %(asctime)s',
+    format='%(message)s - %(asctime)s',
     datefmt='%H:%M:%S %m/%d/%Y ',
     level=logging.INFO)
 

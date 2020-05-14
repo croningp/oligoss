@@ -16,6 +16,8 @@ lint:
 
 test:
   stage: testing
+  before_script: 
+    - pip install git+https://$MZMLRIPPER_USER:$MZMLRIPPER_PW@gitlab.com/croningroup/origins/mzmlripper.git@master
   script:
     - pip install pytest
     - pip install coverage

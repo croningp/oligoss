@@ -1,8 +1,8 @@
 import os
 import mzmlripper.extractor as ripper
 from bisect import bisect_left, bisect_right
-from extractor_classes import ripper_dict
-from general_functions import logging, open_json, write_to_json, return_jsons
+from .extractor_classes import ripper_dict
+from .general_functions import logging, open_json, write_to_json, return_jsons
 
 def mzml_to_json(input_folder, extractor_parameters):
     """
@@ -52,7 +52,7 @@ def apply_prefilters(spectra, min_rt, max_rt, min_max_int, min_total_int):
     rt_filtered_spectra = rt_filter(spectra, min_rt, max_rt)
 
     if not rt_filtered_spectra:
-        logging.info(f'no spectra passed retention time filters')
+        logging.info('no spectra passed retention time filters')
 
     # filter by intensity
     rt_int_filtered_spectra = intensity_filter(
@@ -201,7 +201,7 @@ def min_max_intensity_filter(spectra, min_max_intensity):
             max_int_filtered[spectrum_id] = spectrum_dict
 
     if not max_int_filtered:
-        logging.info(f'no spectra passed maximum intensity filters')
+        logging.info('no spectra passed maximum intensity filters')
 
     return max_int_filtered
 
@@ -233,7 +233,7 @@ def min_total_intensity_filter(spectra, min_total_intensity=None):
             total_int_filtered[spectrum_id] = spectrum_dict
 
     if not total_int_filtered:
-        logging.info(f'no spectra passed total intensity filters')
+        logging.info('no spectra passed total intensity filters')
 
     return total_int_filtered
 
@@ -252,6 +252,13 @@ def find_precursor(spectra, ms2_precursor, error):
     """
 
     precursor_filtered = {}
+
+    # check precursor is list of format [precursor string, precursor mass]
+    if type(ms2_precursor) != list:
+        logging.info(f'ms2 precursor {ms2_precursor} is not of correct format: \
+            [ms2 precursor string, ms2 precusor mass]')
+        # presume input is mass and put into list
+        ms2_precursor = ["precursor", float(ms2_precursor)]
 
     # get list of target precursor masses
     target = [float(ms2_precursor[1]) - error, float(ms2_precursor[1]) + error]
@@ -330,6 +337,9 @@ def prefilter(ripper_file, extractor_parameters, input_folder):
     else:
         error = float(extractor_parameters.error)
 
+    # make sure retention time constraint units consistent with mzml ripper
+    # NEEDS TO BE FINISHED
+
     # apply all pre-filters to each ms1 spectrum
     ripper.spectra["ms1"] = apply_prefilters(
         spectra=ripper.ms1,
@@ -392,5 +402,5 @@ def prefilter_all(rippers, extractor_parameters, input_folder):
                 input_folder=input_folder)))
 
         return filtered_rippers
-    logging.info(f'prefilters not specified')
+    logging.info('prefilters not specified')
     return rippers
