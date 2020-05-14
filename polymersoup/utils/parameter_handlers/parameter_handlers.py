@@ -86,5 +86,8 @@ def generate_param_subobject(params_dict, param_class):
         params_dict=params_dict,
         params_class="silico_ms2")
 
+    if not silico.ms2.adducts:
+        silico.ms2.adducts = silico.ms1.adducts
+
     #  return silico parameters
     return silico

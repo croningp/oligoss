@@ -5,6 +5,7 @@ class InputTypeError(Exception):
     Args:
         Exception (): [description]
     """
+
     def __init__(
         self,
         key,
@@ -114,5 +115,20 @@ class InvalidMonomerId(Exception):
                 self.available_monomers = self.available_monomers.keys()
             err_str += (
                 'Here are the valid monomer one letter codes for\n'
-                f'{self.polymer_class}: {self.available_monomers}')
+                f'{self.polymer_alias}: {self.available_monomers}')
         return err_str
+
+class InvalidModificationTarget(Exception):
+    def __init__(
+        self,
+        modification,
+        target
+    ):
+
+        self.modification = modification
+        self.target = target
+
+    def __str__(self):
+        if str(self.target) in ["0", "-1"]:
+            return f'{self.modification} cannot target terminus {self.target}'
+        return f'{self.modification} cannot target {self.target} sidechain'

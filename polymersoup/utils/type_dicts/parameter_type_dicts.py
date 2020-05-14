@@ -46,7 +46,7 @@ SILICO_LIBRARY_TYPES = {
     "min_length": int,
     "isomeric_targets": List[str],
     "optional": ["isomeric_targets"],
-
+    "modifications": Dict[str, List[str]],
     "ms1": {
         "adducts": List[str],
         "min_z": int,
@@ -54,8 +54,6 @@ SILICO_LIBRARY_TYPES = {
         "max_neutral_losses": int,
         "universal_sidechain_modifications": bool,
         "universal_terminal_modifications": bool,
-        "terminal_modifications": Dict[str, str],
-        "sidechain_modifications": Dict[str, List[str]],
         "optional": [
             "terminal_modifications",
             "sidechain_modifications",

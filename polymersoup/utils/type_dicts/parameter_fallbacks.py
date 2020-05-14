@@ -19,13 +19,12 @@ CORE_PARAM_FALLBACKS = {
 #  fallbacks for nested silico parameters
 SILICO_LIBRARY_FALLBACKS = {
     "isomeric_targets": None,
+    "modifications": None,
     "ms1": {
         "min_z": 1,
         "max_z": None,
         "universal_sidechain_modifications": True,
-        "universal_terminal_modifications": True,
-        "sidechain_modifications": None,
-        "terminal_modifications": None
+        "universal_terminal_modifications": True
     },
     "ms2": {
         "adducts": None,

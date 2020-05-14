@@ -4,12 +4,19 @@
   "instrument": "orbitrap_lumos_tribrid",
   "polymer_class": "depsipeptide",
   "chromatography": "c18",
-  "monomers": ["V", "I", "N", "A"],
+  "monomers": ["K", "E", "R", "S", "N"],
 
   "silico": {
-    "max_length": 6,
-    "min_length": 1,
-    "isomeric_targets": null,
+    "max_length": 5,
+    "min_length": 3,
+    "isomeric_targets": ["CBA", "BBA"],
+    "modifications": {
+      "K": ["Ole", "Pal", "Ace"],
+      "S": ["Trt"],
+      "E": ["Bnz"],
+      "0": ["Ole", "Pal", "Ace"],
+      "-1": ["Bnz"]
+    },
     "ms1": {
       "min_z": 1,
       "max_z": null,
