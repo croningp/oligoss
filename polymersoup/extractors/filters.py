@@ -5,12 +5,13 @@ from .extractor_classes import ripper_dict
 from .general_functions import logging, open_json, write_to_json, return_jsons
 
 def mzml_to_json(input_folder, extractor_parameters):
-    """
-    This function takes all mzml files in the input folder and converts them
+    """ This function takes all mzml files in the input folder and converts them
     to json format using Graham Keenan's ripper if required.
 
-    Arguments:
-        input_folder {str} -- filepath location of input mzML's
+    Args:
+        input_folder (str): filepath location of input mzML's
+        extractor_parameters (object): full extractor parameters from parameter
+        handlers
     """
     if return_jsons(input_folder):
         logging.info('mzml to json conversion not required')
@@ -31,22 +32,21 @@ def mzml_to_json(input_folder, extractor_parameters):
     return logging.info('mzml to json conversion complete')
 
 def apply_prefilters(spectra, min_rt, max_rt, min_max_int, min_total_int):
-    """
-    This function filters spectra by retetention time then minimum maximum
+    """ This function filters spectra by retetention time then minimum maximum
     spectra intensity.
 
-    Arguments:
-        spectra {dict} -- dictionary of format {spectrum_id : {m/z: intensity}}
-        min_rt {float} -- minimum retention time
-        max_rt {float} -- maximum retention time
-        min_max_intensity {float} -- minimum intensity for the most intense peak
+    Args:
+        spectra (dict): dictionary of format {spectrum_id : {m/z: intensity}}
+        min_rt (float): minimum retention time
+        max_rt (float): maximum retention time
+        min_max_int (float): minimum intensity for the most intense peak
             in the spectrum
-        min_total_intensity {float} -- minimum intensity for the total intensity
+        min_total_int (float): minimum intensity for the total intensity
             of the spectrum
-        ms_level {int} -- MS1 or MS2
 
     Returns:
-        dict -- spectra that has passed the retention time and intensity filters
+        rt_int_filtered_spectra (dict): spectra that has passed the retention
+        time and intensity filters
     """
     # filter by retention time
     rt_filtered_spectra = rt_filter(spectra, min_rt, max_rt)
@@ -65,27 +65,26 @@ def apply_prefilters(spectra, min_rt, max_rt, min_max_int, min_total_int):
 def apply_prefilters_ms2(
         spectra, min_rt, max_rt, min_max_intensity, min_total_intensity,
         ms2_precursors, error):
-    """
-    This function filters MS2 spectra in the following order: retention time,
+    """ This function filters MS2 spectra in the following order: retention time,
         minimum maximum intensity, precursor.
 
-    Arguments:
-        spectra {dict} -- dictionary of format {spectrum_id : {m/z: intensity}}
-        min_rt {float} -- minimum retention time
-        max_rt {float} -- maximum retention time
-        min_max_intensity {float} -- minimum intensity for the most intense peak
-            in the spectrum
-        ms_level {int} -- MS1 or MS2 (1 or 2)
-        ms2_precursors {list} -- list or nested list of format:
-            [precursor string, precursor mass]
-        error {float} -- acceptable difference between target mass and found
-            parent mass
+    Args:
+        spectra (dict): dictionary of format {spectrum_id : {m/z: intensity}}
+        min_rt (float): minimum retention time
+        max_rt (float): maximum retention time
+        min_max_intensity (float): minimum intensity for the most intense peak
+        in the spectrum
+        min_total_intensity (float): minimum total intensity for the sum of all
+        peaks in the spectrum
+        ms2_precursors (list or list(list)): list or nested list of format:
+        [precursor string, precursor mass]
+        error (float): acceptable difference between target mass and found
+        parent mass
 
     Returns:
-        dict -- spectra that has passed the retention time, intensity filters
-            and parent mass filters
+        filtered_spectra (dict): spectra that has passed the retention time,
+        intensity filters and parent mass filters
     """
-
     # filter by retention time and intensity
     filtered_spectra = apply_prefilters(
         spectra=spectra,
@@ -103,19 +102,17 @@ def apply_prefilters_ms2(
     return filtered_spectra
 
 def rt_filter(spectra, min_rt, max_rt):
-    """
-    This function filters spectra based on retention time. Spectra within the
+    """ This function filters spectra based on retention time. Spectra within the
     minimum and maximum retention time range will be returned.
 
-    Arguments:
-        spectra {dict} -- dictionary of format {spectrum_id : {m/z: intensity}}
-        min_rt {float} -- minimum retention time
-        max_rt {float} -- maximum retention time
+    Args:
+        spectra (dict): dictionary of format {spectrum_id : {m/z: intensity}}
+        min_rt (float): minimum retention time
+        max_rt (float): maximum retention time
 
     Returns:
-        dict -- spectra that has passed the retention time filter.
+        dict: spectra that has passed the retention time filter.
     """
-
     if min_rt is None or max_rt is None:
         return spectra
 
@@ -143,22 +140,21 @@ def rt_filter(spectra, min_rt, max_rt):
     return {key: spectra[key] for key in spectra_list}
 
 def intensity_filter(spectra, min_max_intensity, min_total_intensity):
-    """
-    This function filters based on the minimum maximum intensity and the
+    """ This function filters based on the minimum maximum intensity and the
     minimum total intensity of the spectra.
     Spectra which pass intensity intensity thresholds will be returned.
 
-    Arguments:
-        spectra {dict} -- dictionary of format {spectrum_id : {m/z: intensity}}
-        min_max_intensity {float} -- minimum intensity for the most intense peak
-            in the spectrum
-        min_total_intensity {float} -- minimum intensity for the total intensity
-            of the spectrum
+    Args:
+        spectra (dict): dictionary of format {spectrum_id : {m/z: intensity}}
+        min_max_intensity (float): minimum intensity for the most intense peak
+        in the spectrum
+        min_total_intensity (float): minimum intensity for the total intensity
+        of the spectrum
 
     Returns:
-        dict -- spectra that has passed the intensity filter.
+        total_intensity_filtered (dict): spectra that has passed the intensity
+        filter.
     """
-
     # filter by minimum maximum intensity
     max_intensity_filtered = min_max_intensity_filter(
         spectra=spectra,
@@ -173,19 +169,17 @@ def intensity_filter(spectra, min_max_intensity, min_total_intensity):
 
 
 def min_max_intensity_filter(spectra, min_max_intensity):
-    """
-    This function filters based on the maximum intensity in the spectra.
+    """ This function filters based on the maximum intensity in the spectra.
     Spectra which maximum intensity exceeds the limit will be returned.
 
-    Arguments:
-        spectra {dict} -- dictionary of format {spectrum_id : {m/z: intensity}}
-        min_max_intensity {float} -- minimum intensity for the most intense peak
+    Args:
+        spectra (dict): dictionary of format {spectrum_id : {m/z: intensity}}
+        min_max_intensity (float): minimum intensity for the most intense peak
             in the spectrum
 
     Returns:
-        dict -- spectra that has passed the intensity filter.
+        max_int_filtered (dict): spectra that has passed the intensity filter.
     """
-
     # return unfiltered spectra if no filter spectified
     if min_max_intensity is None:
         return spectra
@@ -206,17 +200,16 @@ def min_max_intensity_filter(spectra, min_max_intensity):
     return max_int_filtered
 
 def min_total_intensity_filter(spectra, min_total_intensity=None):
-    """
-    This function filters based on the total intensity in the spectra.
+    """ This function filters based on the total intensity in the spectra.
     Spectra which total intensity exceeds the limit will be returned.
 
-    Arguments:
-        spectra {dict} -- dictionary of format {spectrum_id : {m/z: intensity}}
-        min_total_intensity {float} -- minimum intensity for the total intensity
-            of the spectrum
+    Args:
+        spectra (dict): dictionary of format {spectrum_id : {m/z: intensity}}
+        min_total_intensity (float optional): minimum intensity for the total
+        intensity of the spectrum. Defaults to None.
 
     Returns:
-        dict -- spectra that has passed the intensity filter.
+        total_int_filtered: spectra that has passed the intensity filter
     """
     # return unfiltered spectra if no filter spectified
     if min_total_intensity is None:
@@ -238,19 +231,18 @@ def min_total_intensity_filter(spectra, min_total_intensity=None):
     return total_int_filtered
 
 def find_precursor(spectra, ms2_precursor, error):
-    """
-    This function returns MS2 spectra which parent ion matches the target mass.
-
-    Arguments:
-        spectra {dict} -- dictionary of format {spectrum_id : {m/z: intensity}}
-        ms2_precursor {list} -- [ms2 precursor string, ms2 precursor mass]
-        error {float} -- acceptable difference between target mass and found
+    """ This function returns MS2 spectra which parent ion matches the target
+    mass.
+    Args:
+        spectra (dict): dictionary of format {spectrum_id : {m/z: intensity}}
+        ms2_precursor (list): [ms2 precursor string, ms2 precursor mass]
+        error (float): acceptable difference between target mass and found
             parent mass
 
     Returns:
-        dict -- dict of MS2 spectra whos parent ion matches the target mass
+        precursor_filtered dict: dict of MS2 spectra whos parent ion matches the
+        target mass
     """
-
     precursor_filtered = {}
 
     # check precursor is list of format [precursor string, precursor mass]
@@ -274,21 +266,21 @@ def find_precursor(spectra, ms2_precursor, error):
     return precursor_filtered
 
 def find_precursors(spectra, ms2_precursors, error):
-    """
-    This function returns MS2 spectra which parent ion matches the target mass
-    for all targets.
+    """ This function returns MS2 spectra which parent ion matches the target
+    mass for all targets.
 
-    Arguments:
-        spectra {dict} -- dictionary of format {spectrum_id : {m/z: intensity}}
-        ms2_precursor {list or nested list} -- format:
-            [ms2 precursor string, ms2 precursor mass]
-        error {float} -- acceptable difference between target mass and found
-            parent mass
+    Args:
+        spectra (dict]): dictionary of multiple spectra, format:
+        {spectrum_id : {m/z: intensity}}
+        ms2_precursors (list or list(list)):
+        [ms2 precursor string, ms2 precursor mass]
+        error (float): acceptable difference between target mass and found
+        parent mass
 
     Returns:
-        dict -- dict of MS2 spectra whos parent ion matches any target mass
+        precursor_filtered (dict): dict of MS2 spectra whos parent ion matches
+        any target mass
     """
-
     if ms2_precursors is None:
         return spectra
 
@@ -307,44 +299,50 @@ def find_precursors(spectra, ms2_precursors, error):
     return precursor_filtered
 
 def prefilter(ripper_file, extractor_parameters, input_folder):
-    """
-    This function applies all prefilters (retention time, minimum maximum
+    """ This function applies all prefilters (retention time, minimum maximum
     intensity threshold, minimum total intensity threshold, precursor mass) to
     all spectra for a single ripper file.
     The ripper json is converted to an object and it's spectra are filtered by
     the above parameters, starting with MS1 then moving onto MS2.
 
-    Arguments:
-        ripper_file {str} -- full filepath to ripper json
-        extractor_parameters {object} -- full extractor parameters
-        input_folder {str} -- full filepath to ripper json input folder
+    Args:
+        ripper_file (str): full filepath to ripper json
+        extractor_parameters (object): full extractor parameters from parameter
+        handlers
+        input_folder (str): full filepath to ripper json input folder
 
     Returns:
-        str -- full filepath to filtered ripper json
+        full_filepath (str): full filepath to filtered ripper json
     """
+    # check for pre screen filters
+    pre_screen_filters = extractor_parameters.pre_screen_filters
+
+    if not pre_screen_filters:
+        return ripper_file
+
+    # define pre screen filters
+    min_max_ms1 = pre_screen_filters['min_ms1_max_intensity']
+    min_max_ms2 = pre_screen_filters['min_ms2_max_intensity']
+    min_total_ms1 = pre_screen_filters['min_ms1_total_intensity']
+    min_total_ms2 = pre_screen_filters['min_ms2_total_intensity']
+    min_rt = pre_screen_filters['min_rt']
+    max_rt = pre_screen_filters['min_rt']
+
     # open ripper json and convert dict to object
     ripper_data = open_json(ripper_file)
     ripper = ripper_dict(ripper_data)
-    min_max_ms1 = extractor_parameters.filter_min_ms1_max_intensity
-    min_max_ms2 = extractor_parameters.filter_min_ms2_max_intensity
-    min_total_ms1 = extractor_parameters.filter_min_ms1_total_intensity
-    min_total_ms2 = extractor_parameters.filter_min_ms2_total_intensity
 
     # make sure error is absolute
     if extractor_parameters.error_units == 'ppm':
         error = float(extractor_parameters.error) / 1E6
-
     else:
         error = float(extractor_parameters.error)
-
-    # make sure retention time constraint units consistent with mzml ripper
-    # NEEDS TO BE FINISHED
 
     # apply all pre-filters to each ms1 spectrum
     ripper.spectra["ms1"] = apply_prefilters(
         spectra=ripper.ms1,
-        min_rt=extractor_parameters.filter_min_rt,
-        max_rt=extractor_parameters.filter_max_rt,
+        min_rt=min_rt,
+        max_rt=max_rt,
         min_max_int=min_max_ms1,
         min_total_int=min_total_ms1)
 
@@ -355,8 +353,8 @@ def prefilter(ripper_file, extractor_parameters, input_folder):
     # apply all pre-filters to each ms2 spectrum
     ripper.spectra["ms2"] = apply_prefilters_ms2(
         spectra=ripper.ms2,
-        min_rt=extractor_parameters.filter_min_rt,
-        max_rt=extractor_parameters.filter_max_rt,
+        min_rt=min_rt,
+        max_rt=max_rt,
         min_max_intensity=min_max_ms2,
         min_total_intensity=min_total_ms2,
         ms2_precursors=extractor_parameters.precursors,
@@ -379,15 +377,15 @@ def prefilter_all(rippers, extractor_parameters, input_folder):
     intensity threshold, minimum total intensity, precursor mass) to all ripper
     file spectra.
 
-    Arguments:
-        ripper_file {str} -- full filepath to ripper json
-        extractor_parameters {object} -- full extractor parameters
-        input_folder {str} -- full filepath to ripper json input folder
+    Args:
+        rippers (str): full filepath to ripper json
+        extractor_parameters (object): full extractor parameters from parameter
+        handlers
+        input_folder (str): full filepath to ripper json input folder
 
     Returns:
-        list -- list of full filepaths to all filtered rippers
+        rippers (list): list of full filepaths to all filtered rippers
     """
-
     if extractor_parameters.pre_screen_filter:
 
         filtered_rippers = []

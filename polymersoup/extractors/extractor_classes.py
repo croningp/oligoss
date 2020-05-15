@@ -10,13 +10,3 @@ class ripper_dict:
             ripper_data["ms2"], key=lambda x: float(
                 ripper_data["ms2"][x]["retention_time"]), reverse=False)}
         self.spectra = {}
-
-class spectrum:
-
-    def __init__(self, spectrum_data, ms_level):
-
-        self.rt = spectrum_data["retention_time"]
-        self.masslist = spectrum_data["mass_list"]
-
-        if ms_level == 2:
-            self.parent = spectrum_data["parent"]
