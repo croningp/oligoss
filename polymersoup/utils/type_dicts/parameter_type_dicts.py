@@ -115,6 +115,8 @@ SILICO_LIBRARY_TYPES = {
 EXTRACTOR_TYPES = {
     "error": float,
     "error_units": str,
+    "min_rt": float,
+    "max_rt": float,
     "rt_units": str,
     "min_ms2_peak_abundance": float,
     "min_ms1_total_intensity": float,

@@ -16,20 +16,19 @@ def extract_MS1_EICs(
     """ This function extracts EICs for each sequence in the MS1 silico dict
     from the MS1_ripper_dict.
 
-    Arguments:
-        MS1_silico {dict} -- full MS1 silico dictionary of the format:
+    Args:
+        MS1_silico (dict): full MS1 silico dictionary of the format:
         {'sequence' :[masses]}
-        extractor_parameters {object} -- full extractor parameters
-        MS1_dict {dict} -- MS1 ripper mass spectrometry data
-        filename {str} -- name of sample
-        output_folder {str} -- full filepath to output folder
+        extractor_parameters (object): full extractor parameters
+        MS1_dict (dict): MS1 ripper mass spectrometry data
+        filename (str): str name of sample (ripper json name without .json)
+        output_folder (str): full filepath to output folder
 
     Returns:
-        dict -- MS1 silico dictionary whereby any sequence not found in
-        sufficient abundance to build an EIC, is removed
-        dict -- format: {'sequence': [[rt, I]]}
+        trimmed_silico (dict): MS1 silico dictionary whereby any sequence not
+        found in sufficient abundance to build an EIC, is removed
+        MS1_fragments (dict): format: {'sequence': [[rt, I]]}
     """
-
     # format sequence sequence: [[rt, I], ..]
     retention_times = retrieve_retention_times(ripper_dict=MS1_dict)
     MS1_EIC = {}
@@ -46,11 +45,12 @@ def extract_MS1_EICs(
         else:
             error = float(extractor_parameters.error)
 
-        mass_matches, sequence_EIC = generate_EIC(
+        sequence_EIC = generate_EIC(
             masses=masses,
             ripper_dict=MS1_dict,
             error=error,
-            min_total_intensity=extractor_parameters.min_ms1_total_intensity)
+            min_total_intensity=extractor_parameters.min_ms1_total_intensity,
+            rt_units=extractor_parameters.rt_units)
 
         if sequence_EIC:
             logging.info(f'EIC generated for {sequence}')
@@ -64,6 +64,10 @@ def extract_MS1_EICs(
             logging.info(f'{sequence} not in sufficient abundance for EIC')
             del trimmed_silico[sequence]
 
+    # make sure retention time list is in minutes
+    if extractor_parameters.rt_units == 'sec':
+        retention_times = [(r / 60) for r in retention_times]
+
     MS1_EIC['retention_times'] = retention_times
 
     # write MS1 EIC to json
@@ -75,13 +79,12 @@ def retrieve_retention_times(ripper_dict):
     """ This function generates a list of all retention times from a ripperdict.
     This list will be useful in plotting EICs by providing full time series.
 
-    Arguments:
-        ripper_dict {dict} -- ripper mass spectrometry data dictionary
+    Args:
+        ripper_dict (dict): ripper mass spectrometry data dictionary
 
     Returns:
-        list -- list of all retention times
+        retention times (list[float]): list of all retention times
     """
-
     retention_times = []
 
     for spectrum in ripper_dict.values():
@@ -93,12 +96,13 @@ def match_mass(spectrum, mass_range):
     """ This function takes a mass range for a single target and finds matches
     within the spectrum.
 
-    Arguments:
-        spectrum {dict} -- single spectrum, must contain 'mass_list'
-        mass_range {[list]} -- [minimum mass, maximum mass]
+    Args:
+        spectrum (dict): single spectrum, must contain 'mass_list'.
+        mass_range (list): format: [minimum mass, maximum mass]
 
     Returns:
-        [list] -- list of mass matches from spectrum that fall within limit.
+        matches (list[float]): list of mass matches from spectrum that fall
+        within limit.
     """
     matches = []
 
@@ -125,27 +129,32 @@ def match_mass(spectrum, mass_range):
 
     return matches
 
-def generate_EIC(masses, ripper_dict, error, min_total_intensity=None):
+def generate_EIC(
+        masses, ripper_dict, error, rt_units, min_total_intensity=None):
     """ Takes a list of ions (m/z values) and generates a combined extracted ion
     chromatogram (EIC) of those ions from mass spectra in mzml ripper format
     (ripper_dict).
 
-    Arguments:
-        masses {list of floats} -- list of target ion m/z values
-        ripper_dict {dict} -- mzml ripper mass spectrometry data dictionary
-        error {float} -- absolute error tolerance for matching target ions to
-            masses found in spectra
-        min_total_intensity {float} -- maximum total intensity of EIC
-                for it to be returned. Defaults to None
+    Args:
+        masses (list[float]): list of target ion m/z values
+        ripper_dict (dict): mzml ripper mass spectrometry data dictionary
+        error (float): absolute error tolerance for matching target ions to
+        masses found in spectra
+        rt_units (str): units of the mzml ripper retention times (min or sec)
+        min_total_intensity (float, optional): maximum total intensity of EIC
+        for it to be returned. Defaults to None
 
     Returns:
-        nested list -- extracted ion chromatogram in format: [[rt, I]..]
-            where rt = retention time (float) and I = intensity of all
-            species that match target ions at that retention time.
+        EIC (list(list)): extracted ion chromatogram in format: [[rt, I]..]
+        where rt = retention time (float) and I = intensity of all species that
+        match target ions at that retention time.
     """
-    mass_matches = []
     EIC = []
     total_intensity = 0
+
+    rt_conversion = 1
+    if rt_units == 'sec':
+        rt_conversion = 60
 
     for mass in masses:
 
@@ -158,21 +167,19 @@ def generate_EIC(masses, ripper_dict, error, min_total_intensity=None):
             matches = match_mass(spectrum=spectrum, mass_range=mass_range)
 
             if matches:
+                # make sure retention time output is in minutes
                 for match in matches:
                     EIC.append(
-                        [spectrum['retention_time'], spectrum[str(match)]])
+                        [(spectrum['retention_time'] / rt_conversion),
+                            spectrum[str(match)]])
                     total_intensity += spectrum[str(match)]
-                mass_matches.append(mass)
 
     # check total intensity meets minimum value, if not return empty EIC
     if min_total_intensity:
         if (total_intensity <= min_total_intensity):
             EIC = []
 
-    mass_matches = list(set(mass_matches))
-    mass_matches.sort()
-
-    return mass_matches, EIC
+    return EIC
 
 def min_ms2_peak_abundance_filter(
         spectra, peak_list, error, min_ms2_peak_abundance=None):
@@ -182,17 +189,18 @@ def min_ms2_peak_abundance_filter(
     the most intense peak in the spectrum (not-related to sequence) and the
     spectrum is returned if it exceeds the min ms2 peak abundance threshold.
 
-    Arguments:
-        spectra {dict} -- dictionary of MS2 spectra to be filtered.
-        peak_list {list} -- list of all peaks (floats) associated with a given
-        sequence.
-
-    Keyword Arguments:
-        min_ms2_peak_abundance {int} -- minimum percentage of ms2 peak abundance
-            (default: {None})
+    Args:
+        spectra (dict): dictionary of MS2 spectra to be filtered.
+        peak_list (list(float)): list of all peaks (floats) associated with a
+        given sequence.
+        error (float): absolute error tolerance for matching target ions to
+        masses found in spectra
+        min_ms2_peak_abundance (int, optional): minimum percentage of ms2
+        peak abundance. Defaults to None.
 
     Returns:
-        dict -- dictionary of spectra that have passed the filter.
+        min_ms2_peak_filtered (dict): dictionary of spectra that have passed the
+        filter.
     """
     # return unfiltered spectra if no filter spectified
     if min_ms2_peak_abundance is None:
@@ -230,13 +238,17 @@ def confirm_fragment(masses, error, spectra):
     """ This function iterates through spectra, looking for mass matches for the
     target masses. A full list of silico masses found is returned.
 
-    Arguments:
-        masses {list of floats} -- list of target ion m/z values
-        spectra {dict} -- dictionary of all MS2 spectra for a single ripper.
+    Args:
+        masses (list[float]): list of target ion m/z values
+        error (float): absolute error tolerance for matching target ions to
+        masses found in spectra
+        spectra (dict): dictionary of all MS2 spectra for a single ripper
 
     Returns:
-        lists -- list of mass matches and a list of spectrum id's where
-        fragments were found.
+        matches (list[float]): list of masses found in spectra that match
+        original masses
+        spectra_matches (list[str]): list of spectrum id's where fragments were
+        found
     """
     matches = []
     spectra_matches = []
@@ -265,17 +277,20 @@ def confirm_all_fragments(fragment_dict, spectra, error):
     It also creates a json listing which spectra contained fragment hits for
     certain sequences.
 
-    Arguments:
-        fragment_dict {dict} -- silico MSMS dictionary for the sequence
-        spectra {dict} -- dictionary of MS2 spectra where the precursor mass
+    Args:
+        fragment_dict (dict): silico MSMS dictionary for the sequence
+        spectra (dict): dictionary of MS2 spectra where the precursor mass
             matches the target sequence
-        error {float} -- absolute error tolerance for matching target ions to
+        error (float): absolute error tolerance for matching target ions to
             masses found in spectra
 
     Returns:
-        dict -- dict of all confirmed fragments and matched masses
+        [type]: [description]
+        confirmed_fragments (dict): dictionary of all confirmed fragments where
+        key is the fragment string and values are a list of silico masses
+        all_spectra_matches (dict): dictionary of all spectra in which fragments
+        were confirmed. format: {'fragment string': ['spectra id's (str)']}
     """
-
     # separate out 'core' fragments from signatures
     silico_fragments = {
         k: v for k, v in fragment_dict['MS2'].items() if k != 'signatures'}
@@ -321,23 +336,25 @@ def confirm_all_sequences_fragments(
     and the spectra in which these fragments were found is also created. This
     will be used by the postprocessing module to plots spectral assignments.
 
-    Arguments:
-        MSMS_insilico_dict {dictionary} -- silico MSMS dictionary for all
-            sequences
-        MS2_spectra {dict} -- all MS2 spectra for the ripper file
-        error {float} -- absolute error tolerance for matching target ions to
-            masses found in spectra
-        filename {str} -- name of sample
-        output_folder {str} -- filepath to where confirmed fragment dict will be
-            saved as a json
-        min_ms2_total_intensity {float} -- minimum intensity for the total
-            intensity for each MS2 spectrum
+    Args:
+        MSMS_insilico_dict (dict): silico MSMS dictionary for all
+        sequences
+        MS2_spectra (dict): all MS2 spectra for the ripper file
+        error (float): absolute error tolerance for matching target ions to
+        masses found in spectra
+        filename (str): str name of sample (ripper json name without .json)
+        output_folder (str): filepath to where confirmed fragment dict will be
+        saved as a json
+        min_ms2_total_intensity (int): minimum intensity for the total
+        intensity for each MS2 spectrum
+        min_ms2_peak_abundance (int): minimum intensity percentage for intensity
+        of a peak associated with the sequences compared to the most intense
+        peak in the spectrum
 
     Returns:
-        dictionary -- dictionary of all sequences with confirmed fragments
-            format = {sequence: [confirmed fragment strings]}
+        confirmed_fragment_dict (dict): dictionary of all sequences with
+        confirmed fragments format = {sequence: [confirmed fragment strings]}
     """
-
     confirmed_fragment_dict = {}
     all_spectra_matches = {}
 
@@ -389,16 +406,17 @@ def standard_extraction(MS1_silico, rippers, extractor_parameters, output):
     Full MSMS insilico fragments are generated for confirmed compositions.
     MS2 fragments are confirmed for each sequence.
 
-    Arguments:
-        MS1_silico {dict} -- theoretical dictionary of all compositions and
-            their masses
-        rippers {list} -- list of full filepaths to ripper jsons
-        extractor_parameters {object} -- full extractor parameters
-        output {str} -- full filepath to desired output folder
+    Args:
+        MS1_silico (dict): theoretical dictionary of all compositions (k) and
+            a list of associated their masses (v)
+        rippers (list): list of full filepaths to ripper jsons
+        extractor_parameters (object): full extractor parameters
+        output (str): full filepath to desired output folder
 
     Returns:
-        str -- full filepath to full fragment confirmation json.
-            format = {sequence: {'MS1: [m/z]', 'MS2': {fragment: [m/z]} }}
+        confirmed_fragment_list(dict): full filepath to full fragment
+        confirmation json.
+        format = {sequence: {'MS1: [m/z]', 'MS2': {fragment: [m/z]}}}
     """
     confirmed_fragment_dict_list = []
     for ripper_file in rippers:
