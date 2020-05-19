@@ -27,7 +27,8 @@ def mzml_to_json(input_folder, extractor_parameters):
     for mzml in mzml_files:
         ripper.process_mzml_file(
             filename=(os.path.join(input_folder, mzml)),
-            out_dir=input_folder)
+            out_dir=input_folder,
+            rt_units=extractor_parameters.rt_units)
 
     return logging.info('mzml to json conversion complete')
 

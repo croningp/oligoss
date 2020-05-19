@@ -64,10 +64,6 @@ def extract_MS1_EICs(
             logging.info(f'{sequence} not in sufficient abundance for EIC')
             del trimmed_silico[sequence]
 
-    # make sure retention time list is in minutes
-    if extractor_parameters.rt_units == 'sec':
-        retention_times = [(r / 60) for r in retention_times]
-
     MS1_EIC['retention_times'] = retention_times
 
     # write MS1 EIC to json
@@ -152,10 +148,6 @@ def generate_EIC(
     EIC = []
     total_intensity = 0
 
-    rt_conversion = 1
-    if rt_units == 'sec':
-        rt_conversion = 60
-
     for mass in masses:
 
         # define minimum and maximum mass match considering errors
@@ -167,10 +159,9 @@ def generate_EIC(
             matches = match_mass(spectrum=spectrum, mass_range=mass_range)
 
             if matches:
-                # make sure retention time output is in minutes
                 for match in matches:
                     EIC.append(
-                        [(spectrum['retention_time'] / rt_conversion),
+                        [spectrum['retention_time'],
                             spectrum[str(match)]])
                     total_intensity += spectrum[str(match)]
 
