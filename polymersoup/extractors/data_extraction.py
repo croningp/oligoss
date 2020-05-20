@@ -286,7 +286,11 @@ def confirm_all_fragments(fragment_dict, spectra, error):
     silico_fragments = {
         k: v for k, v in fragment_dict['MS2'].items() if k != 'signatures'}
     silico_signatures = fragment_dict['MS2']['signatures']
-    confirmed_fragments = {}
+    silico_signatures_list = {
+        k: v for k, v in silico_signatures.items()
+        if k != 'terminal_modifications'}
+    confirmed_fragments = {
+        "core": {}, "signatures": {"terminal_modifications": {}}}
     all_spectra_matches = {}
 
     # confirm 'core' fragments
@@ -297,19 +301,32 @@ def confirm_all_fragments(fragment_dict, spectra, error):
             spectra=spectra)
 
         if fragment_matches:
-            confirmed_fragments[fragment] = fragment_matches
+            confirmed_fragments["core"][fragment] = fragment_matches
             all_spectra_matches[fragment] = spectra_matches
 
     # confirm signatures
-    for signature, masses in silico_signatures.items():
+    for signature, masses in silico_signatures_list.items():
         signature_matches, sig_spectra_matches = confirm_fragment(
             masses=masses,
             error=error,
             spectra=spectra)
 
         if signature_matches:
-            confirmed_fragments[signature] = signature_matches
+            confirmed_fragments["signatures"][signature] = signature_matches
             all_spectra_matches[signature] = sig_spectra_matches
+
+    # confirm terminal modifications
+    for mod, masses in silico_signatures['terminal_modifications'].items():
+
+        mod_matches, mod_spectra_matches = confirm_fragment(
+            masses=masses,
+            error=error,
+            spectra=spectra)
+
+        if mod_matches:
+            confirmed_fragments[
+                "signatures"]["terminal_modifications"][mod] = mod_matches
+            all_spectra_matches[mod] = mod_spectra_matches
 
     return confirmed_fragments, all_spectra_matches
 
@@ -405,11 +422,10 @@ def standard_extraction(MS1_silico, rippers, extractor_parameters, output):
         output (str): full filepath to desired output folder
 
     Returns:
-        confirmed_fragment_list(dict): full filepath to full fragment
-        confirmation json.
-        format = {sequence: {'MS1: [m/z]', 'MS2': {fragment: [m/z]}}}
+        extracted_data_folders (list[str]): full filepath to extracted data
+        folder for all rippers.
     """
-    confirmed_fragment_dict_list = []
+    extracted_data_folders = []
     for ripper_file in rippers:
 
         # open ripper json
@@ -419,6 +435,7 @@ def standard_extraction(MS1_silico, rippers, extractor_parameters, output):
         # create output folder
         ripper_name = (ripper_file.split('\\')[-1]).replace('.json', '')
         ripper_output = os.path.join(output, ripper_name)
+        extracted_data_folders.append(ripper_output)
         if not os.path.exists(ripper_output):
             os.mkdir(ripper_output)
 
@@ -470,6 +487,5 @@ def standard_extraction(MS1_silico, rippers, extractor_parameters, output):
         confirmed_fragments_output = os.path.join(
             ripper_output, f'{ripper_name}_confirmed_fragment_dict.json')
         write_to_json(all_confirmed_fragments, confirmed_fragments_output)
-        confirmed_fragment_dict_list.append(confirmed_fragments_output)
 
-    return confirmed_fragment_dict_list
+    return extracted_data_folders
