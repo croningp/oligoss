@@ -12,13 +12,7 @@ logging.basicConfig(
 
 def standard_postprocess(extracted_data_folder, postprocess_parameters):
 
-    all_ssw = [0, 1]
-    postprocess_parameters.exclude_fragments = None
-    postprocess_parameters.optional_core_fragments = ['b1']
-    postprocess_parameters.dominant_signature_cap = 0
-    postprocess_parameters.essential_fragments = None
-    postprocess_parameters.subsequence_weight = [0, 1]
-    postprocess_parameters.core_linear_series = ['b', 'y']
+    all_ssw = postprocess_parameters.subsequence_weight
 
     if type(all_ssw) != list:
         all_ssw = [all_ssw]

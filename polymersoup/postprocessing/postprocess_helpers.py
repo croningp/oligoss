@@ -186,10 +186,14 @@ def get_percent_found_fragments(
         float: % fragments that have been confirmed for a sequence.
     """
     # get list of in silico fragments that belong to core fragment series
-    core_silico = insilico_fragments["core"]
+    core_silico = [
+        frag for frag in insilico_fragments["core"]
+        if frag[0] in core_fragment_series]
 
     # get list of confirmed fragments that belong to core fragment series
-    core_confirmed = confirmed_fragments["core"]
+    core_confirmed = [
+        frag for frag in confirmed_fragments["core"]
+        if frag[0] in core_fragment_series]
 
     # check for fragments to exclude from confidence calculation; if any are
     # specified, remove these fragments from silico and confirmed fragment
