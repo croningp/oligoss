@@ -7,7 +7,7 @@
   "monomers": ["V", "I", "N", "A"],
 
   "silico": {
-    "max_length": 6,
+    "max_length": 11,
     "min_length": 1,
     "isomeric_targets": null,
     "ms1": {

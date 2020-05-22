@@ -25,6 +25,7 @@ def test_instrument_defaults_extractors():
 
     assert parameters.extractors.error == 5
     assert parameters.extractors.error_units == "ppm"
+    assert parameters.extractors.rt_units == "min"
 
 @pytest.mark.unit
 def test_instrument_defaults_silico():

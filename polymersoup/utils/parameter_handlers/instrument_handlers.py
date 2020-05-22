@@ -80,7 +80,7 @@ def check_instrument_info(params_dict):
         configs=CHROMATOGRAPHY_CONFIGS)
     return instrument_info
 
-def retrieve_instrument_alias_info(params_dict, inst_key, configs):
+def retrieve_instrument_alias_info(params_dict, inst_key, configs=None):
     """
     Takes alias of mass spec or chromatography instrument and retrieves
     default parameters defined in instrument config file
@@ -88,9 +88,9 @@ def retrieve_instrument_alias_info(params_dict, inst_key, configs):
     Args:
         params_dict (dict): dict of parameters and values from input file
         inst_key (str): either "mass_spec" or "chromatography" to specify which
-            type of instrument
-        configs (dict): dict of available instrument aliases and associated
-            defaults
+            type of instrument.
+        configs (dict, optional): dict of available instrument aliases and
+            associated defaults.
 
     Raises:
         Exception: raised if instrument aliases does not match pre-configured
@@ -100,6 +100,15 @@ def retrieve_instrument_alias_info(params_dict, inst_key, configs):
         dict: dict of parameters and associated default values for instrument
     """
     if inst_key in params_dict:
+        if not configs:
+            if inst_key == "instrument":
+                configs = MASS_SPEC_CONFIGS
+            elif inst_key == "chromatography":
+                configs = CHROMATOGRAPHY_CONFIGS
+            else:
+                raise Exception(
+                    f'{inst_key} not a valid instrument parameter key')
+
         if params_dict[inst_key]:
             if params_dict[inst_key] in configs:
                 with open(configs[params_dict[inst_key]]) as f:
@@ -112,6 +121,15 @@ def retrieve_instrument_alias_info(params_dict, inst_key, configs):
                     'create a new instrument config file. Valid aliases:\n'
                     f'{configs.keys}')
     return {}
+
+def retrieve_mass_spec_info_params_obj(params_obj):
+
+    if not params_obj.instrument:
+        return {}
+
+    with open(MASS_SPEC_CONFIGS[params_obj.instrument]) as f:
+        info = json.load(f)
+        return info
 
 def sanity_check_silico_fragmentation(
     silico_params,

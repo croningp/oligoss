@@ -30,6 +30,10 @@ def load_polymer_info(polymer_class):
     Returns:
         dict: polymer_info dict
     """
+    #  if polymer_class is not a config not alias, return immediately
+    if type(polymer_class) == dict:
+        return polymer_class
+
     #  check whether polymer_class str is valid alias for polymer backbone props
     polymer_class = polymer_class.replace(".json", "")
     if polymer_class not in POLYMER_ALIASES:

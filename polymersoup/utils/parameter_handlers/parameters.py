@@ -1,7 +1,9 @@
 from typing import List, Dict
+
 from .instrument_handlers import (
     check_instrument_info,
     sanity_check_silico_fragmentation)
+from ..silico.silico_utils import retrieve_adduct_info
 from ..errors import InputTypeError, TypeDictKeyError, MissingParameterValue
 from ..type_dicts.parameter_type_dicts import (
     CORE_PARAM_TYPES,
@@ -76,6 +78,22 @@ class Parameters():
         #  read params dict and set parameter attributes
         self.set_parameter_attributes()
         self.final_attrs_check()
+
+    @classmethod
+    def generate_silico(cls, params_dict):
+        return cls(params_dict=params_dict, params_class="silico")
+
+    @classmethod
+    def generate_silico_ms1(cls, params_dict):
+        return cls(params_dict=params_dict, params_class="silico_ms1")
+
+    @classmethod
+    def generate_extractors(cls, params_dict):
+        return cls(params_dict=params_dict, params_class="extractors")
+
+    @classmethod
+    def generate_postprocess(cls, params_dict):
+        return cls(params_dict=params_dict, params_class="postprocess")
 
     def get_param_associations(
         self,
@@ -207,6 +225,10 @@ class Parameters():
         #  in inputs, there will be no instrument defaults so return None
         if (not self.active_instruments["mass_spec"]
                 and not self.active_instruments["chromatography"]):
+            return None
+
+        #  silico parameters have no directly instrument-depndent subparameters
+        if self.params_class == "silico":
             return None
 
         #  identify which parameters potentially have set values in active
@@ -359,12 +381,19 @@ class Parameters():
             raise Exception(
                 f'the following parameters are missing: {missing_params}')
 
-        if self.params_class == "silico_ms2":
-            sanity_check_silico_fragmentation(
-                silico_params=self.sub_params,
-                polymer_class=self.params_dict["polymer_class"],
-                ms_level=2,
-                instrument_info=self.active_instruments["mass_spec"])
+        #  check adducts and fragments for silico parameters
+        if self.params_class in ["silico_ms2", "silico_ms1"]:
+
+            if self.adducts:
+                self.adducts = retrieve_adduct_info(
+                    mode=self.params_dict["mode"], adducts=self.adducts
+                )
+            if self.params_class == "silico_ms2":
+                sanity_check_silico_fragmentation(
+                    silico_params=self.sub_params,
+                    polymer_class=self.params_dict["polymer_class"],
+                    ms_level=2,
+                    instrument_info=self.active_instruments["mass_spec"])
 
         #  remove any remaining temp_prop attributes. This is just for
         #  readability and easier debugging in later workflows
