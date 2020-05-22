@@ -65,7 +65,7 @@ def apply_prefilters(spectra, min_rt, max_rt, min_max_int, min_total_int):
 
 def apply_prefilters_ms2(
         spectra, min_rt, max_rt, min_max_intensity, min_total_intensity,
-        ms2_precursors, error):
+        ms2_precursors, error, error_units):
     """ This function filters MS2 spectra in the following order: retention time,
         minimum maximum intensity, precursor.
 
@@ -81,6 +81,7 @@ def apply_prefilters_ms2(
         [precursor string, precursor mass]
         error (float): acceptable difference between target mass and found
         parent mass
+        error_units (str): 'ppm' or 'abs'
 
     Returns:
         filtered_spectra (dict): spectra that has passed the retention time,
@@ -98,7 +99,8 @@ def apply_prefilters_ms2(
     filtered_spectra = find_precursors(
         spectra=filtered_spectra,
         ms2_precursors=ms2_precursors,
-        error=error)
+        error=error,
+        error_units=error_units)
 
     return filtered_spectra
 
@@ -114,7 +116,7 @@ def rt_filter(spectra, min_rt, max_rt):
     Returns:
         dict: spectra that has passed the retention time filter.
     """
-    if min_rt is None or max_rt is None:
+    if (min_rt is None) and (max_rt is None):
         return spectra
 
     if min_rt is None:
@@ -231,7 +233,7 @@ def min_total_intensity_filter(spectra, min_total_intensity=None):
 
     return total_int_filtered
 
-def find_precursor(spectra, ms2_precursor, error):
+def find_precursor(spectra, ms2_precursor, error, error_units):
     """ This function returns MS2 spectra which parent ion matches the target
     mass.
     Args:
@@ -239,6 +241,7 @@ def find_precursor(spectra, ms2_precursor, error):
         ms2_precursor (list): [ms2 precursor string, ms2 precursor mass]
         error (float): acceptable difference between target mass and found
             parent mass
+        error_units (str): 'abs' or 'ppm'
 
     Returns:
         precursor_filtered dict: dict of MS2 spectra whos parent ion matches the
@@ -253,6 +256,10 @@ def find_precursor(spectra, ms2_precursor, error):
         # presume input is mass and put into list
         ms2_precursor = ["precursor", float(ms2_precursor)]
 
+    # make sure error is abs
+    if error_units == 'ppm':
+        error = (float(ms2_precursor[1]) / 1E6 * error)
+
     # get list of target precursor masses
     target = [float(ms2_precursor[1]) - error, float(ms2_precursor[1]) + error]
 
@@ -266,7 +273,7 @@ def find_precursor(spectra, ms2_precursor, error):
 
     return precursor_filtered
 
-def find_precursors(spectra, ms2_precursors, error):
+def find_precursors(spectra, ms2_precursors, error, error_units):
     """ This function returns MS2 spectra which parent ion matches the target
     mass for all targets.
 
@@ -277,6 +284,7 @@ def find_precursors(spectra, ms2_precursors, error):
         [ms2 precursor string, ms2 precursor mass]
         error (float): acceptable difference between target mass and found
         parent mass
+        error_units (str): 'ppm' or 'abs'
 
     Returns:
         precursor_filtered (dict): dict of MS2 spectra whos parent ion matches
@@ -290,14 +298,106 @@ def find_precursors(spectra, ms2_precursors, error):
         return find_precursor(
             spectra=spectra,
             ms2_precursor=ms2_precursors,
-            error=error)
+            error=error,
+            error_units=error_units)
 
     precursor_filtered = {}
     for ms2_precursor in ms2_precursors:
         precursor_filtered = precursor_filtered.update(find_precursor(
-            spectra=spectra, ms2_precursor=ms2_precursor, error=error))
+            spectra=spectra, ms2_precursor=ms2_precursor, error=error,
+            error_units=error_units))
 
     return precursor_filtered
+
+def min_ms2_peak_abundance_filter(
+        spectra, peak_list, error, min_ms2_peak_abundance=None):
+    """ This function checks all spectra meet the minimum ms2 peak abundance.
+    Each spectrum is screened for the most intense peak from the peak list that
+    is associated with the sequence. The intensity of this peak is compared with
+    the most intense peak in the spectrum (not-related to sequence) and the
+    spectrum is returned if it exceeds the min ms2 peak abundance threshold.
+
+    Args:
+        spectra (dict): dictionary of MS2 spectra to be filtered.
+        peak_list (list(float)): list of all peaks (floats) associated with a
+        given sequence.
+        error (float): absolute error tolerance for matching target ions to
+        masses found in spectra
+        min_ms2_peak_abundance (int, optional): minimum percentage of ms2
+        peak abundance. Defaults to None.
+
+    Returns:
+        min_ms2_peak_filtered (dict): dictionary of spectra that have passed the
+        filter.
+    """
+    # return unfiltered spectra if no filter spectified
+    if min_ms2_peak_abundance is None:
+        return spectra
+
+    min_ms2_peak_filtered = {}
+
+    # find whether peak associated with sequence passes abundance limit
+    for spectrum_id, spectrum_dict in spectra.items():
+
+        # find most intense peak in spectrum
+        max_intensity = max(
+            [float(x) for x in list(spectrum_dict.values()) if type(x) == int])
+
+        # find most intense peak in spectrum associated to sequence
+        highest_int_frag = 0
+        for mass in peak_list:
+            matches = match_mass(
+                spectrum=spectrum_dict,
+                mass_range=[mass - error, mass + error])
+            for match in matches:
+                if spectrum_dict[str(match)] > highest_int_frag:
+                    highest_int_frag = spectrum_dict[str(match)]
+
+        ms2_peak_abundance = (
+            float(highest_int_frag) / float(max_intensity)) * 100
+
+        # if ms2 peak abundance is higher than threshold, pass the spectrum
+        if ms2_peak_abundance >= min_ms2_peak_abundance:
+            min_ms2_peak_filtered[spectrum_id] = spectrum_dict
+
+    return min_ms2_peak_filtered
+
+def match_mass(spectrum, mass_range):
+    """ This function takes a mass range for a single target and finds matches
+    within the spectrum.
+
+    Args:
+        spectrum (dict): single spectrum, must contain 'mass_list'.
+        mass_range (list): format: [minimum mass, maximum mass]
+
+    Returns:
+        matches (list[float]): list of mass matches from spectrum that fall
+        within limit.
+    """
+    matches = []
+
+    # find closest values to min and max mass in mass list
+    mass_list = spectrum['mass_list']
+    min_match = bisect_left(mass_list, mass_range[0])
+    max_match = bisect_right(mass_list, mass_range[1])
+
+    # find matches within mass range
+    try:
+        mass_matches = [mass_list[min_match]]
+
+    # if there's no matches (index exceeds the list), return empty list
+    except IndexError:
+        return matches
+
+    if min_match != max_match:
+        mass_matches = mass_list[min_match:max_match]
+
+    if mass_matches:
+        matches = [
+            format(m, '.4f') for m in mass_matches if (
+                m >= mass_range[0]) and (m <= mass_range[1])]
+
+    return matches
 
 def prefilter(ripper_file, extractor_parameters, input_folder):
     """ This function applies all prefilters (retention time, minimum maximum
@@ -333,12 +433,6 @@ def prefilter(ripper_file, extractor_parameters, input_folder):
     ripper_data = open_json(ripper_file)
     ripper = ripper_dict(ripper_data)
 
-    # make sure error is absolute
-    if extractor_parameters.error_units == 'ppm':
-        error = float(extractor_parameters.error) / 1E6
-    else:
-        error = float(extractor_parameters.error)
-
     # apply all pre-filters to each ms1 spectrum
     ripper.spectra["ms1"] = apply_prefilters(
         spectra=ripper.ms1,
@@ -359,7 +453,8 @@ def prefilter(ripper_file, extractor_parameters, input_folder):
         min_max_intensity=min_max_ms2,
         min_total_intensity=min_total_ms2,
         ms2_precursors=extractor_parameters.precursors,
-        error=error)
+        error=extractor_parameters.error,
+        error_units=extractor_parameters.error_units)
 
     # save to json and return filepath
     output_folder = os.path.join(input_folder, "prefiltered")
