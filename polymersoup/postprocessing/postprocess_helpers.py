@@ -152,7 +152,8 @@ def assign_confidence_sequence(
     # calculate final confidence by combining WEIGHTED values for percentage
     # confirmed fragments and sequence coverage
     confidence = percentage_found_fragments * (1 - sequence_coverage_weight)
-    confidence += sequence_coverage * sequence_coverage_weight
+    confidence += float(
+        "{:.4f}".format(sequence_coverage * sequence_coverage_weight))
 
     # return final confidence score for sequence, making sure to apply
     # confidence cap if any essential fragments are missing

@@ -1,89 +1,70 @@
-import os
 import pytest
-import mzmlripper.extractor as ripper
-from ...extractors.data_extraction import match_mass
-from ...extractors.general_functions import open_json
+from ...extractors.data_extraction import retrieve_retention_times,\
+    confirm_fragment
 
 @pytest.fixture
-def example_mass_list():
-    return {"mass_list": [
-            57.1412,
-            124.4417,
-            722.9747]}
+def example_MS1_dict():
+    return {"spectrum_1": {
+        "159.9641": 1843, "159.9644": 2790, "159.9646": 3108, "159.9649": 2129,
+        "retention_time": 1.234},
+        "spectrum_2": {
+            "217.9568": 3373, "217.9573": 1906, "217.9586": 2677,
+            "217.9590": 4325, "217.9594": 5098, "217.9599": 3508,
+            "retention_time": 1.888},
+        "spectrum_3": {
+            "512.4443": 4955, "513.3324": 43495, "514.2045": 5023,
+            "516.2305": 304395,
+            "retention_time": 10.111}}
+
+@pytest.fixture
+def example_MS2_dict():
+    return {"spectrum_1": {
+        "50.5803": 1915, "55.9342": 2547, "56.0492": 6106,
+        "58.1675": 2080, "59.0132": 1777, "retention_time": "1.738227561067",
+        "mass_list": [50.5803, 55.9342, 56.0492, 58.1675, 59.0132],
+        "parent": "228.4263"},
+        "spectrum_2": {
+            "101.5577": 13530, "102.0591": 2931, "107.0600": 5300,
+            "108.0554": 13671, "109.0630": 11450,
+            "retention_time": "1.742648580783",
+            "mass_list": [101.5577, 102.0591, 107.06, 108.0554, 109.063],
+            "parent": "247.7614"},
+        "spectrum_3": {
+            "196.0708": 18939, "202.1081": 7813, "214.0814": 18958,
+            "214.1077": 2617,
+            "retention_time": "1.745956381317",
+            "mass_list": [196.0708, 202.1081, 214.0814, 214.1077],
+            "parent": "228.4263"}}
 
 @pytest.mark.unit
-def test_mass_match(example_mass_list):
-    exact_positive_test = match_mass(
-        spectrum=example_mass_list,
-        mass_range=[57.1412, 57.1412])
-
-    positive_lower_bound_test = match_mass(
-        spectrum=example_mass_list,
-        mass_range=[57.1412, 57.1512])
-
-    positive_upper_bound_test = match_mass(
-        spectrum=example_mass_list,
-        mass_range=[57.1312, 57.1412])
-
-    negative_test = match_mass(
-        spectrum=example_mass_list,
-        mass_range=[125.4417, 125.5580])
-
-    negative_lower_bound_test = match_mass(
-        spectrum=example_mass_list,
-        mass_range=[125.4316, 125.4416])
-
-    negative_upper_bound_test = match_mass(
-        spectrum=example_mass_list,
-        mass_range=[124.4418, 124.4518])
-
-    assert exact_positive_test == ['57.1412']
-    assert positive_lower_bound_test == ['57.1412']
-    assert positive_upper_bound_test == ['57.1412']
-    assert negative_test == []
-    assert negative_lower_bound_test == []
-    assert negative_upper_bound_test == []
+def test_retrieve_retention_times(example_MS1_dict):
+    test_rts = retrieve_retention_times(example_MS1_dict)
+    assert test_rts == [1.234, 1.888, 10.111]
 
 @pytest.mark.unit
-def test_mzml_to_json_rt_conversion():
-    mzml_folder = os.path.join(
-        os.path.dirname(os.path.realpath(__file__)), 'test_mzmls')
-    bruker_mzml = os.path.join(mzml_folder, '20190522-EFF MS2 CE5.mzML')
-    output_folder = os.path.join(mzml_folder, 'ripper_output')
+def test_confirm_fragment(example_MS2_dict):
+    pos_masses = [50.5853, 102.0631, 214.1097]
 
-    not_converted_json = os.path.join(
-        output_folder, 'not_converted', 'ripper_20190522-EFF MS2 CE5.json')
-    sec_converted_json = os.path.join(
-        output_folder, 'sec_converted', 'ripper_20190522-EFF MS2 CE5.json')
+    abs_matches, positive_test_abs = confirm_fragment(
+        masses=pos_masses,
+        error=0.01,
+        error_units='abs',
+        spectra=example_MS2_dict)
 
-    if os.path.isfile(not_converted_json):
-        os.remove(not_converted_json)
-    if os.path.isfile(sec_converted_json):
-        os.remove(sec_converted_json)
+    ppm_matches, positive_test_ppm = confirm_fragment(
+        masses=pos_masses,
+        error=1,
+        error_units='ppm',
+        spectra=example_MS2_dict)
 
-    ripper.process_mzml_file(
-        filename=bruker_mzml,
-        out_dir=os.path.join(output_folder, 'not_converted'))
-    not_converted_ripper = open_json(not_converted_json)
+    neg_matches, neg_test_abs = confirm_fragment(
+        masses=[1000.00, 23.3040],
+        error=0.01,
+        error_units='abs',
+        spectra=example_MS2_dict)
 
-    ripper.process_mzml_file(
-        filename=bruker_mzml,
-        out_dir=os.path.join(output_folder, 'sec_converted'),
-        rt_units='sec')
-    sec_converted_ripper = open_json(sec_converted_json)
-
-    not_conv_MS1_rts = [
-        v['retention_time'] for v in not_converted_ripper['ms1'].values()]
-    not_conv_MS2_rts = [
-        v['retention_time'] for v in not_converted_ripper['ms2'].values()]
-
-    manual_conv_MS1 = [str(float(rt) / 60) for rt in not_conv_MS1_rts]
-    manual_conv_MS2 = [str(float(rt) / 60) for rt in not_conv_MS2_rts]
-
-    sec_conv_MS1_rts = [
-        v['retention_time'] for v in sec_converted_ripper['ms1'].values()]
-    sec_conv_MS2_rts = [
-        v['retention_time'] for v in sec_converted_ripper['ms2'].values()]
-
-    assert manual_conv_MS1.sort() == sec_conv_MS1_rts.sort()
-    assert manual_conv_MS2.sort() == sec_conv_MS2_rts.sort()
+    assert abs_matches, ppm_matches == [
+        'spectrum_1', 'spectrum_2', 'spectrum_3']
+    assert positive_test_abs, positive_test_ppm == pos_masses
+    assert neg_matches == []
+    assert neg_test_abs == []

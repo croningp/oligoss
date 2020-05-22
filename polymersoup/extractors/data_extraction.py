@@ -1,6 +1,6 @@
 from .general_functions import os, logging, open_json, write_to_json
-from bisect import bisect_left, bisect_right
-from .filters import ripper_dict, find_precursors, min_total_intensity_filter
+from .filters import ripper_dict, find_precursors, min_total_intensity_filter,\
+    min_ms2_peak_abundance_filter, match_mass
 
 logging.basicConfig(
     format='%(message)s - %(asctime)s',
@@ -38,17 +38,11 @@ def extract_MS1_EICs(
     # generate EIC for each
     for sequence, masses in MS1_silico.items():
 
-        # make sure error is absolute
-        if extractor_parameters.error_units == 'ppm':
-            error = float(extractor_parameters.error) / 1E6
-
-        else:
-            error = float(extractor_parameters.error)
-
         sequence_EIC = generate_EIC(
             masses=masses,
             ripper_dict=MS1_dict,
-            error=error,
+            error=extractor_parameters.error,
+            error_units=extractor_parameters.error_units,
             min_total_intensity=extractor_parameters.min_ms1_total_intensity,
             rt_units=extractor_parameters.rt_units)
 
@@ -88,45 +82,9 @@ def retrieve_retention_times(ripper_dict):
 
     return retention_times
 
-def match_mass(spectrum, mass_range):
-    """ This function takes a mass range for a single target and finds matches
-    within the spectrum.
-
-    Args:
-        spectrum (dict): single spectrum, must contain 'mass_list'.
-        mass_range (list): format: [minimum mass, maximum mass]
-
-    Returns:
-        matches (list[float]): list of mass matches from spectrum that fall
-        within limit.
-    """
-    matches = []
-
-    # find closest values to min and max mass in mass list
-    mass_list = spectrum['mass_list']
-    min_match = bisect_left(mass_list, mass_range[0])
-    max_match = bisect_right(mass_list, mass_range[1])
-
-    # find matches within mass range
-    try:
-        mass_matches = [mass_list[min_match]]
-
-    # if there's no matches (index exceeds the list), return empty list
-    except IndexError:
-        return matches
-
-    if min_match != max_match:
-        mass_matches = mass_list[min_match:max_match]
-
-    if mass_matches:
-        matches = [
-            format(m, '.4f') for m in mass_matches if (
-                m >= mass_range[0]) and (m <= mass_range[1])]
-
-    return matches
-
 def generate_EIC(
-        masses, ripper_dict, error, rt_units, min_total_intensity=None):
+        masses, ripper_dict, error, error_units, rt_units,
+        min_total_intensity=None):
     """ Takes a list of ions (m/z values) and generates a combined extracted ion
     chromatogram (EIC) of those ions from mass spectra in mzml ripper format
     (ripper_dict).
@@ -134,8 +92,9 @@ def generate_EIC(
     Args:
         masses (list[float]): list of target ion m/z values
         ripper_dict (dict): mzml ripper mass spectrometry data dictionary
-        error (float): absolute error tolerance for matching target ions to
+        error (float): error tolerance for matching target ions to
         masses found in spectra
+        error_units (str): 'ppm' or 'abs'
         rt_units (str): units of the mzml ripper retention times (min or sec)
         min_total_intensity (float, optional): maximum total intensity of EIC
         for it to be returned. Defaults to None
@@ -149,6 +108,10 @@ def generate_EIC(
     total_intensity = 0
 
     for mass in masses:
+
+        # make sure error is in absolute units
+        if error_units == 'ppm':
+            error = (float(mass) / 1E6 * error)
 
         # define minimum and maximum mass match considering errors
         mass_range = [mass - error, mass + error]
@@ -172,67 +135,15 @@ def generate_EIC(
 
     return EIC
 
-def min_ms2_peak_abundance_filter(
-        spectra, peak_list, error, min_ms2_peak_abundance=None):
-    """ This function checks all spectra meet the minimum ms2 peak abundance.
-    Each spectrum is screened for the most intense peak from the peak list that
-    is associated with the sequence. The intensity of this peak is compared with
-    the most intense peak in the spectrum (not-related to sequence) and the
-    spectrum is returned if it exceeds the min ms2 peak abundance threshold.
-
-    Args:
-        spectra (dict): dictionary of MS2 spectra to be filtered.
-        peak_list (list(float)): list of all peaks (floats) associated with a
-        given sequence.
-        error (float): absolute error tolerance for matching target ions to
-        masses found in spectra
-        min_ms2_peak_abundance (int, optional): minimum percentage of ms2
-        peak abundance. Defaults to None.
-
-    Returns:
-        min_ms2_peak_filtered (dict): dictionary of spectra that have passed the
-        filter.
-    """
-    # return unfiltered spectra if no filter spectified
-    if min_ms2_peak_abundance is None:
-        return spectra
-
-    min_ms2_peak_filtered = {}
-
-    # find whether peak associated with sequence passes abundance limit
-    for spectrum_id, spectrum_dict in spectra.items():
-
-        # find most intense peak in spectrum
-        max_intensity = max(
-            [float(x) for x in list(spectrum_dict.values()) if type(x) == int])
-
-        # find most intense peak in spectrum associated to sequence
-        highest_int_frag = 0
-        for mass in peak_list:
-            matches = match_mass(
-                spectrum=spectrum_dict,
-                mass_range=[mass - error, mass + error])
-            for match in matches:
-                if spectrum_dict[str(match)] > highest_int_frag:
-                    highest_int_frag = spectrum_dict[str(match)]
-
-        ms2_peak_abundance = (
-            float(highest_int_frag) / float(max_intensity)) * 100
-
-        # if ms2 peak abundance is higher than threshold, pass the spectrum
-        if ms2_peak_abundance >= min_ms2_peak_abundance:
-            min_ms2_peak_filtered[spectrum_id] = spectrum_dict
-
-    return min_ms2_peak_filtered
-
-def confirm_fragment(masses, error, spectra):
+def confirm_fragment(masses, error, error_units, spectra):
     """ This function iterates through spectra, looking for mass matches for the
     target masses. A full list of silico masses found is returned.
 
     Args:
         masses (list[float]): list of target ion m/z values
-        error (float): absolute error tolerance for matching target ions to
+        error (float): tolerance for matching target ions to
         masses found in spectra
+        error_units (str): 'ppm' or 'abs'
         spectra (dict): dictionary of all MS2 spectra for a single ripper
 
     Returns:
@@ -246,6 +157,10 @@ def confirm_fragment(masses, error, spectra):
 
     for spectrum_id, spectrum in spectra.items():
         for mass in masses:
+
+            # make sure error is in absolute units
+            if error_units == 'ppm':
+                error = (float(mass) / 1E6 * error)
 
             # search for matches in spectrum
             mass_range = [mass - error, mass + error]
@@ -262,7 +177,7 @@ def confirm_fragment(masses, error, spectra):
     spectra_matches = list(set(spectra_matches))
     return matches, spectra_matches
 
-def confirm_all_fragments(fragment_dict, spectra, error):
+def confirm_all_fragments(fragment_dict, spectra, error, error_units):
     """ This function confirms all fragments, including signatures of a silico
     fragment dictionary in a dictionary of MS2 spectra for a single sequence.
     It also creates a json listing which spectra contained fragment hits for
@@ -272,11 +187,11 @@ def confirm_all_fragments(fragment_dict, spectra, error):
         fragment_dict (dict): silico MSMS dictionary for the sequence
         spectra (dict): dictionary of MS2 spectra where the precursor mass
             matches the target sequence
-        error (float): absolute error tolerance for matching target ions to
+        error (float): error tolerance for matching target ions to
             masses found in spectra
+        error_units (str): 'ppm' or 'abs'
 
     Returns:
-        [type]: [description]
         confirmed_fragments (dict): dictionary of all confirmed fragments where
         key is the fragment string and values are a list of silico masses
         all_spectra_matches (dict): dictionary of all spectra in which fragments
@@ -298,6 +213,7 @@ def confirm_all_fragments(fragment_dict, spectra, error):
         fragment_matches, spectra_matches = confirm_fragment(
             masses=masses,
             error=error,
+            error_units=error_units,
             spectra=spectra)
 
         if fragment_matches:
@@ -309,6 +225,7 @@ def confirm_all_fragments(fragment_dict, spectra, error):
         signature_matches, sig_spectra_matches = confirm_fragment(
             masses=masses,
             error=error,
+            error_units=error_units,
             spectra=spectra)
 
         if signature_matches:
@@ -321,6 +238,7 @@ def confirm_all_fragments(fragment_dict, spectra, error):
         mod_matches, mod_spectra_matches = confirm_fragment(
             masses=masses,
             error=error,
+            error_units=error_units,
             spectra=spectra)
 
         if mod_matches:
@@ -334,6 +252,7 @@ def confirm_all_sequences_fragments(
         MSMS_insilico_dict,
         MS2_spectra,
         error,
+        error_units,
         filename,
         output_folder,
         min_ms2_total_intensity,
@@ -348,8 +267,9 @@ def confirm_all_sequences_fragments(
         MSMS_insilico_dict (dict): silico MSMS dictionary for all
         sequences
         MS2_spectra (dict): all MS2 spectra for the ripper file
-        error (float): absolute error tolerance for matching target ions to
+        error (float): error tolerance for matching target ions to
         masses found in spectra
+        error_units (str): 'abs' or 'ppm'
         filename (str): str name of sample (ripper json name without .json)
         output_folder (str): filepath to where confirmed fragment dict will be
         saved as a json
@@ -373,7 +293,8 @@ def confirm_all_sequences_fragments(
         precursor_spectra = find_precursors(
             spectra=MS2_spectra,
             ms2_precursors=frag_dict['MS1'],
-            error=error)
+            error=error,
+            error_units=error_units)
 
         # make sure spectra meet min MS2 total intensity threshold
         int_filtered_precursor_spectra = min_total_intensity_filter(
@@ -393,7 +314,8 @@ def confirm_all_sequences_fragments(
             confirmed_fragments, spectra_matches = confirm_all_fragments(
                 fragment_dict=frag_dict,
                 spectra=filtered_precursor_spectra,
-                error=error)
+                error=error,
+                error_units=error_units)
 
             if confirmed_fragments:
                 confirmed_fragment_dict[sequence] = confirmed_fragments
@@ -439,12 +361,6 @@ def standard_extraction(MS1_silico, rippers, extractor_parameters, output):
         if not os.path.exists(ripper_output):
             os.mkdir(ripper_output)
 
-        # make sure error is absolute
-        if extractor_parameters.error_units == 'ppm':
-            error = float(extractor_parameters.error) / 1E6
-        else:
-            error = float(extractor_parameters.error)
-
         logging.info(f'extracting MS1 EICs for {ripper_name}')
 
         # extract MS1 EICs
@@ -466,7 +382,8 @@ def standard_extraction(MS1_silico, rippers, extractor_parameters, output):
         confirmed_fragment_dict = confirm_all_sequences_fragments(
             MSMS_insilico_dict=MSMS_insilico,
             MS2_spectra=ripper.ms2,
-            error=error,
+            error=extractor_parameters.errorerror,
+            error_units=extractor_parameters.error_units,
             filename=ripper_name,
             output_folder=ripper_output,
             min_ms2_peak_abundance=extractor_parameters.min_ms2_peak_abundance,

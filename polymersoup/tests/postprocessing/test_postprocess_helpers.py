@@ -84,7 +84,7 @@ def test_assign_isomeric_groups():
 @pytest.mark.unit
 def test_assign_confidence_sequence(eg_confirmed_frags, eg_silico_frags):
 
-    b_y_positive_test = assign_confidence_sequence(
+    b_y_positive_test_1 = assign_confidence_sequence(
         insilico_fragments=eg_silico_frags,
         confirmed_fragments=eg_confirmed_frags,
         core_fragment_series=['b', 'y'],
@@ -93,6 +93,16 @@ def test_assign_confidence_sequence(eg_confirmed_frags, eg_silico_frags):
         essential_fragments=None,
         essential_fragment_cap=0,
         sequence_coverage_weight=0)
+
+    b_y_positive_test_2 = assign_confidence_sequence(
+        insilico_fragments=eg_silico_frags,
+        confirmed_fragments=eg_confirmed_frags,
+        core_fragment_series=['b', 'y'],
+        optional_fragments=['b1'],
+        exclude_fragments=None,
+        essential_fragments=None,
+        essential_fragment_cap=0,
+        sequence_coverage_weight=1)
 
     b_y_a_positive_test = assign_confidence_sequence(
         insilico_fragments=eg_silico_frags,
@@ -109,11 +119,12 @@ def test_assign_confidence_sequence(eg_confirmed_frags, eg_silico_frags):
         confirmed_fragments=eg_confirmed_frags,
         core_fragment_series=['b'],
         optional_fragments=None,
-        exclude_fragments=None,
+        exclude_fragments=['b3'],
         essential_fragments=None,
         essential_fragment_cap=0,
         sequence_coverage_weight=0)
 
-    assert b_y_positive_test == 40.00
+    assert b_y_positive_test_1 == 40.00
+    assert b_y_positive_test_2 == 33.3333
     assert b_y_a_positive_test == 33.33
     assert negative_test == 0
