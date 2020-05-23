@@ -6,9 +6,12 @@ Artificial Life Team, Cronin Group, 2020
 """
 import os
 import sys
-from .utils.parameter_handlers.parameter_handlers import generate_parameters
+from polymersoup.utils.parameter_handlers.parameter_handlers import (
+    generate_parameters
+)
+from polymersoup.workflows.workflows import exhaustive_screen
 
-def run_polymersoup(input_file):
+def run_polymersoup(input_file, data_folder, out_folder):
     """
     Reads input file and runs a PolymerSoup workflow
 
@@ -23,8 +26,15 @@ def run_polymersoup(input_file):
     run_params = generate_parameters(
         params_json=params_json)
 
-    #  temp print of run parameters for debugging
-    print(vars(run_params.extractors))
+    exhaustive_screen(
+        params=run_params,
+        data_folder=data_folder,
+        out_folder=out_folder
+    )
 
 
-run_polymersoup(input_file=sys.argv[1])
+run_polymersoup(
+    input_file=sys.argv[1],
+    data_folder=sys.argv[2],
+    out_folder=sys.argv[3]
+)

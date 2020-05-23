@@ -2,8 +2,10 @@ import os
 import logging
 import pandas as pd
 from ..extractors.general_functions import open_json, write_to_json
-from .postprocess_helpers import assign_confidence_sequences,\
+from .postprocess_helpers import (
+    assign_confidence_sequences,
     assign_isomeric_groups
+)
 
 logging.basicConfig(
     format='%(message)s - %(asctime)s',
@@ -12,22 +14,17 @@ logging.basicConfig(
 
 def standard_postprocess(extracted_data_folder, postprocess_parameters):
 
-    all_ssw = postprocess_parameters.subsequence_weight
-
-    if type(all_ssw) != list:
-        all_ssw = [all_ssw]
-
     for ripper_folder in os.listdir(extracted_data_folder):
 
         postprocess_ripper(
             ripper_folder=os.path.join(extracted_data_folder, ripper_folder),
-            all_ssw=all_ssw,
             postprocess_parameters=postprocess_parameters)
 
     return logging.info('all postprocessing finished')
 
-def postprocess_ripper(ripper_folder, all_ssw, postprocess_parameters):
+def postprocess_ripper(ripper_folder, postprocess_parameters):
 
+    all_ssw = postprocess_parameters.subsequence_weight
     ripper_name = ripper_folder.split('\\')[-1]
 
     # retrieve full silico MSMS dict from extracted data
@@ -81,12 +78,12 @@ def postprocess_ripper(ripper_folder, all_ssw, postprocess_parameters):
 
         # create 'Confirmed Core Fragments' column
         postprocess_summary['Confirmed Core Fragments'] = [
-            list(confirmed_fragments[sequence]["MS2"]["core"].keys())
+            list(confirmed_fragments[sequence]["core"].keys())
             for sequence in sequences]
 
         # create 'Confirmed Signatures' column
         postprocess_summary['Confirmed Signatures'] = [
-            list(confirmed_fragments[sequence]["MS2"]["signatures"].keys())[:-1]
+            list(confirmed_fragments[sequence]["signatures"].keys())[:-1]
             for sequence in sequences]
 
         # create 'Max Intensity' column

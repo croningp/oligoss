@@ -1,4 +1,4 @@
-class ripper_dict:
+class RipperDict:
 
     def __init__(self, ripper_data):
 

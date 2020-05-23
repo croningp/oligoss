@@ -43,7 +43,7 @@ def test_retrieve_retention_times(example_MS1_dict):
 
 @pytest.mark.unit
 def test_confirm_fragment(example_MS2_dict):
-    pos_masses = [50.5853, 102.0631, 214.1097]
+    pos_masses = (50.5853, 102.0631, 214.1097)
 
     abs_matches, positive_test_abs = confirm_fragment(
         masses=pos_masses,

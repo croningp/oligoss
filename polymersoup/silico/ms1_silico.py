@@ -11,7 +11,7 @@ from .helpers.helpers import (
 def generate_ms1_ions(
     params,
     polymer,
-    sequencing=True
+    sequencing=False
 ):
     """
     Generates dict of MS1 precursors from Parameters and Polymers object.
@@ -20,7 +20,7 @@ def generate_ms1_ions(
         params (Parameters): Parameters object
         polymer (Polymer): Polymer object
         sequencing (bool, optional): specifies whether to generate precursor
-            dict for monomers or unique compositions. Defaults to True.
+            dict for monomers or unique compositions. Defaults to False.
 
     Returns:
         Dict[str, List[float]]: dict of sequence strings and associated list of

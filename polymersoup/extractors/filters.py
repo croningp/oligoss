@@ -1,7 +1,7 @@
 import os
 import mzmlripper.extractor as ripper
 from bisect import bisect_left, bisect_right
-from .extractor_classes import ripper_dict
+from .extractor_classes import RipperDict
 from .general_functions import logging, open_json, write_to_json, return_jsons
 
 def mzml_to_json(input_folder, extractor_parameters):
@@ -70,17 +70,17 @@ def apply_prefilters_ms2(
         minimum maximum intensity, precursor.
 
     Args:
-        spectra (dict): dictionary of format {spectrum_id : {m/z: intensity}}
+        spectra (Dict[str, dict]): dictionary of format
+            {spectrum_id : {m/z: intensity}}
         min_rt (float): minimum retention time
         max_rt (float): maximum retention time
         min_max_intensity (float): minimum intensity for the most intense peak
         in the spectrum
         min_total_intensity (float): minimum total intensity for the sum of all
-        peaks in the spectrum
-        ms2_precursors (list or list(list)): list or nested list of format:
-        [precursor string, precursor mass]
+            peaks in the spectrum
+        ms2_precursors (List[float]): list of precursor m/z values
         error (float): acceptable difference between target mass and found
-        parent mass
+            parent mass
         error_units (str): 'ppm' or 'abs'
 
     Returns:
@@ -105,24 +105,26 @@ def apply_prefilters_ms2(
     return filtered_spectra
 
 def rt_filter(spectra, min_rt, max_rt):
-    """ This function filters spectra based on retention time. Spectra within the
+    """
+    This function filters spectra based on retention time. Spectra within the
     minimum and maximum retention time range will be returned.
 
     Args:
-        spectra (dict): dictionary of format {spectrum_id : {m/z: intensity}}
+        spectra (Dicr[str, dict]): dictionary of format:
+            {spectrum_id : {m/z: intensity}}
         min_rt (float): minimum retention time
         max_rt (float): maximum retention time
 
     Returns:
         dict: spectra that has passed the retention time filter.
     """
-    if (min_rt is None) and (max_rt is None):
+    if not min_rt and not max_rt:
         return spectra
 
-    if min_rt is None:
+    if not min_rt:
         min_rt = 0
 
-    if max_rt is None:
+    if not max_rt:
         max_rt = 1E6
 
     # make ordered lists of retention times and spectra ids
@@ -215,7 +217,7 @@ def min_total_intensity_filter(spectra, min_total_intensity=None):
         total_int_filtered: spectra that has passed the intensity filter
     """
     # return unfiltered spectra if no filter spectified
-    if min_total_intensity is None:
+    if not min_total_intensity:
         return spectra
 
     total_int_filtered = {}
@@ -290,20 +292,12 @@ def find_precursors(spectra, ms2_precursors, error, error_units):
         precursor_filtered (dict): dict of MS2 spectra whos parent ion matches
         any target mass
     """
-    if ms2_precursors is None:
+    if not ms2_precursors:
         return spectra
-
-    # check if there are multiple ms2 precursors (nested list)
-    if type(ms2_precursors[0]) != list:
-        return find_precursor(
-            spectra=spectra,
-            ms2_precursor=ms2_precursors,
-            error=error,
-            error_units=error_units)
 
     precursor_filtered = {}
     for ms2_precursor in ms2_precursors:
-        precursor_filtered = precursor_filtered.update(find_precursor(
+        precursor_filtered.update(find_precursor(
             spectra=spectra, ms2_precursor=ms2_precursor, error=error,
             error_units=error_units))
 
@@ -318,20 +312,20 @@ def min_ms2_peak_abundance_filter(
     spectrum is returned if it exceeds the min ms2 peak abundance threshold.
 
     Args:
-        spectra (dict): dictionary of MS2 spectra to be filtered.
-        peak_list (list(float)): list of all peaks (floats) associated with a
+        spectra (Dict[str, dict]): dictionary of MS2 spectra to be filtered.
+        peak_list (List[float]): list of all peaks (floats) associated with a
         given sequence.
         error (float): absolute error tolerance for matching target ions to
         masses found in spectra
-        min_ms2_peak_abundance (int, optional): minimum percentage of ms2
+        min_ms2_peak_abundance (float, optional): minimum percentage of ms2
         peak abundance. Defaults to None.
 
     Returns:
-        min_ms2_peak_filtered (dict): dictionary of spectra that have passed the
-        filter.
+        min_ms2_peak_filtered (Dict[str, dict]): dictionary of spectra that
+            have passed the filter.
     """
     # return unfiltered spectra if no filter spectified
-    if min_ms2_peak_abundance is None:
+    if not min_ms2_peak_abundance:
         return spectra
 
     min_ms2_peak_filtered = {}
@@ -399,18 +393,17 @@ def match_mass(spectrum, mass_range):
 
     return matches
 
-def prefilter(ripper_file, extractor_parameters, input_folder):
+def prefilter(ripper_file, extractor_parameters):
     """ This function applies all prefilters (retention time, minimum maximum
     intensity threshold, minimum total intensity threshold, precursor mass) to
     all spectra for a single ripper file.
-    The ripper json is converted to an object and it's spectra are filtered by
+    The ripper json is converted to an object and its spectra are filtered by
     the above parameters, starting with MS1 then moving onto MS2.
 
     Args:
         ripper_file (str): full filepath to ripper json
         extractor_parameters (object): full extractor parameters from parameter
         handlers
-        input_folder (str): full filepath to ripper json input folder
 
     Returns:
         full_filepath (str): full filepath to filtered ripper json
@@ -421,17 +414,39 @@ def prefilter(ripper_file, extractor_parameters, input_folder):
     if not pre_screen_filters:
         return ripper_file
 
-    # define pre screen filters
-    min_max_ms1 = pre_screen_filters['min_ms1_max_intensity']
-    min_max_ms2 = pre_screen_filters['min_ms2_max_intensity']
-    min_total_ms1 = pre_screen_filters['min_ms1_total_intensity']
-    min_total_ms2 = pre_screen_filters['min_ms2_total_intensity']
-    min_rt = pre_screen_filters['min_rt']
-    max_rt = pre_screen_filters['min_rt']
+    #  define pre-screen filters
+    if "min_ms1_max_intensity" in pre_screen_filters:
+        min_max_ms1 = pre_screen_filters["min_ms1_max_intensity"]
+    else:
+        min_max_ms1 = 0
+    if "min_ms2_max_intensity" in pre_screen_filters:
+        min_max_ms2 = pre_screen_filters["min_ms2_max_intensity"]
+    else:
+        min_max_ms2 = 0
+    if "min_ms1_total_intensity" in pre_screen_filters:
+        min_total_ms1 = pre_screen_filters["min_ms1_total_intensity"]
+    else:
+        min_total_ms1 = 0
+    if "min_ms2_total_intensity" in pre_screen_filters:
+        min_total_ms2 = pre_screen_filters["min_ms2_total_intensity"]
+    else:
+        min_total_ms2 = 0
+    if "min_rt" in pre_screen_filters:
+        min_rt = pre_screen_filters["min_rt"]
+    else:
+        min_rt = 0
+    if "max_rt" in pre_screen_filters:
+        max_rt = pre_screen_filters["max_rt"]
+    else:
+        max_rt = 0
+    if "precursors" in pre_screen_filters:
+        ms2_precursors = pre_screen_filters["precursors"]
+    else:
+        ms2_precursors = None
 
     # open ripper json and convert dict to object
     ripper_data = open_json(ripper_file)
-    ripper = ripper_dict(ripper_data)
+    ripper = RipperDict(ripper_data)
 
     # apply all pre-filters to each ms1 spectrum
     ripper.spectra["ms1"] = apply_prefilters(
@@ -452,23 +467,23 @@ def prefilter(ripper_file, extractor_parameters, input_folder):
         max_rt=max_rt,
         min_max_intensity=min_max_ms2,
         min_total_intensity=min_total_ms2,
-        ms2_precursors=extractor_parameters.precursors,
+        ms2_precursors=ms2_precursors,
         error=extractor_parameters.error,
         error_units=extractor_parameters.error_units)
 
     # save to json and return filepath
-    output_folder = os.path.join(input_folder, "prefiltered")
+    output_folder = os.path.join(os.path.dirname(ripper_file), "prefiltered")
     if not os.path.exists(output_folder):
         os.mkdir(output_folder)
 
-    ripper_filename = ripper_file.split('\\')[-1]
     full_filepath = os.path.join(
-        output_folder, f"prefiltered_{ripper_filename}")
+        output_folder, os.path.basename(ripper_file))
+
     write_to_json(ripper.spectra, full_filepath)
 
     return full_filepath
 
-def prefilter_all(rippers, extractor_parameters, input_folder):
+def prefilter_all(rippers, extractor_parameters):
     """ This function applies all prefilters (retention time, minimum maximum
     intensity threshold, minimum total intensity, precursor mass) to all ripper
     file spectra.
@@ -477,12 +492,11 @@ def prefilter_all(rippers, extractor_parameters, input_folder):
         rippers (str): full filepath to ripper json
         extractor_parameters (object): full extractor parameters from parameter
         handlers
-        input_folder (str): full filepath to ripper json input folder
 
     Returns:
-        rippers (list): list of full filepaths to all filtered rippers
+        rippers (List[str]): list of full filepaths to all filtered rippers
     """
-    if extractor_parameters.pre_screen_filter:
+    if extractor_parameters.pre_screen_filters:
 
         filtered_rippers = []
 
@@ -490,10 +504,10 @@ def prefilter_all(rippers, extractor_parameters, input_folder):
             logging.info(f'applying prefilters to {ripper_file}')
 
             # pre filter spectra
-            filtered_rippers.append(str(prefilter(
+            filtered_rippers.append(prefilter(
                 ripper_file=ripper_file,
-                extractor_parameters=extractor_parameters,
-                input_folder=input_folder)))
+                extractor_parameters=extractor_parameters
+            ))
 
         return filtered_rippers
     logging.info('prefilters not specified')

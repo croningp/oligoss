@@ -13,6 +13,6 @@ build/
 dist/
 .csv
 *.lnk
-*.coverage
+.coverage
 *shortcut*
 !*.flake8.*

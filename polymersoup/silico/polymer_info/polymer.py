@@ -29,6 +29,8 @@ class Polymer():
             monomers (List[Monomer]): list of Monomer objects.
             dominant_signatures (List[str]): list of monomer id strings for
                 monomers with dominant signature ions.
+            signatures (Dict[str, dict]): dict of signature types and associated
+                monomer-specific signature ions.
             mass_diff (float): mass lost upon addition of monomer to elongating
                 backbone.
             elongation_unit (int): number of monomers added at each elongation.
@@ -52,6 +54,7 @@ class Polymer():
         self.elongation_unit = self.__polymer_config["ELONGATION"]
         self.symmetry = self.__polymer_config["SYMMETRY"]
         self.chain_terminators = self.__polymer_config["CHAIN_TERMINATORS"]
+        self.signatures = self.__polymer_config["MS2_SIGNATURE_IONS"]
         self.fragment_info = self.retrieve_fragment_info()
 
         self.modifications = self.build_modifications_dict(
@@ -194,7 +197,7 @@ class Polymer():
         for sig in self.__params.silico.ms2.signatures:
             for monomer in self.monomers:
                 if monomer.id in self.__polymer_config[
-                        "MS_SIGNATURE_IONS"][sig]["dominant"]:
+                        "MS2_SIGNATURE_IONS"]["dominant"]:
                     dominant_sigs.append(monomer.id)
         return dominant_sigs
 

@@ -3,7 +3,7 @@ from typing import List, Dict
 from .instrument_handlers import (
     check_instrument_info,
     sanity_check_silico_fragmentation)
-from ..silico.silico_utils import retrieve_adduct_info
+from ..silico_utils.silico_utils import retrieve_adduct_info
 from ..errors import InputTypeError, TypeDictKeyError, MissingParameterValue
 from ..type_dicts.parameter_type_dicts import (
     CORE_PARAM_TYPES,

@@ -1,6 +1,7 @@
 from .filters import mzml_to_json, prefilter_all, return_jsons
 from .data_extraction import standard_extraction
 
+
 def full_extraction(
         extractor_parameters,
         input_folder,
@@ -36,8 +37,7 @@ def full_extraction(
     # apply pre-filters to rippers
     filtered_rippers = prefilter_all(
         rippers=rippers,
-        extractor_parameters=extractor_parameters,
-        input_folder=input_folder)
+        extractor_parameters=extractor_parameters)
 
     # create confirmed sequence and fragment dictionary
     extracted_data = standard_extraction(

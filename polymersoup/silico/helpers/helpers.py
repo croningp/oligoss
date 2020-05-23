@@ -2,7 +2,7 @@ import itertools
 from functools import lru_cache
 
 from ...utils.global_chemical_constants import FUNCTIONAL_GROUPS
-from ...utils.silico.silico_utils import SILICO_MOD_MARKERS
+from ...utils.silico_utils.silico_utils import SILICO_MOD_MARKERS
 
 def find_sequence_mass(
     sequence,
@@ -871,22 +871,21 @@ def generate_all_sequences(
         List[str]: list of sequence or composition strings.
     """
 
-    res = get_sequences(
+    #  if isomeric target sequences are specified in input parameters, return
+    #  list of all sequences that are isomeric to one or more target sequence
+    if params.silico.isomeric_targets:
+        return get_isomeric_seqs(
+            target_sequences=params.silico.isomeric_targets,
+            sequencing=sequencing
+        )
+
+    #  return list of all possible sequences or compositions (if
+    #  sequencing=False) that fit constraints of input parameters
+    return get_sequences(
         polymer=polymer,
         params=params,
         sequencing=sequencing
     )
-
-    # If isomeric targets only return sequences that are in isomeric targets
-    if params.silico.isomeric_targets:
-        isomeric_targets = [
-            "".join(sorted(target))
-            for target in params.silico.isomeric_targets
-        ]
-        res = list(filter(
-            lambda seq: "".join(sorted(seq)), isomeric_targets))
-
-    return res
 
 def get_sequences(
     polymer,
@@ -951,3 +950,50 @@ def get_compositions(
 
     #  sort compositions and return
     return list(set([''.join(sorted(item)) for item in compositions]))
+
+def get_isomeric_seqs(target_sequences, sequencing=True):
+    """
+    Generates and returns lists of all sequences that are isomeric to one or
+    more target in target_sequences.
+
+    Args:
+        target_sequences (List[str]): list of sequence strings for target
+            sequences.
+        sequencing (bool, optional): specifies whether to return composition
+            strings or unique sequence strings. Defaults to True.
+
+    Returns:
+        List[str]: list of all sequence string permutations that are isomeric
+            to one or more isomeric targets.
+    """
+
+    #  init list to store isomeric sequences
+    isomeric_sequences = []
+
+    #  iterate through isomeric targets, retrieve monomer ids and all possible
+    #  sequence permutations
+    for target in target_sequences:
+        monomers = return_monomer_ids_sequence(
+            sequence=target,
+            return_modified=True,
+            return_set=False
+        )
+
+        #  if returning unique sequences, get all possible sequence permutations
+        #  for target monomers
+        if sequencing:
+            isomeric_sequences.extend([
+                "".join(x) for x in itertools.permutations(monomers)
+            ])
+
+        #  returning compositions, so treat isomers as identical composition
+        #  strings
+        else:
+            isomeric_sequences.append("".join(sorted(monomers)))
+
+    #  return list of sequences isomeric to one or more target, sorted by
+    #  sequence length
+    return list(set(sorted(
+        isomeric_sequences,
+        key=lambda x: len(x)
+    )))
