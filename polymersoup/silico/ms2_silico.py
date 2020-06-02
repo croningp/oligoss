@@ -1,17 +1,18 @@
 """
 This file contains functions for generating MS2 silico libraries
 """
-from functools import lru_cache
-
-from ..utils.global_chemical_constants import (
-    ANIONS,
-    CATIONS
-)
 from .helpers.helpers import (
     reverse_sequence,
     return_monomer_ids_sequence,
     get_full_neutral_masses_sequence
 )
+from ..utils.global_chemical_constants import (
+    ANIONS,
+    CATIONS
+)
+
+from functools import lru_cache
+
 
 def build_linear_fragments_sequence_dict(
     sequences,
@@ -76,7 +77,8 @@ def build_fragment_dict_for_sequences(
         params (Parameters): Parameters object
         polymer (Polymer): Polymer object
         fragment_series (str): string id for a single fragment series
-
+        cache_clear (bool, optional): specifies whether to clear cached data
+            for memoized build_single_fragment function
     Returns:
         Dict[str, Dict[str, List[float]]]: dict of sequences and corresponding
             fragment sub dictionaries for fragment series.
@@ -99,10 +101,6 @@ def build_fragment_dict_for_sequences(
         )
         for sequence in sequences
     }
-
-    #  clear cache for memoized fragment builder function as next set of calls
-    #  won't apply to this fragment series
-    build_single_fragment.cache_clear()
 
     return ms2_dict
 
@@ -369,6 +367,7 @@ def get_memoized_ms2_neutral_masses(
         ms_level=2
     )
 
+@lru_cache(maxsize=10)
 def retrieve_intrinsic_adduct_series(
     fragment_series,
     polymer,
@@ -401,3 +400,46 @@ def retrieve_intrinsic_adduct_series(
         return ions[ion]
 
     return None, None, None
+
+@lru_cache(maxsize=1000)
+def add_signature_ions_sequence(
+    sequence,
+    params,
+    polymer
+):
+    """
+    Takes a sequence and returns a dict of monomer-specific signature ions
+
+    Args:
+        sequence (str): sequence str
+        params (Parameters): Parameters object
+        polymer (Polymer): Polymer object
+
+    Returns:
+        Dict[str, List[float]]: dict of signature ions and associated m/z values
+    """
+    #  get signature types for sequence
+    signature_types = params.silico.ms2.signatures
+
+    #  get monomer strings from sequence
+    monomers = return_monomer_ids_sequence(
+        sequence=sequence,
+        return_modified=False,
+        return_set=True
+    )
+
+    #  init dict to store signature ions
+    ms2_signatures = {}
+
+    #  iterate through signature types, and if any monomers have signature ions
+    #  of this type add them to ms2_signatures dict
+    for sig_type in signature_types:
+        signatures = polymer.signatures[sig_type]
+        for monomer in monomers:
+            if monomer in [x[0] for x in signatures]:
+                ms2_signatures[f'{sig_type}{monomer}'] = [
+                    x[1] for x in signatures
+                    if x[0] == monomer
+                ]
+
+    return ms2_signatures

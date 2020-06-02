@@ -335,7 +335,7 @@ def test_apply_prefilters_ms2(example_spectrum):
         max_rt=2,
         min_max_intensity=60000,
         min_total_intensity=230000,
-        ms2_precursors=["X", "741.2699"],
+        ms2_precursors=["741.2699"],
         error=0.01,
         error_units='abs')
 
@@ -345,7 +345,7 @@ def test_apply_prefilters_ms2(example_spectrum):
         max_rt=3,
         min_max_intensity=80000,
         min_total_intensity=250000,
-        ms2_precursors=["X", "743.2699"],
+        ms2_precursors=["743.2699"],
         error=0.01,
         error_units='abs')
 

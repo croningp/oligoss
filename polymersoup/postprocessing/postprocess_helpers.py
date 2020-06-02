@@ -38,7 +38,7 @@ def assign_confidence_sequences(
         # input postprocess parameters from input parameters .json file
         confidence_assignment = assign_confidence_sequence(
             insilico_fragments=silico_dict[sequence]["MS2"],
-            confirmed_fragments=confirmed_fragments["MS2"],
+            confirmed_fragments=confirmed_fragments,
             core_fragment_series=postprocess_params.core_linear_series,
             optional_fragments=postprocess_params.optional_core_fragments,
             exclude_fragments=postprocess_params.exclude_fragments,
@@ -67,45 +67,58 @@ def assign_confidence_sequence(
     criteria set.
 
     Args:
-        insilico_fragments (dict[str]): dict of fragment ids and their
-        corresponding masses that are theoretically possible for sequence.
-        confirmed_fragments (list[str]): list of fragment ids for fragments that
-        have been confirmed from mass spec data.
-        core_fragment_series (list[str]): list of fragment series one letter
-        codes for fragment series used in calculating % confirmed fragments and
-        / or fragment sequence coverage.
-        optional_fragments (list[str]): list of fragment ids for fragments that
-        can be excluded from consideration IF they are not confirmed.
-        exclude_fragments (list[str]): list of fragment ids for fragments that
-        are to be excludeed from consideration whether confirmed or not.
-        These will never be used in confidence calculation.
-        essential_fragments (list[str]): list of fragment ids for fragments
-        whose presence is required for confidence assignment to exceed a
-        threshold (essential_fragment_cap).
+        insilico_fragments (Dict[str, List[float]]): dict of fragment ids and
+            their corresponding masses that are theoretically possible for
+            sequence.
+        confirmed_fragments (List[str]): list of fragment ids for fragments that
+            have been confirmed from mass spec data.
+        core_fragment_series (List[str]): list of fragment series one letter
+            codes for fragment series used in calculating % confirmed fragments
+            and / or fragment sequence coverage.
+        optional_fragments (List[str]): list of fragment ids for fragments that
+            can be excluded from consideration IF they are not confirmed.
+        exclude_fragments (List[str]): list of fragment ids for fragments that
+            are to be excludeed from consideration whether confirmed or not.
+            These will never be used in confidence calculation.
+        essential_fragments (List[str]): list of fragment ids for fragments
+            whose presence is required for confidence assignment to exceed a
+            threshold (essential_fragment_cap).
         essential_fragment_cap (float): upper limit on assigned confidence
-        threshold for a sequence if any essential fragments are missing.
+            threshold for a sequence if any essential fragments are missing.
         sequence_coverage_weight (float): weighting assigned to sequence
-        coverage for confidence calculation (given as a decimal fraction - i.e.
-        MUST BE BETWEEN 0 AND 1).
+            coverage for confidence calculation (given as a decimal fraction
+            - i.e. MUST BE BETWEEN 0 AND 1).
 
     Returns:
         confidence (float): final confidence assignment (in %).
     """
     insilico_fragment_dict = {
-        'core': [k for k in insilico_fragments.keys() if k != 'signatures'],
+        'core': [
+            k for k in insilico_fragments
+            if k not in ['signatures', 'composition']
+        ],
         'signatures': [
             s for s in insilico_fragments['signatures']
-            if s != 'terminal_modifications'],
-        'terminal_modifications': [t for t in insilico_fragments[
-            'signatures']['terminal_modifications'].keys()]}
+            if s != 'terminal_modifications']}
+    if 'terminal_modifications' in insilico_fragments['signatures']:
+        insilico_fragment_dict.update({
+            'terminal_modifications': [t for t in insilico_fragments[
+                'signatures']['terminal_modifications'].keys()]
+        }
+        )
 
     confirmed_fragment_dict = {
         'core': [k for k in confirmed_fragments['core'].keys()],
         'signatures': [
             s for s in confirmed_fragments['signatures']
-            if s != 'terminal_modifications'],
-        'terminal_modifications': [t for t in confirmed_fragments[
-            'signatures']['terminal_modifications'].keys()]}
+            if s != 'terminal_modifications']
+    }
+    if 'terminal_modifications' in confirmed_fragments:
+        confirmed_fragment_dict.update({
+            'terminal_modifications': [t for t in confirmed_fragments[
+                'signatures']['terminal_modifications'].keys()]
+        }
+        )
 
     # work out percentage found fragments from core series
     percentage_found_fragments = get_percent_found_fragments(
@@ -165,23 +178,25 @@ def get_percent_found_fragments(
     core_fragment_series,
     optional_fragments,
     exclude_fragments
+
+
 ):
     """ Takes a list of in silico fragments for a sequence, confirmed fragments
     and one letter codes for core fragments, and returns % core fragments that
     have been confirmed for sequence.
 
     Args:
-        insilico_fragments (dict{list}): dict of fragment types and a list of
-        fragment ids for in silico (i.e.theoretical) sequence fragment.
-        confirmed_fragments (list): list of fragment ids for confirmed (i.e.
-        observed) sequence fragments.
-        core_fragment_series (list): list of ONE LETTER CODES for fragment
-        series that are to be used to calculate percentage found fragments.
-        optional_fragments (list): list of specific fragment ids to exclude
-        from calculation IF they have not been confirmed.
-        exclude_fragments (list): list of specific fragment ids to exclude
-        from calculation UNDER ANY CIRCUMSTANCES, including if they have
-        been confirmed.
+        insilico_fragments (Dict[List[str]): dict of fragment types and a list
+            of fragment ids for in silico (i.e.theoretical) sequence fragment.
+        confirmed_fragments (List[str]): list of fragment ids for confirmed (
+            i.e. observed) sequence fragments.
+        core_fragment_series (List[str]): list of ONE LETTER CODES for fragment
+            series that are to be used to calculate percentage found fragments.
+        optional_fragments (List[str]): list of specific fragment ids to exclude
+            from calculation IF they have not been confirmed.
+        exclude_fragments (List[str]): list of specific fragment ids to exclude
+            from calculation UNDER ANY CIRCUMSTANCES, including if they have
+            been confirmed.
 
     Returns:
         float: % fragments that have been confirmed for a sequence.
@@ -244,14 +259,14 @@ def get_subsequence_coverage(
     core fragment series.
 
     Args:
-        confirmed_fragments (list): list of confirmed fragment ids.
-        core_fragment_series (list): list of fragment one letter codes for
-        series that are to be used in calculation.
-        optional_fragments (list): list of specific fragment ids to exclude from
-        calculation ONLY IF they are not in the list of confirmed fragments.
-        Include in the calculation if they are in the list.
-        excluded_fragments (list): list of specific fragment ids to exclude from
-        subsequence coverage in ALL cases.
+        confirmed_fragments (List[str]): list of confirmed fragment ids.
+        core_fragment_series (List[str]): list of fragment one letter codes for
+            series that are to be used in calculation.
+        optional_fragments (List[str]): list of specific fragment ids to exclude
+            from calculation ONLY IF they are not in the list of confirmed
+            fragments. Include in the calculation if they are in the list.
+        excluded_fragments (List[str]): list of specific fragment ids to exclude
+            from subsequence coverage in ALL cases.
     Returns:
         final_sequence_coverage (float): average % sequence coverage for all
         core fragment series.
@@ -333,9 +348,9 @@ def get_core_fragments(
     of the specified core series.
 
     Args:
-        target_fragments (list): list of fragment id strings.
+        target_fragments (List[str]): list of fragment id strings.
         core_series (list or str): list of core fragment series one letter
-        codes OR single one letter code for single core series.
+            codes OR single one letter code for single core series.
 
     Returns:
         list: list of fragments in input target fragments that belong to one
@@ -361,12 +376,12 @@ def calculate_subsequence_coverage(fragment_indices):
     number of fragments in longest continuous block of fragments).
 
     Args:
-        fragment_indices (list of ints): list of fragment positions in a given
-        series (ints).
+        fragment_indices (List[int]): list of fragment positions in a given
+            series (ints).
 
     Returns:
         sequence_coverage (int): number of fragments in longest continuous
-        block of fragments.
+            block of fragments.
     """
     # set sequence coverage to 0 before iterating through fragment indeces
     sequence_coverage = 0
@@ -399,11 +414,11 @@ def assign_isomeric_groups(sequences):
     """ This function groups isomeric sequences and assigns each group a number.
 
     Args:
-        sequences (list[str]): list of sequences to be grouped by composition
+        sequences (List[str]): list of sequences to be grouped by composition
 
     Returns:
-        assignments (dict): Dictionary containing sequences as keys and their
-        assigned isomeric group number as a value.
+        assignments (Dict[str, int]): Dictionary containing sequences as keys
+            and their assigned isomeric group number as a value.
     """
     groups = {}
 

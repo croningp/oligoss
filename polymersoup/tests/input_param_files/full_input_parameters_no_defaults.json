@@ -22,7 +22,8 @@
       "min_z": 1,
       "max_z": 1,
       "adducts": null,
-      "max_neutral_losses": 1
+      "max_neutral_losses": 1,
+      "signatures": ["Im"]
     }
   },
   "extractors": {

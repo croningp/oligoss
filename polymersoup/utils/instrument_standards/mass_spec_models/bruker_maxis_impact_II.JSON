@@ -1,19 +1,20 @@
 {
-    "error": 0.01,
-    "err_abs": true,
+  "error": 0.01,
+  "err_abs": true,
 
-    "min_ms1_total_intensity": null,
-    "min_ms2_total_intensity": null,
-    "min_ms1_max_intensity": null,
-    "min_ms2_max_intensity": null,
-    "pre_screen_filters": {
-        "min_ms1_max_intensity": 1E3,
-        "min_ms2_max_intensity": null
-    },
-    "fragmentation": {
-        "ms1": "neutral",
-        "ms2": ["CID", "neutral"],
-        "incompatible": [],
-        "capabilities": ["CID", "neutral"]
-    }
+  "min_ms1_total_intensity": null,
+  "min_ms2_total_intensity": null,
+  "min_ms1_max_intensity": null,
+  "min_ms2_max_intensity": null,
+  "pre_screen_filters": {
+    "min_ms1_max_intensity": 1e3,
+    "min_ms2_max_intensity": null
+  },
+  "fragmentation": {
+    "ms1": "neutral",
+    "ms2": ["CID", "neutral"],
+    "incompatible": [],
+    "capabilities": ["CID", "neutral"],
+    "signatures": ["Im"]
+  }
 }

@@ -451,8 +451,6 @@
     }
   },
 
-  "IMMONIUM_IONS": "MS2_SIGNATURE_IONS",
-
   "MS2_SIGNATURE_IONS": {
     "Im": [
       ["F", 120.0813],
