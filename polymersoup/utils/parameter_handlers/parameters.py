@@ -388,6 +388,8 @@ class Parameters():
                 self.adducts = retrieve_adduct_info(
                     mode=self.params_dict["mode"], adducts=self.adducts
                 )
+                if self.params_class == "silico_ms2":
+                    raise Exception(self.adduct)
             if self.params_class == "silico_ms2":
                 sanity_check_silico_fragmentation(
                     silico_params=self.sub_params,
