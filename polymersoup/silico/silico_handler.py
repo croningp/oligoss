@@ -42,7 +42,6 @@ def get_ms2_silico_dict_from_compositions(
 
         #  get all sequences that match target composition
         sequences = get_isomeric_seqs([composition])
-        print(f"fragmenting {len(sequences)} sequences for {composition}")
 
         #  for linear fragment series, generate dict MS/MS dict of all sequences
         for linear_series in polymer.fragment_info:

@@ -347,7 +347,7 @@ class Parameters():
             subtype = expected_type.__args__[0]
             return [
                 subtype(elm) for elm in value
-                if elm]
+                if elm is not None]
         return value
 
     def final_attrs_check(self, temp_props=TEMP_PROPS):

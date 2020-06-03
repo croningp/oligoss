@@ -32,8 +32,6 @@ def assign_confidence_sequences(
     # a confidence score
     for sequence, confirmed_fragments in confirmed_dict.items():
 
-        print(f"assigning confidence for {sequence}")
-
         # assign sequence a confidence score, using constraints specified in
         # input postprocess parameters from input parameters .json file
         confidence_assignment = assign_confidence_sequence(
@@ -230,14 +228,8 @@ def get_percent_found_fragments(
         core_silico = list(filter(
             lambda frag: frag not in missing_optional_fragments, core_silico))
 
-    print(f"core_silico = {core_silico}")
-    print(f"core_confirmed = {core_confirmed}")
-
     # count number of theoretical (silico) and confirmed fragments
     n_silico, n_confirmed = len(core_silico), len(core_confirmed)
-
-    print(f"n_confirmed = {n_confirmed}")
-    print(f"n_silico = {n_silico}")
 
     # return 0 if no fragments are confirmed
     if n_confirmed == 0:

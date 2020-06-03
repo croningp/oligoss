@@ -29,13 +29,8 @@ def exhaustive_screen(params, data_folder, out_folder):
         extractor_parameters=params.extractors
     )
 
-    # #  get list of filepaths to ripper JSON files
+    #  get list of filepaths to ripper JSON files
     rippers = return_jsons(data_folder)
-
-    filtered_rippers = [
-        os.path.join(data_folder, "prefiltered", ripper_f)
-        for ripper_f in os.listdir(os.path.join(data_folder, "prefiltered"))
-    ]
 
     # pre-filter ripper JSONs and save output
     filtered_rippers = prefilter_all(
@@ -64,7 +59,6 @@ def exhaustive_screen(params, data_folder, out_folder):
         output_json=ms1_silico_o_file
     )
 
-    print(f"written MS1 dict to {ms1_silico_o_file}")
     #  iterate through each ripper file, screening for ms1 hits and then ms2
     #  fragments for potential hits
     for ripper in filtered_rippers:
