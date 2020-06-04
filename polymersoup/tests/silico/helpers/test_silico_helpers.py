@@ -20,8 +20,9 @@ from ....silico.helpers.helpers import (
     return_core_sequence,
     reverse_sequence,
     ionize_sequence_precursors,
-    add_sidechain_neutral_loss_products_sequence,
-    generate_all_sequences
+    generate_all_sequences,
+    get_isomeric_seqs,
+    get_full_neutral_masses_sequence
 )
 
 HERE = os.path.abspath(os.path.dirname(__file__))
@@ -189,111 +190,59 @@ def test_ionize_sequence(test_sequences, polymer, params):
                 test_sequences[sequence] + CATIONS["Na"][0], 2)
 
 @pytest.mark.unit
-def test_neutral_losses(params):
+def test_full_neutral_masses(params, polymer):
     """
-    Tests add_sidechain_neutral_loss_products_sequence function. This should
-    take a sequence string, corresponding full neutral mass, and work out
-    a list of neutral loss products from constituent monomers (including
-    sidechain mods) and Parameters object.
+    Test for neutral masses. Checks whether function
+    "get_full_neutral_masses_sequence" calculates accurate full monoisotopic
+    masses and sidechain-specific loss products. Also tests whether
+    max_neutral_losses is enforced from silico parameters.
 
     Args:
         params (Parameters): Parameters object
+        polymer (Polymer): Polymer object
     """
-    #  make copy of params for editing
-    test_params = copy.deepcopy(params)
+    #  make a local copy of Parameters object for changing parameters
+    local_params = copy.deepcopy(params)
+    local_params.monomers = ["A", "S", "G", "N", "Q", "V"]
 
-    #  increase neutral loss limit
-    test_params.silico.ms1.max_neutral_losses = 6
+    #  set upper limit on neutral loss cap to apply in local_params
+    max_loss_caps = 10
 
-    #  set modifications to target test sequences with sidechain mods
-    test_params.silico.modifications = {
-        "K": ["Ole", "Pal", "Ace"],
-        "R": ["Ole", "Pal", "Ace"],
-        "S": ["Trt"],
-        "T": ["Trt"],
-        "E": ["Bnz", "BtA"],
-        "D": ["Bnz", "BtA"]
-    }
-
-    #  keys = sequences prone to neutral losses
-    neutral_loss_seqs = {
-        "KARKSN": [
-            5,  # expected number of neutral loss products for "KARKSN"
-            {
-                "K(Ole)AR(Pal)S(Trt)N": 1,  # modified sequences, expected
-                "K(Pal)AR(Ole)S(Trt)N": 1,  # number of neutral losses
-                "K(Ace)AR(Pal)S(Trt)N": 1,
-                "K(Ole)AR(Pal)SN": 2,
-                "KAR(Ole)S(Trt)N": 2,
-                "K(Ace)ARS(Trt)N": 2,
-                "K(Ole)ARSN": 3,
-                "KARS(Trt)N": 3,
-                "K(Ace)ARSN": 3,
-                "KARSN": 4
-            }
-        ],
-        "RTEDSN": [
-            6,
-            {
-                "R(Ole)T(Trt)E(Bnz)D(BtA)S(Trt)N": 1,
-                "R(Ace)T(Trt)E(BtA)D(Bnz)S(Trt)N": 1,
-                "R(Pal)T(Trt)E(Bnz)D(BtA)S(Trt)N": 1,
-                "R(Ole)T(Trt)E(Bnz)D(BtA)SN": 2,
-                "RT(Trt)E(BtA)D(Bnz)S(Trt)N": 2,
-                "R(Pal)T(Trt)ED(BtA)S(Trt)N": 2,
-                "RT(Trt)E(Bnz)D(BtA)SN": 3,
-                "RT(Trt)E(BtA)D(Bnz)SN": 3,
-                "R(Pal)T(Trt)EDS(Trt)N": 3,
-                "RT(Trt)EDS(Trt)N": 4,
-                "RTE(BtA)D(Bnz)SN": 4,
-                "R(Pal)T(Trt)EDSN": 4,
-                "RTEDS(Trt)N": 5,
-                "RTE(BtA)DSN": 5,
-                "R(Pal)TEDSN": 5,
-                "RTEDSN": 6,
-            }
+    #  dict of sequence strings and associated full neutral masses, including
+    #  all possible loss products
+    loss_prone_sequences = {
+        "AAV": [259.15322],
+        "ASGNQ": [
+            475.20273,
+            458.17618,
+            457.192165,
+            441.14963,
+            440.165615,
+            439.1816,
+            423.139065,
+            422.15505
         ]
     }
 
-    #  make sure monomers list contains every monomer used in tests
-    test_params.monomers = list(set(
-        "".join(test_params.silico.modifications.keys())
-        + "".join(neutral_loss_seqs.keys())))
-
-    #  Polymer object using new params
-    test_polymer = Polymer(params_obj=test_params)
-
-    #  iterate through modified and unmodified sequences. Check that all
-    #  neutral losses are present for unmodified seqs. Modified seqs should
-    #  only have two neutral losses - OH, H2O for asparagine (N)
-    for seq, info in neutral_loss_seqs.items():
-        full_neutral_mass = find_sequence_mass(
-            sequence=seq,
-            polymer=test_polymer)
-        neutral_losses = add_sidechain_neutral_loss_products_sequence(
-            sequence=seq,
-            sequence_mass=full_neutral_mass,
-            polymer=test_polymer,
-            params=test_params
-        )
-
-        assert len(neutral_losses) == info[0]
-
-        for mod_seq in info[1]:
-            mod_neutral_mass = find_sequence_mass(
-                sequence=mod_seq,
-                polymer=test_polymer
+    #  iterate through sequenes and associated neutral masses, ensure number
+    #  of neutral sequences = full neutral mass + all permissible loss products
+    for seq, neutral_masses in loss_prone_sequences.items():
+        for i in range(max_loss_caps):
+            local_params.silico.ms1.max_neutral_losses = i
+            test_masses = get_full_neutral_masses_sequence(
+                sequence=seq,
+                polymer=Polymer(local_params),
+                params=local_params,
+                ms_level=1
             )
-            mod_neutral_masses = add_sidechain_neutral_loss_products_sequence(
-                sequence=mod_seq,
-                sequence_mass=mod_neutral_mass,
-                polymer=test_polymer,
-                params=test_params
-            )
-            if len(mod_neutral_masses) != info[1][mod_seq]:
-                raise Exception(mod_seq, len(
-                    mod_neutral_masses), info[1][mod_seq])
-            assert len(mod_neutral_masses) == info[1][mod_seq]
+
+            #  losses should always be capped by parameters override
+            assert len(test_masses) == min(i + 1, len(neutral_masses))
+
+            #  ensure all neutral masses are accounted for - no nasty surprises
+            assert not [
+                mass for mass in test_masses
+                if mass not in neutral_masses]
 
 @pytest.mark.unit
 def test_generate_all_sequence(params):
@@ -334,3 +283,45 @@ def test_generate_all_sequence(params):
         )
 
         assert len(sequences) == check_length_distribution()
+
+@pytest.mark.unit
+def test_isomeric_targets(params):
+    """
+    Test for isomeric sequence lists.
+
+    Args:
+        params (Parameters): Parameters object.
+    """
+
+    #  list of target sequence lists
+    targets = [
+        ["AAAA", "TRED"],
+        ["NVTEDPQ", "GAGA", "GAGA", "GAGA"],
+        ["KICKERHV"]
+    ]
+
+    #  iterate through isomeric targets and check get_isomeric_seqs for each
+    for test_data in targets:
+
+        #  generate list of sequences and compositions that are isomeric to
+        #  one or more targets
+        isomeric_seqs = get_isomeric_seqs(
+            target_sequences=test_data,
+            sequencing=True
+        )
+        isomeric_compositions = get_isomeric_seqs(
+            target_sequences=test_data,
+            sequencing=False
+        )
+
+        #  get composition strings that match isomers in test data
+        compositions = list(set([
+            "".join(sorted(target_seq)) for target_seq in test_data
+        ]))
+
+        #  check all isomeric seqs are correct
+        for seq in isomeric_seqs:
+            assert "".join(sorted(seq)) in compositions
+
+        #  check function works for composition strings
+        assert sorted(compositions) == sorted(isomeric_compositions)

@@ -32,7 +32,7 @@ def exhaustive_screen(params, data_folder, out_folder):
     #  get list of filepaths to ripper JSON files
     rippers = return_jsons(data_folder)
 
-    # pre-filter ripper JSONs and save output
+    #  pre - filter ripper JSONs and save output
     filtered_rippers = prefilter_all(
         rippers=rippers,
         extractor_parameters=params.extractors
@@ -65,7 +65,8 @@ def exhaustive_screen(params, data_folder, out_folder):
 
         #  open ripper data, set output folder
         ripper_data = RipperDict(open_json(ripper))
-        ripper_output = os.path.join(out_folder, os.path.basename(ripper))
+        ripper_output = os.path.join(
+            out_folder, os.path.basename(ripper)).replace(".json", "")
         if not os.path.exists(ripper_output):
             os.mkdir(ripper_output)
 

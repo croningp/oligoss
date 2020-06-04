@@ -20,12 +20,12 @@
       "silico_ms1": {
         "min_z": 1,
         "max_z": null,
-        "max_neutral_losses": 3
+        "max_neutral_losses": null
       },
       "silico_ms2": {
         "min_z": 1,
         "max_z": 1,
-        "max_neutral_losses": 1,
+        "max_neutral_losses": null,
         "fragment_series": ["b", "y", "a"],
         "signatures": ["Im"]
       },

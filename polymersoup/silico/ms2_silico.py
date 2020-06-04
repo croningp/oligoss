@@ -163,9 +163,6 @@ def build_single_fragment_series_sequence(
             polymer=polymer
         )
 
-        for neutral_mass in neutral_masses:
-            if neutral_mass < 70:
-                raise Exception(neutral_mass, sorted_subsequence)
         #  create subsequence from subsequence monomer id strings
         subsequence = "".join(
             monomer_ids[polymer.fragment_info[series_id]["start"]:i + 1])

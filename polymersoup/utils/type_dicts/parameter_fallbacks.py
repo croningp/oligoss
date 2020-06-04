@@ -24,11 +24,13 @@ SILICO_LIBRARY_FALLBACKS = {
         "min_z": 1,
         "max_z": None,
         "universal_sidechain_modifications": True,
-        "universal_terminal_modifications": True
+        "universal_terminal_modifications": True,
+        "max_neutral_losses": None
     },
     "ms2": {
         "adducts": None,
-        "signatures": None
+        "signatures": None,
+        "max_neutral_losses": None
     }
 }
 

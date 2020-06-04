@@ -803,15 +803,13 @@ def add_sidechain_neutral_loss_products_sequence(
         List[float]: list of neutral loss products (with loss product =
             full_neutral_mass - neutral_loss).
     """
-    #  init list to store products of neutral loss fragmentations
-    neutral_loss_products = []
 
     if ms_level == 1:
         max_neutral_losses = params.silico.ms1.max_neutral_losses
     else:
         max_neutral_losses = params.silico.ms2.max_neutral_losses
-    if not max_neutral_losses:
-        return neutral_loss_products
+    if max_neutral_losses == 0:
+        return []
 
     #  list monomer ids for sequence
     monomers = return_monomer_ids_sequence(
@@ -822,31 +820,43 @@ def add_sidechain_neutral_loss_products_sequence(
 
     #  retrieve loss products from Polymer object, add each loss product
     #  to loss product list
-    potential_losses = retrieve_loss_products_monomers_list(
+    potential_unique_losses = retrieve_loss_products_monomers_list(
         monomer_id_list=monomers,
         polymer=polymer
     )
 
-    if not potential_losses:
+    #  no loss product-prone sidechains so sashay away
+    if not potential_unique_losses:
         return []
 
-    neutral_loss_products, total_losses = [], 0
+    #  if no cap on max_neutral_losses has been set, limit this only by number
+    #  possible due to intrinsic properties of sequence monomers
+    if not max_neutral_losses:
+        max_neutral_losses = len(sequence)**2
 
-    max_neutral_losses = min(max_neutral_losses, sum([
-        monomers.count(monomer) for monomer in potential_losses
-    ]))
+    #  init list to store loss products, counter for losses
+    neutral_loss_products, total_losses = [sequence_mass], 0
 
     #  iterate through loss product-prone monomers and add corresponding loss
     #  products up until the maximum neutral loss limit has been reached
-    for loss_monomer, loss_masses in potential_losses.items():
+    for loss_monomer, loss_masses in potential_unique_losses.items():
         occurence = monomers.count(loss_monomer)
-        if total_losses < max_neutral_losses:
-            for mass in loss_masses:
-                for i in range(occurence):
-                    if total_losses < max_neutral_losses:
-                        neutral_loss_products.append(
-                            sequence_mass - (mass * (i + 1)))
-                        total_losses += 1
+        monomer_losses = []
+        for loss_mass in loss_masses:
+            for i in range(occurence):
+                final_loss = loss_mass * (i + 1)
+                monomer_losses.extend([
+                    mass - final_loss
+                    for mass in neutral_loss_products
+                ])
+        for loss_product in monomer_losses:
+            if total_losses < max_neutral_losses:
+                if loss_product not in neutral_loss_products:
+                    neutral_loss_products.append(loss_product)
+                    total_losses += 1
+
+    #  remove intact sequence mass from loss products list
+    neutral_loss_products.remove(sequence_mass)
 
     #  return neutral loss products sorted by descending mass
     return sorted(neutral_loss_products, reverse=True)
