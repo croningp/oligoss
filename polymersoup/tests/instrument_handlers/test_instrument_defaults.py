@@ -44,11 +44,11 @@ def test_instrument_defaults_silico():
     assert parameters.silico.ms2.fragment_series == ["b", "y", "a"]
     assert parameters.silico.ms2.min_z == 1
     assert parameters.silico.ms2.max_z == 1
-    assert parameters.silico.ms2.max_neutral_losses == 1
+    assert parameters.silico.ms2.max_neutral_losses is None
 
     assert parameters.silico.ms1.min_z == 1
     assert not parameters.silico.ms1.max_z
-    assert parameters.silico.ms1.max_neutral_losses == 3
+    assert parameters.silico.ms1.max_neutral_losses is None
 
 @pytest.mark.unit
 def test_invalid_silico_instruemntation():
