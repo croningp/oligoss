@@ -91,7 +91,8 @@ def exhaustive_screen(params, data_folder, out_folder):
 
         postprocess_ripper(
             ripper_folder=ripper_output,
-            postprocess_parameters=params.postprocess
+            postprocess_parameters=params.postprocess,
+            ms2_data=ripper_data.ms2
         )
 
 def screen_ripper(

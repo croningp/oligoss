@@ -4,7 +4,8 @@ import pandas as pd
 from ..extractors.general_functions import open_json, write_to_json
 from .postprocess_helpers import (
     assign_confidence_sequences,
-    assign_isomeric_groups
+    assign_isomeric_groups,
+    all_spectral_assignment_plots
 )
 
 logging.basicConfig(
@@ -12,17 +13,17 @@ logging.basicConfig(
     datefmt='%H:%M:%S %m/%d/%Y ',
     level=logging.INFO)
 
-def standard_postprocess(extracted_data_folder, postprocess_parameters):
+def postprocess_ripper(ripper_folder, postprocess_parameters, ms2_data):
+    """ This function performs all standard postprocessing operations for a
+        single ripper output.
 
-    for ripper_folder in os.listdir(extracted_data_folder):
+    Args:
+        ripper_folder (str): filepath to extracted data folder for a single
+        ripper(where all output files from data extraction were saved).
+        postprocess_parameters (obj): postprocessing parameters.
+        ms2_data (dict): MS2 data only from ripper.
 
-        postprocess_ripper(
-            ripper_folder=os.path.join(extracted_data_folder, ripper_folder),
-            postprocess_parameters=postprocess_parameters)
-
-    return logging.info('all postprocessing finished')
-
-def postprocess_ripper(ripper_folder, postprocess_parameters):
+    """
 
     all_ssw = postprocess_parameters.subsequence_weight
     ripper_name = ripper_folder.split('\\')[-1]
@@ -48,6 +49,13 @@ def postprocess_ripper(ripper_folder, postprocess_parameters):
             [file for file in os.listdir(ripper_folder)
                 if 'MS1_EICs' in file][0]))
 
+    # retrieve spectra matches from extracted data
+    MS2_spectra_matches = open_json(
+        os.path.join(
+            ripper_folder,
+            [file for file in os.listdir(ripper_folder)
+                if 'spectra_matches' in file][0]))
+
     # get confidence scores for sequences at all subsequence weights
     for ssw in all_ssw:
         confidence_scores = assign_confidence_sequences(
@@ -61,6 +69,18 @@ def postprocess_ripper(ripper_folder, postprocess_parameters):
             ripper_folder,
             'postprocessing',
             f'confidence_assignments_{ssw}ssw')
+
+        # spectral assignment plots over confidence threshold
+        if postprocess_parameters.spectral_assignment_plots:
+            plot_sequence_list = [
+                s for s, c in confidence_scores.items()
+                if float(c) >= postprocess_parameters.min_plot_confidence]
+
+            all_spectral_assignment_plots(
+                sequence_list=plot_sequence_list,
+                MS_data=ms2_data,
+                MS2_spectra_matches=MS2_spectra_matches,
+                postprocess_folder=confidence_dir)
 
         if not os.path.exists(confidence_dir):
             os.makedirs(confidence_dir)
@@ -101,7 +121,5 @@ def postprocess_ripper(ripper_folder, postprocess_parameters):
         postprocess_summary.to_csv(
             os.path.join(confidence_dir, f'postprocess_summary_{ssw}ssw.csv'),
             index=False)
-
-        # spectral assignment plots over confidence threshold
 
     return logging.info(f'postprocessing complete for {ripper_name}')

@@ -46,7 +46,9 @@ EXTRACTOR_FALLBACKS = {
 #  fallbacks for nested postprocess parameters
 POSTPROCESS_FALLBACKS = {
     "essential_fragments": None,
-    "exclude_fragments": None
+    "exclude_fragments": None,
+    "spectral_assignment_plots": False,
+    "min_plot_confidence": 70
 }
 
 # list of parameters which must ALWAYS be supplied in input file

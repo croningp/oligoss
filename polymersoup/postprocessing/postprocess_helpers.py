@@ -1,3 +1,13 @@
+import os
+import logging
+import matplotlib.pyplot as plt
+import numpy as np
+
+logging.basicConfig(
+    format='%(message)s - %(asctime)s',
+    datefmt='%H:%M:%S %m/%d/%Y ',
+    level=logging.INFO)
+
 def assign_confidence_sequences(
     silico_dict,
     confirmed_dict,
@@ -436,3 +446,145 @@ def assign_isomeric_groups(sequences):
         g += 1
 
     return assignments
+
+def single_spectrum_plot(
+    sequence,
+    confirmed_frags,
+    spectrum_id,
+    spectrum,
+    output_folder
+):
+    """ This function plots individual spectral assignment plots for a given
+    sequence.
+
+    Args:
+        sequence (str): precursor sequence string.
+        confirmed_frags (Dict[str, Dict[str, List[float]]): dictionary detailing
+            which spectra fragments have been confirmed in and the masses of the
+            confirmed fragments for a single sequence.
+            format: {fragment: spectrum: [confirmed masses (float)]}
+        spectrum_id (str): spectrum number.
+        spectrum (dict): individual MS2 spectrum.
+        output_folder (str): filepath to where the plots are to be saved.
+    """
+    # set default bar width and maximum m/z (upper x axis limit)
+    max_x = 600
+    width = 2
+
+    # get x and y values, parent identity and retention time from spectra
+    x = [float(k) for k in spectrum.keys() if k not in [
+        'retention_time', 'mass_list', 'parent']]
+    parent = spectrum['parent']
+    rt = "{:.2f}".format(float(spectrum['retention_time']))
+    y = [float(v) for k, v in spectrum.items() if k not in [
+        'retention_time', 'mass_list', 'parent']]
+
+    # if there's more than 500 spectra, make bar width smaller
+    if max(x) >= 500:
+        max_x = 1100
+        width = 3
+
+    # set up spectral assignment plot
+    fig, ax = plt.subplots(1, dpi=200)
+    plt.bar(x=x, height=y, width=width, color='black')
+    plt.xlabel('m/z')
+    plt.ylabel('Intensity (absolute)')
+    plt.xticks(np.arange(0, max_x, step=100))
+    nl = '\n'
+    text = f'#{spectrum_id}{nl}parent: {parent}{nl}rt: {rt}{nl}{sequence}'
+    plt.text(
+        x=0.82,
+        y=0.85,
+        s=text,
+        fontsize=10,
+        horizontalalignment='center',
+        verticalalignment='center',
+        transform=ax.transAxes,
+        color='black')
+
+    # get list of fragments
+    frag_list = [
+        k for k, v in confirmed_frags.items() if spectrum_id in v.keys()]
+
+    # start taking note of where the last confirmed fragment label was
+    # if x values are too close, y values will be increased
+    last_label = 0
+
+    # add each fragment label to the spectrum
+    for frag in frag_list:
+        frag_x = confirmed_frags[frag][spectrum_id]
+
+        for f in frag_x:
+            label_index = min(range(len(x)), key=lambda i: abs(x[i] - f))
+            y_label = y[label_index]
+            if abs(last_label - y_label) <= 25:
+                y_label += (max(y) / 10)
+
+            plt.text(
+                x=x[label_index],
+                y=y_label,
+                s=frag,
+                fontsize=10,
+                color='blue',
+                horizontalalignment='center',
+                verticalalignment='bottom')
+
+            last_label = y_label
+
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+
+    plt.savefig(
+        os.path.join(
+            output_folder, f'{spectrum_id}.png'), dpi=200, layout='tight')
+    plt.close()
+    return logging.info(
+        f'fragments from {sequence} plotted in {spectrum_id}')
+
+def all_spectral_assignment_plots(
+    sequence_list,
+    MS_data,
+    MS2_spectra_matches,
+    postprocess_folder
+):
+    """ This function plots all spectral assignment plots for sequences
+    provided in the sequence list.
+
+    Args:
+        sequence_list (list): list of sequences over sequences that are over
+            the minimum confidence threshold for plotting.
+        MS_data (dict): ripper MS2 dict.
+        MS2_spectra_matches (Dict[str, Dict[str, Dict[str, List[float]]]):
+            dictionary detailing which spectra fragments have been confirmed in
+            and the masses of the confirmed fragments for all sequences.
+            format: {sequence: fragment: spectrum: [confirmed masses (float)]}
+        postprocess_folder (str): filepath of postprocessing output folder.
+    """
+
+    if not sequence_list:
+        return 'no sequences reach minimum spectral assignment confidence'
+
+    plot_outputs = os.path.join(postprocess_folder, 'spectral_assignment_plots')
+
+    for sequence in sequence_list:
+        confirmed_frags = MS2_spectra_matches[sequence]
+
+        output_folder = os.path.join(plot_outputs, sequence)
+
+        all_spectra_ids = list(
+            set([s for sublist in confirmed_frags.values() for s in sublist]))
+
+        spectra = {
+            k: v for k, v in MS_data.items() if k in all_spectra_ids}
+
+        for spectrum_id, spectrum in spectra.items():
+
+            single_spectrum_plot(
+                sequence=sequence,
+                confirmed_frags=confirmed_frags,
+                spectrum_id=spectrum_id,
+                spectrum=spectrum,
+                output_folder=output_folder)
+
+    return logging.info(
+        f'{len(sequence_list)} spectral assignment plots complete')
