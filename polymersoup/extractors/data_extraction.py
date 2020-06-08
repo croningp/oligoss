@@ -156,38 +156,40 @@ def confirm_fragment(masses, error, error_units, spectra):
         error (float): tolerance for matching target ions to
             masses found in spectra
         error_units (str): 'ppm' or 'abs'
-        spectra (Dict[str, dict]): dictionary of all MS2 spectra for a single
-            ripper
+        spectra (Dict[str, Dict[str, float]]): dictionary of all MS2 spectra for
+            a single ripper
 
     Returns:
         matches (List[float]): list of masses found in spectra that match
             original masses
-        spectra_matches (List[str]): list of spectrum id's where fragments were
-            found
+        spectra_matches (Dict[str, List(float)]): dict of spectrum id's where
+            fragments were found and which masses were matched
     """
     matches = []
-    spectra_matches = []
+    spectra_matches = {}
 
     for spectrum_id, spectrum in spectra.items():
+        error_value = error
         for mass in masses:
 
             # make sure error is in absolute units
             if error_units == 'ppm':
-                error = (float(mass) / 1E6 * error)
+                error_value = (float(mass) / 1E6) * error
 
             # search for matches in spectrum
-            mass_range = [mass - error, mass + error]
+            mass_range = [mass - error_value, mass + error_value]
+
             match = match_mass(
                 spectrum=spectrum,
                 mass_range=mass_range)
+
             if match:
                 matches.append(mass)
-                spectra_matches.append(spectrum_id)
+                spectra_matches[spectrum_id] = match
 
     # sort matches by ascending number
     matches = list(set(matches))
     matches.sort()
-    spectra_matches = list(set(spectra_matches))
     return matches, spectra_matches
 
 def confirm_ms2_fragments_isomeric_sequences(

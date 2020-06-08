@@ -43,7 +43,7 @@ def test_retrieve_retention_times(example_MS1_dict):
 
 @pytest.mark.unit
 def test_confirm_fragment(example_MS2_dict):
-    pos_masses = (50.5853, 102.0631, 214.1097)
+    pos_masses = (50.5803, 102.0591, 214.1077)
 
     abs_matches, positive_test_abs = confirm_fragment(
         masses=pos_masses,
@@ -63,8 +63,10 @@ def test_confirm_fragment(example_MS2_dict):
         error_units='abs',
         spectra=example_MS2_dict)
 
-    assert abs_matches, ppm_matches == [
+    assert list(positive_test_ppm.keys()) == [
         'spectrum_1', 'spectrum_2', 'spectrum_3']
-    assert positive_test_abs, positive_test_ppm == pos_masses
+    assert list(positive_test_abs.keys()) == [
+        'spectrum_1', 'spectrum_2', 'spectrum_3']
+    assert abs_matches, ppm_matches == pos_masses
     assert neg_matches == []
-    assert neg_test_abs == []
+    assert neg_test_abs == {}

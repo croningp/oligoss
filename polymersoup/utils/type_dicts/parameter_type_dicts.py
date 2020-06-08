@@ -147,7 +147,7 @@ EXTRACTOR_TYPES = {
     "pre_screen_filters": Dict[str, float]
 }
 
-#  types for nested postprocess parameters
+# types for nested postprocess parameters
 POSTPROCESS_TYPES = {
     "exclude_fragments": List[str],
     "optional_core_fragments": List[str],
@@ -157,6 +157,8 @@ POSTPROCESS_TYPES = {
     "core_linear_series": List[str],
     "rt_bin": float,
     "ms2_rt_bin": float,
+    "spectral_assignment_plots": bool,
+    "min_plot_confidence": int,
     "optional": [
         "exclude_fragments",
         "optional_core_fragments",
@@ -165,7 +167,9 @@ POSTPROCESS_TYPES = {
         "rt_bin",
         "ms2_rt_bin",
         "dominant_signature_cap",
-        "core_linear_series"
+        "core_linear_series",
+        "spectral_assignment_plots",
+        "min_plot_confidence"
     ],
     "instrument_dependent": {
         "instrument_only": {
