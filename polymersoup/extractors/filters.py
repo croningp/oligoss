@@ -1,8 +1,9 @@
 import os
+import logging
 import mzmlripper.extractor as ripper
 from bisect import bisect_left, bisect_right
 from .extractor_classes import RipperDict
-from .general_functions import logging, open_json, write_to_json, return_jsons
+from .general_functions import open_json, write_to_json, return_jsons
 
 def mzml_to_json(input_folder, extractor_parameters):
     """ This function takes all mzml files in the input folder and converts them
@@ -30,7 +31,7 @@ def mzml_to_json(input_folder, extractor_parameters):
             out_dir=input_folder,
             rt_units=extractor_parameters.rt_units)
 
-    return logging.info('mzml to json conversion complete')
+    logging.info('mzml to json conversion complete')
 
 def apply_prefilters(spectra, min_rt, max_rt, min_max_int, min_total_int):
     """ This function filters spectra by retetention time then minimum maximum
@@ -240,7 +241,7 @@ def find_precursor(spectra, ms2_precursor, error, error_units):
     mass.
     Args:
         spectra (dict): dictionary of format {spectrum_id : {m/z: intensity}}
-        ms2_precursor (list): [ms2 precursor string, ms2 precursor mass]
+        ms2_precursor (float): precursor m/z value
         error (float): acceptable difference between target mass and found
             parent mass
         error_units (str): 'abs' or 'ppm'
@@ -251,19 +252,12 @@ def find_precursor(spectra, ms2_precursor, error, error_units):
     """
     precursor_filtered = {}
 
-    # check precursor is list of format [precursor string, precursor mass]
-    if type(ms2_precursor) != list:
-        logging.info(f'ms2 precursor {ms2_precursor} is not of correct format: \
-            [ms2 precursor string, ms2 precusor mass]')
-        # presume input is mass and put into list
-        ms2_precursor = ["precursor", float(ms2_precursor)]
-
     # make sure error is abs
     if error_units == 'ppm':
-        error = (float(ms2_precursor[1]) / 1E6 * error)
+        error = (float(ms2_precursor) / 1E6 * error)
 
     # get list of target precursor masses
-    target = [float(ms2_precursor[1]) - error, float(ms2_precursor[1]) + error]
+    target = [float(ms2_precursor) - error, float(ms2_precursor) + error]
 
     # find whether precursor ion mass matches a target
     for spectrum_id, spectrum_dict in spectra.items():
@@ -281,16 +275,15 @@ def find_precursors(spectra, ms2_precursors, error, error_units):
 
     Args:
         spectra (dict]): dictionary of multiple spectra, format:
-        {spectrum_id : {m/z: intensity}}
-        ms2_precursors (list or list(list)):
-        [ms2 precursor string, ms2 precursor mass]
+            {spectrum_id : {m/z: intensity}}
+        ms2_precursors (List[float]): list of MS2 precrursor m/z values
         error (float): acceptable difference between target mass and found
-        parent mass
+            parent mass. Can either be in absolute units (u) or relative (ppm).
         error_units (str): 'ppm' or 'abs'
 
     Returns:
         precursor_filtered (dict): dict of MS2 spectra whos parent ion matches
-        any target mass
+            any target mass
     """
     if not ms2_precursors:
         return spectra

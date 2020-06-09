@@ -10,11 +10,6 @@ from .filters import (
     match_mass
 )
 
-logging.basicConfig(
-    filename="logger.log",
-    format='%(message)s - %(asctime)s',
-    datefmt='%H:%M:%S %m/%d/%Y ',
-    level=logging.INFO)
 
 def extract_MS1_EICs(
     MS1_silico,
@@ -44,6 +39,9 @@ def extract_MS1_EICs(
     retention_times = retrieve_retention_times(ripper_dict=MS1_dict)
     ms1_EICs = {}
 
+    #  log number of compositions being screened for
+    logging.info(f"generating MS1 EICs for {len(MS1_silico)} compositions")
+
     # generate EIC for each
     for sequence, masses in MS1_silico.items():
 
@@ -56,18 +54,19 @@ def extract_MS1_EICs(
             rt_units=extractor_parameters.rt_units)
 
         if sequence_EIC:
-            logging.info(f'EIC generated for {sequence}')
             ms1_EICs[sequence] = sequence_EIC
 
-        # if no EIC was generated for the sequence, remove it from silico dict
-        if not sequence_EIC:
-            logging.info(f'{sequence} not in sufficient abundance for EIC')
-
+    #  add list of retention times for all ms1 spectra for saving to output
     ms1_EICs['retention_times'] = retention_times
 
     # write MS1 EIC to json
     write_to_json(ms1_EICs, os.path.join(
         output_folder, f'{filename}_MS1_EICs.json'))
+
+    #  log summary of MS1 extraction
+    logging.info(
+        f"EICs generated for {len(ms1_EICs) - 1} compositions and written to\n"
+        f"{os.path.join(output_folder, f'{filename}_MS1_EICs.json')}")
 
     return ms1_EICs
 
@@ -215,6 +214,11 @@ def confirm_ms2_fragments_isomeric_sequences(
     Returns:
         Dict[str, dict], Dict[str, dict]: confirmed_fragments, spectral_matches
     """
+
+    #  log target composition
+    logging.info(
+        "searching for MS2 fragments for sequences isomeric to\n"
+        f"{target_composition}")
     confirmed_fragment_dict, confirmed_spectral_matches = {}, {}
 
     candidate_spectra = find_precursors(
@@ -232,6 +236,11 @@ def confirm_ms2_fragments_isomeric_sequences(
         if (full_msms_silico_dict[seq]["MS2"]["composition"]
             == target_composition)
     ]
+
+    #  log number of isomers to be screened at MS2
+    logging.info(
+        f"screening {len(sequence_entries)} for composition\n"
+        f"{target_composition}. Searching {len(candidate_spectra)} MS2 spectra")
 
     for sequence in sequence_entries:
 
@@ -256,6 +265,11 @@ def confirm_ms2_fragments_isomeric_sequences(
             )
             confirmed_fragment_dict[sequence] = confirmed_fragments
             confirmed_spectral_matches[sequence] = spectra_matches
+
+    #  log number of sequences isomeric to target have been found at MS2
+    logging.info(
+        f"found {len(confirmed_fragment_dict)} sequence isomeric to\n"
+        f"{target_composition} with one or more confirmed MS2 fragments")
 
     return confirmed_fragment_dict, confirmed_spectral_matches
 

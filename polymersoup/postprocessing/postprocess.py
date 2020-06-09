@@ -8,11 +8,6 @@ from .postprocess_helpers import (
     all_spectral_assignment_plots
 )
 
-logging.basicConfig(
-    format='%(message)s - %(asctime)s',
-    datefmt='%H:%M:%S %m/%d/%Y ',
-    level=logging.INFO)
-
 def postprocess_ripper(ripper_folder, postprocess_parameters, ms2_data):
     """ This function performs all standard postprocessing operations for a
         single ripper output.
@@ -122,4 +117,4 @@ def postprocess_ripper(ripper_folder, postprocess_parameters, ms2_data):
             os.path.join(confidence_dir, f'postprocess_summary_{ssw}ssw.csv'),
             index=False)
 
-    return logging.info(f'postprocessing complete for {ripper_name}')
+    logging.info(f'postprocessing complete for {ripper_name}')

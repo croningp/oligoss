@@ -3,10 +3,6 @@ import logging
 import matplotlib.pyplot as plt
 import numpy as np
 
-logging.basicConfig(
-    format='%(message)s - %(asctime)s',
-    datefmt='%H:%M:%S %m/%d/%Y ',
-    level=logging.INFO)
 
 def assign_confidence_sequences(
     silico_dict,
@@ -538,8 +534,6 @@ def single_spectrum_plot(
         os.path.join(
             output_folder, f'{spectrum_id}.png'), dpi=200, layout='tight')
     plt.close()
-    return logging.info(
-        f'fragments from {sequence} plotted in {spectrum_id}')
 
 def all_spectral_assignment_plots(
     sequence_list,
@@ -560,6 +554,9 @@ def all_spectral_assignment_plots(
             format: {sequence: fragment: spectrum: [confirmed masses (float)]}
         postprocess_folder (str): filepath of postprocessing output folder.
     """
+    #  log number of assignments to be plotted
+    logging.info(
+        f"plotting spectral assignments for {len(sequence_list)} sequences")
 
     if not sequence_list:
         return 'no sequences reach minimum spectral assignment confidence'
@@ -586,5 +583,5 @@ def all_spectral_assignment_plots(
                 spectrum=spectrum,
                 output_folder=output_folder)
 
-    return logging.info(
-        f'{len(sequence_list)} spectral assignment plots complete')
+    logging.info(
+        f"spectral plots complete and saved to {plot_outputs} folder")
