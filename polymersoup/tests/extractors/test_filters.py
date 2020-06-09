@@ -220,44 +220,38 @@ def test_precursor_mass_filter(example_spectrum):
     # example spectrum parent mass = 741.2699
     exact_positive_test_abs = find_precursor(
         spectra=example_spectrum,
-        ms2_precursor=["X", "741.2699"],
+        ms2_precursor=741.2699,
         error=0.01,
         error_units='abs')
 
     exact_positive_test_ppm = find_precursor(
         spectra=example_spectrum,
-        ms2_precursor=["X", "741.2699"],
+        ms2_precursor=741.2699,
         error=5,
         error_units='ppm')
 
     positive_test = find_precursor(
         spectra=example_spectrum,
-        ms2_precursor=["X", "741.2730"],
-        error=0.01,
-        error_units='abs')
-
-    no_precursor_string = find_precursor(
-        spectra=example_spectrum,
-        ms2_precursor=741.2699,
+        ms2_precursor=741.2730,
         error=0.01,
         error_units='abs')
 
     negative_test_lower_bound = find_precursor(
         spectra=example_spectrum,
-        ms2_precursor=["X", "741.2589"],
+        ms2_precursor=741.2589,
         error=0.01,
         error_units='abs')
 
     negative_test_higher_bound = find_precursor(
         spectra=example_spectrum,
-        ms2_precursor=["X", "741.2800"],
+        ms2_precursor=741.2800,
         error=0.01,
         error_units='abs')
 
     assert len(exact_positive_test_abs) == 1
     assert len(exact_positive_test_ppm) == 1
     assert len(positive_test) == 1
-    assert len(no_precursor_string) == 1
+
     assert len(negative_test_lower_bound) == 0
     assert len(negative_test_higher_bound) == 0
 

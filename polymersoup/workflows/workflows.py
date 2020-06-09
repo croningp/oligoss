@@ -52,7 +52,6 @@ def exhaustive_screen(params, data_folder, out_folder):
         out_folder, "extracted", "MS1_pre_screening.json")
     if not os.path.exists(ms1_silico_o_file):
         os.mkdir(os.path.dirname(ms1_silico_o_file))
-
     #  write MS1 compositional silico dict to file
     write_to_json(
         write_dict=compositional_ms1_dict,

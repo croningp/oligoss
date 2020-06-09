@@ -1,13 +1,5 @@
 import os
 import json
-import logging
-
-# configure info logging
-logging.basicConfig(
-    filename="logger.log",
-    format='%(message)s - %(asctime)s',
-    datefmt='%H:%M:%S %m/%d/%Y ',
-    level=logging.INFO)
 
 def open_json(filepath):
     """
@@ -36,8 +28,6 @@ def write_to_json(
     """
     with open(output_json, 'w') as fp:
         json.dump(write_dict, fp, indent=4)
-
-    return logging.info(f'data written to {output_json}')
 
 def return_jsons(input_folder):
     """
