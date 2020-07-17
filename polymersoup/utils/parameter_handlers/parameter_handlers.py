@@ -3,6 +3,7 @@ This file contains functions for reading parameters from input files and
 creating instance of Parameters class for use in PolymerSoup workflows
 """
 import json
+import copy
 from .parameters import Parameters
 from ..type_dicts.parameter_fallbacks import ESSENTIAL_CORE_PARAMS, CORE_CLASSES
 
@@ -63,6 +64,12 @@ def generate_param_subobject(params_dict, param_class):
     Returns:
         Parameters: instance of Parameters class
     """
+    # there is a weird bug whereby the params dict is changed after going
+    # through parameters, making copies is a temporary fix as it's removing some
+    # keys from silico ms1 currently
+    params_silico = copy.deepcopy(params_dict)
+    params_silico_ms1 = copy.deepcopy(params_dict)
+    params_silico_ms2 = copy.deepcopy(params_dict)
 
     #  get parameter class from inputs. NOTE: silico parameters is the only
     #  parameter class with nested inner classes (ms1 and ms2)
@@ -73,17 +80,17 @@ def generate_param_subobject(params_dict, param_class):
 
     #  generate instance of Parameters class for silico parameters
     silico = Parameters(
-        params_dict=params_dict,
+        params_dict=params_silico,
         params_class="silico")
 
     #  set silico.ms1 to instance of Parameters class for silico ms1 parameters
     silico.ms1 = Parameters(
-        params_dict=params_dict,
+        params_dict=params_silico_ms1,
         params_class="silico_ms1")
 
     #  set silico.ms2 to instance of Parameters class for silico ms2 parameters
     silico.ms2 = Parameters(
-        params_dict=params_dict,
+        params_dict=params_silico_ms2,
         params_class="silico_ms2")
 
     if not silico.ms2.adducts:

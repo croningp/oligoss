@@ -4,7 +4,11 @@ features that are passed in from parameter handlers and passed on to
 silico modules
 """
 from ...utils.parameter_handlers.polymer_param_handlers import load_polymer_info
-from ...utils.global_chemical_constants import FUNCTIONAL_GROUPS
+from ...utils.global_chemical_constants import (
+    FUNCTIONAL_GROUPS,
+    CATIONS,
+    ANIONS
+)
 from ...utils.errors import (
     InvalidMonomerId,
     InvalidMSFragmentation,
@@ -41,6 +45,25 @@ class Polymer():
                 associated info.
             modifications (Dict[str, List[str]]): dict of sidechains and termini
                 target for covalent modification(s).
+            exceptions (Dict[str, dict]): dict of exceptions to standard
+                backbone fragmentation rules. For each fragment series, any
+                possible exceptions are stored with ids of the monomers that can
+                induce the exceptions. Format:
+                    {
+                        fragment_series (str) : {
+                            monomer.id (str) : {
+                                fragmentation_property (str): {
+                                    "positions": List[int],
+                                    "start": int,
+                                    "end": int,
+                                    "exception_value": value
+                                },
+                                ...
+                            },
+                            ...,
+                            "monomers": List[str]
+                        }
+                    }
         """
 
         #  set internal properties, params and polymer_config
@@ -48,6 +71,8 @@ class Polymer():
         self.__polymer_config = load_polymer_info(params_obj.polymer_class)
 
         #  set remaining properties
+        self.modifications = self.build_modifications_dict(
+            targets=self.__params.silico.modifications)
         self.monomers = self.instantiate_monomers()
         self.dominant_signatures = self.retrieve_dominant_signatures()
         self.mass_diff = self.retrieve_mass_diff()
@@ -56,9 +81,7 @@ class Polymer():
         self.chain_terminators = self.__polymer_config["CHAIN_TERMINATORS"]
         self.signatures = self.__polymer_config["MS2_SIGNATURE_IONS"]
         self.fragment_info = self.retrieve_fragment_info()
-
-        self.modifications = self.build_modifications_dict(
-            targets=self.__params.silico.modifications)
+        self.reactivity_classes = self.__polymer_config["REACTIVITY_CLASSES"]
 
     def instantiate_monomers(self):
         """
@@ -68,27 +91,34 @@ class Polymer():
             List[Monomer]: list of Monomer objects
         """
         monomer_ids = self.__params.monomers
+        if self.modifications:
+            for target_monomer, mods in self.modifications.items():
+                if str(target_monomer) not in ["0", "-1"]:
+                    monomer_ids.extend([
+                        f"{target_monomer}({mod.id})" for mod in mods])
+            if self.__params.silico.ms1.universal_sidechain_modifications:
+                monomer_ids = list(
+                    filter(lambda x: x not in self.modifications, monomer_ids))
+
         monomers = [
             Monomer(
                 monomer_id=monomer_id,
                 polymer_info=self.__polymer_config,
                 mode=self.__params.mode,
-                ms2_signature_types=self.__params.silico.ms2.signatures)
+                ms2_signature_types=self.__params.silico.ms2.signatures,
+                modification_targets=self.modifications)
             for monomer_id in list(set(monomer_ids))]
         return monomers
 
     def retrieve_mass_diff(self):
+        """
+        Get mass value for mass_diff.
 
+        Returns:
+            float: mass_diff value for polymer class (in u).
+        """
         mass_diff = self.__polymer_config["MASS_DIFF"]
-        try:
-            mass_diff = str(mass_diff)
-        except ValueError:
-            if mass_diff[0] == "-":
-                mass_diff = -FUNCTIONAL_GROUPS[mass_diff[1::]]
-            else:
-                mass_diff = FUNCTIONAL_GROUPS[mass_diff]
-
-        return mass_diff
+        return self.lookup_massdiff_string(mass_diff)
 
     def retrieve_fragment_info(self):
         """
@@ -107,21 +137,42 @@ class Polymer():
             for fragment in fragment_series
         }
 
+        #  explicitly state intrinsic charges due to exchangeable ("i_adduct")
+        #  and non-exchangeable ("i_charge") ions for each fragment series
+        for series, series_info in fragment_info.items():
+
+            if "intrinsic_charge" not in series_info:
+                series_info["intrinsic_charge"] = 0
+            else:
+                i_charge = series_info["intrinsic_charge"][self.__params.mode]
+                if i_charge:
+                    series_info["intrinsic_charge"] = i_charge
+                else:
+                    series_info["intrinsic_charge"] = 0
+
+            if "intrinsic_adduct" in series_info:
+                if self.__params.mode == "pos":
+                    ions = CATIONS
+                elif self.__params.mode == "neg":
+                    ions = ANIONS
+                else:
+                    raise Exception("mode must either be 'pos' or 'neg'")
+                if series_info["intrinsic_adduct"][self.__params.mode]:
+                    ion = series_info["intrinsic_adduct"][self.__params.mode]
+                    series_info["intrinsic_adduct"] = ions[ion]
+            else:
+                series_info["intrinsic_adduct"] = None, None, None
+
         #  convert fragment mass_diffs to floats
         for series in fragment_info:
-            massdiff_info = fragment_info[series]["mass_diff"]
-            for mode, value in massdiff_info.items():
-                if value and mode != "exceptions":
-                    try:
-                        fragment_info[series][mode] = float(value)
-                    except ValueError:
-                        if value[0] == "-":
-                            fragment_info[series]["mass_diff"][mode] = (
-                                -FUNCTIONAL_GROUPS[value[1::]]
-                            )
-                        else:
-                            fragment_info[series]["mass_diff"][mode] = (
-                                FUNCTIONAL_GROUPS[value])
+            raw_mass_diff = fragment_info[series][
+                "mass_diff"][self.__params.mode]
+            fragment_info[series]["mass_diff"] = self.lookup_massdiff_string(
+                mass_diff=raw_mass_diff)
+
+        #  find possible exceptions to standard fragmentation rules and set
+        #  these in self.exceptions
+        self.find_fragmentation_exceptions(fragment_info)
 
         #  ensure all fragment series are compatible with instruments
         if not self.check_fragment_instrument_compatibility(fragment_info):
@@ -130,6 +181,90 @@ class Polymer():
                     params_obj=self.__params))
 
         return fragment_info
+
+    def lookup_massdiff_string(self, mass_diff):
+        """
+        Takes a mass_diff value and converts it to absolute mass (u) if not
+        already in mass units.
+
+        Args:
+            mass_diff (str or float): mass_diff as read from Polymer objkect.
+
+        Returns:
+            float: mass_diff value in absolute mass units (u).
+        """
+        try:
+            mass_diff = float(mass_diff)
+        except ValueError:
+            if mass_diff[0] == "-":
+                mass_diff = -FUNCTIONAL_GROUPS[mass_diff[1::]]
+            else:
+                mass_diff = FUNCTIONAL_GROUPS[mass_diff]
+        return mass_diff
+
+    def find_fragmentation_exceptions(self, fragment_info):
+        """
+        Finds possible exceptions to standard linear fragmentation rules for
+        monomers present, stores these in self.exceptions.
+
+        Args:
+            fragment_info (Dict[str, dict]): FRAG_SERIES dict from config file.
+        """
+        #  init dict to store exceptions to standard fragmentation rules
+        #  init list to keep track of monomers that cause exceptions
+        frag_exceptions = {}
+
+        #  get list of unique functional groups involved in backbone links
+        monomer_func_groups = []
+        for monomer in self.monomers:
+            monomer_func_groups.extend([
+                x[0] for x in monomer.func_groups])
+
+        #  iterate through fragment series info, work out if any monomers have
+        #  potential exceptions to standard fragmentation rules and, if so,
+        #  store these
+        for series, info in fragment_info.items():
+            series_exceptions = {}
+            if "exceptions" in info:
+                exception_info = info["exceptions"][self.__params.mode]
+                if exception_info:
+                    for exception_group in exception_info:
+                        if exception_group in monomer_func_groups:
+                            exceptional_monomers = [
+                                monomer.id for monomer in self.monomers
+                                if (exception_group in [x[0]
+                                    for x in monomer.func_groups])]
+                            if exceptional_monomers:
+                                for e_monomer in exceptional_monomers:
+                                    if e_monomer in series_exceptions:
+                                        series_exceptions[e_monomer].update({
+                                            exception_info[exception_group]
+                                        })
+                                    else:
+                                        series_exceptions[e_monomer] = (
+                                            exception_info[exception_group])
+                                    if "mass_diff" in series_exceptions[
+                                            e_monomer]:
+                                        e_mdiff = series_exceptions[
+                                            e_monomer][
+                                                "mass_diff"][
+                                                    "exception_value"]
+                                        e_mdiff = (
+                                            self.lookup_massdiff_string(
+                                                mass_diff=e_mdiff))
+                                        series_exceptions[
+                                            e_monomer][
+                                                "mass_diff"][
+                                                    "exception_value"] = (
+                                                        e_mdiff)
+
+                                series_exceptions["monomers"] = (
+                                    exceptional_monomers)
+            if series_exceptions:
+                frag_exceptions[series] = series_exceptions
+
+        #  set new attribute for exceptions
+        self.__setattr__("exceptions", frag_exceptions)
 
     def check_fragment_instrument_compatibility(self, fragment_info):
         """
@@ -194,7 +329,7 @@ class Polymer():
         if not self.__params.silico.ms2.signatures:
             return None
 
-        for sig in self.__params.silico.ms2.signatures:
+        for _ in self.__params.silico.ms2.signatures:
             for monomer in self.monomers:
                 if monomer.id in self.__polymer_config[
                         "MS2_SIGNATURE_IONS"]["dominant"]:
@@ -257,7 +392,8 @@ class Monomer():
         monomer_id,
         polymer_info,
         mode,
-        ms2_signature_types
+        ms2_signature_types,
+        modification_targets
     ):
         """
         Defines Monomer objects to be used in generation of oligomer sequences.
@@ -269,9 +405,13 @@ class Monomer():
                 negative, respectively.
             ms2_signature_types (List[str]): list of signature types to
                 determine which signature fragments are associated with Monomer.
+            modification_targets (Dict[str, List[str]]): dict of monomer one-
+                letter codes and corresponding covalent modification strings
+                targetting monomer sidechain.
 
         Properties:
-            id (str): monomer id string (typically one letter code).
+            id (str): monomer id string (typically one letter code). NOTE: for
+                sidechain-modified monomers id == modified monomer string.
             neutral_mass (float): neutral monoisotopic mass of monomer.
             func_groups (List[list]): list containing monomer functional groups
                 in format (using a standard amino acid as an example):
@@ -301,6 +441,7 @@ class Monomer():
         #  full_name)
         self.__mode = mode
         self.id = monomer_id
+        self.__modification_targets = modification_targets
         self.set_basic_attrs()
 
         # set remaining props
@@ -327,9 +468,25 @@ class Monomer():
         #  try loading monomer info from polymer config file, populate attrs
         #  dict
         try:
-            basic_monomer_attrs["neutral_mass"] = monomer_dict[self.id][0]
-            basic_monomer_attrs["func_groups"] = monomer_dict[self.id][1]
-            basic_monomer_attrs["full_name"] = monomer_dict[self.id][2]
+            neutral_mass = self.__polymer_config["MONOMERS"][
+                str(self.id)[0]][0]
+            if self.__modification_targets:
+                if self.id[0] in self.__modification_targets:
+                    for mod in self.__modification_targets[self.id[0]]:
+                        mod_info = self.__polymer_config[
+                            "MODIFICATIONS"][mod.id]
+                        if self.id.find(f"({mod.id})") > -1:
+                            mod_mdiff = mod_info["mass_diff"]["ms1"]
+                            if type(mod_mdiff) == str:
+                                if mod_mdiff[0] == -1:
+                                    mod_mdiff = -FUNCTIONAL_GROUPS[
+                                        mod_mdiff[1::]]
+                                else:
+                                    mod_mdiff = FUNCTIONAL_GROUPS[mod_mdiff]
+                            neutral_mass += (mod_info["mass"] - mod_mdiff)
+            basic_monomer_attrs["neutral_mass"] = neutral_mass
+            basic_monomer_attrs["func_groups"] = monomer_dict[self.id[0]][1]
+            basic_monomer_attrs["full_name"] = monomer_dict[self.id[0]][2]
         except KeyError:
             raise InvalidMonomerId(
                 monomer_id=self.id,

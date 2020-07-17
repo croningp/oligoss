@@ -1,4 +1,3 @@
-*.json
 !polymersoup/insilico/Config_files/*.json
 .md
 !*read*.md

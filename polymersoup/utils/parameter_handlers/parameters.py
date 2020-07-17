@@ -66,13 +66,16 @@ class Parameters():
     ):
         self.params_class = params_class
         self.params_dict = params_dict
+
         for param in ESSENTIAL_CORE_PARAMS:
             if param not in self.params_dict:
                 raise Exception(
                     f'parameter "{param}" is missing from input file\n'
                     f'{self.params_class}, {self.params_dict}')
+
         self.type_dict, self.fallbacks, self.sub_params = (
             self.get_param_associations())
+
         self.active_instruments = check_instrument_info(params_dict)
 
         #  read params dict and set parameter attributes
@@ -165,10 +168,14 @@ class Parameters():
         #  Finally, set each of these parameters as attributes in instance of
         #  Parameters class
         for k, v in self.sub_params.items():
+
             if k not in self.type_dict and k not in NON_ATTR_KEYS:
                 raise Exception(
                     f'{k} not a valid parameter for {self.params_class}')
-            if not v:
+
+            # this needs to be 'is None' compared to 'if not v' as it would take
+            # keys with 'False' values as having no value
+            if v is None:
                 if k not in self.type_dict["optional"]:
                     raise MissingParameterValue(
                         key=k,
@@ -389,7 +396,7 @@ class Parameters():
                     mode=self.params_dict["mode"], adducts=self.adducts
                 )
                 if self.params_class == "silico_ms2":
-                    raise Exception(self.adduct)
+                    raise Exception(self.adducts)
             if self.params_class == "silico_ms2":
                 sanity_check_silico_fragmentation(
                     silico_params=self.sub_params,

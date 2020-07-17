@@ -65,12 +65,11 @@ def get_ms2_silico_dict_from_compositions(
                         "composition": composition
                     })
                 else:
-                    ms2_silico_dict[sequence].update(
-                        series_dict[sequence]
-                    )
+                    ms2_silico_dict[sequence].update(series_dict[sequence])
 
-    #  to save memory, clear cache of fragment builder function
-    build_single_fragment.cache_clear()
+            #  to save memory, clear cache of fragment builder function
+            build_single_fragment.cache_clear()
+
     return ms2_silico_dict
 
 def combine_ms1_ms2_silico_dicts(
@@ -108,6 +107,7 @@ def combine_ms1_ms2_silico_dicts(
     full_msms_silico = {}
 
     for seq, seq_info in ms2_silico_dict.items():
+
         full_msms_silico[seq] = {
             "MS1": ms1_silico_dict[seq_info["composition"]],
             "MS2": seq_info

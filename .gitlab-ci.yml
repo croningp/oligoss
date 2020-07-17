@@ -20,6 +20,7 @@ test:
     - pip install git+https://$MZMLRIPPER_USER:$MZMLRIPPER_PW@gitlab.com/croningroup/origins/mzmlripper.git@master
     - pip install matplotlib
     - pip install numpy
+    - pip install regex
   script:
     - pip install pytest
     - pip install coverage
