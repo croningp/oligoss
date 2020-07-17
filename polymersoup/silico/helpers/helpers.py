@@ -55,7 +55,7 @@ def find_monomer_mass(monomer_id, polymer):
     Takes a monomer id string and returns neutral monoisotopic mass of monomer
 
     Args:
-        monomer_id (str): monomer id string, including any sidechain
+        monomer_id (str): monomer id string, including any sidechain or terminal
             modifications
         polymer (Polymer): instance of Polymer class
 
@@ -63,9 +63,15 @@ def find_monomer_mass(monomer_id, polymer):
          float: neutral monoisotopic mass of monomer
     """
 
+    # get monomer mass if terminal modification
+    if monomer_id[0] == '[':
+        monomer = list(
+            filter(lambda x: x.id == monomer_id[5], polymer.monomers))[0]
+
     #  get appropriate Monomer object from Polymer object
-    monomer = list(filter(
-        lambda x: x.id == monomer_id[0], polymer.monomers))[0]
+    else:
+        monomer = list(
+            filter(lambda x: x.id == monomer_id[0], polymer.monomers))[0]
 
     #  if monomer_id has no extra characters it is unmodified, so return
     #  standard neutral mass for unmodified monomer
@@ -225,7 +231,7 @@ def get_modified_monomer_ids(
 ):
     """
     Takes a sequence string and returns list of monomer ids (including
-    associated sidechain modifications).
+    associated sidechain and/or terminal modifications).
 
     Args:
         sequence (str): sequence string with +/- sidechain and terminal
@@ -239,7 +245,13 @@ def get_modified_monomer_ids(
         List[str]: list of monomer id strings
     """
     #  remove terminal modifications from sequence string, leaving only monomers
-    sequence = remove_terminal_modifications_sequence_string(sequence)
+    terminal_modifications = {}
+
+    if '[' in sequence:
+
+        # create dictionary of removed modifications to add back later
+        terminal_modifications = return_terminal_mods(sequence=sequence)
+        sequence = remove_terminal_modifications_sequence_string(sequence)
 
     # init list to store monomers
     monomers = []
@@ -284,6 +296,14 @@ def get_modified_monomer_ids(
     )
     monomers = [x[0] for x in monomers]
 
+    # if terminal modifications were removed, add them back into the list
+    if terminal_modifications:
+        for terminus, mod in terminal_modifications.items():
+            if terminus == 0:
+                monomers[0] = f'[{mod}]{monomers[terminus]}'
+            if terminus == -1:
+                monomers[-1] = f'{monomers[terminus]}[{mod}]'
+
     # return list of unique monomers if return_set is set to True
     if return_set:
         return list(set(monomers))
@@ -325,6 +345,28 @@ def remove_terminal_modifications_sequence_string(sequence):
         sequence = sequence[0:mod_start]
 
     return sequence
+
+def return_terminal_mods(sequence):
+    """ This function creates a dictionary listing the modifications present
+    at terminal monomers for a given sequence. Used in get_modified_monomer_ids.
+
+    Args:
+        sequence (str): terminally modified sequence string.
+
+    Returns:
+        terminal_modifications (Dict[int, str]): key is terminus position and
+            value is three letter modification string.
+    """
+
+    terminal_modifications = {}
+
+    if sequence[0] == '[':
+        terminal_modifications[0] = str(sequence[1:4])
+
+    if sequence[-1] == ']':
+        terminal_modifications[-1] = str(sequence[-4:-1])
+
+    return terminal_modifications
 
 def remove_sidechain_modifications_sequence_string(sequence):
     """
@@ -527,7 +569,6 @@ def ionize_sequence_precursors(sequence, params, polymer):
     Returns:
         List[float]: list of m/z values for sequence precursors (MS1 ions)
     """
-
     #  get full list of neutral monoisotopic masses for sequence - standard
     #  neutral mass + neutral loss products
     neutral_masses = get_full_neutral_masses_sequence(
@@ -721,17 +762,23 @@ def retrieve_loss_products_monomer_id(monomer_id, polymer):
 
     Args:
         monomer_id (str): monomer id code. NOTE: this can be one-letter code
-            for unmodified monomers or modified monomer string for sidechain
-            modified monomer
+            for unmodified monomers or modified monomer string for sidechain or
+            terminally modified monomers
         polymer (Polymer): Polymer object.
 
     Returns:
         List[float]: list of neutral masses corresponding to neutral losses for
             target monomer.
     """
+    # get monomer mass if terminal modification
+    if monomer_id[0] == '[':
+        monomer = list(
+            filter(lambda x: x.id == monomer_id[5], polymer.monomers))[0]
 
-    #  retrieve appropriate Monomer object from Polymer object
-    monomer = list(filter(lambda x: x.id == monomer_id[0], polymer.monomers))[0]
+    else:
+        #  retrieve appropriate Monomer object from Polymer object
+        monomer = list(
+            filter(lambda x: x.id == monomer_id[0], polymer.monomers))[0]
 
     #  retrieve loss products as defined in Monomer object, if None return None
     loss_products = monomer.loss_products
@@ -768,7 +815,14 @@ def retrieve_loss_products_monomer_id(monomer_id, polymer):
     #  iterate through sidechain modifications and check if any prevent neutral
     #  losses
     for modification in modifications:
-        mod_list = polymer.modifications[monomer_id[0]]
+
+        # account for sequences modified at 0 terminus 0
+        if monomer_id[0] == '[':
+            mod_mon = monomer_id[5]
+        else:
+            mod_mon = monomer_id[0]
+
+        mod_list = polymer.modifications[mod_mon]
         mod_object = list(filter(
             lambda x: x.id == modification[1:-1],
             mod_list))[0]
@@ -889,13 +943,21 @@ def generate_all_sequences(
             sequencing=sequencing
         )
 
-    #  return list of all possible sequences or compositions (if
+    #  generate list of all possible sequences or compositions (if
     #  sequencing=False) that fit constraints of input parameters
-    return get_sequences(
+    compositions = get_sequences(
         polymer=polymer,
         params=params,
-        sequencing=sequencing
-    )
+        sequencing=sequencing)
+
+    silico = params.silico.ms1
+
+    if params.silico.modifications:
+        compositions = add_modifications_strings(
+            sequence_list=compositions,
+            modifications=params.silico.modifications,
+            universal_terminal_mod=silico.universal_terminal_modifications)
+    return compositions
 
 def get_sequences(
     polymer,
@@ -986,8 +1048,23 @@ def get_isomeric_seqs(target_sequences, sequencing=True):
         monomers = return_monomer_ids_sequence(
             sequence=target,
             return_modified=True,
-            return_set=False
-        )
+            return_set=False)
+
+        # if there's only one monomer, return the sequence
+        if len(monomers) == 1:
+            isomeric_sequences.append(target)
+            break
+
+        terminal_mod_monomers = {}
+
+        # if terminal modifications, remove terminally modified monomer before
+        # generating permutations
+        if '[' in target:
+            terminal_modifications = return_terminal_mods(sequence=target)
+
+            for terminus in terminal_modifications:
+                terminal_mod_monomers[terminus] = monomers[terminus]
+                del monomers[terminus]
 
         #  if returning unique sequences, get all possible sequence permutations
         #  for target monomers
@@ -995,6 +1072,16 @@ def get_isomeric_seqs(target_sequences, sequencing=True):
             isomeric_sequences.extend([
                 "".join(x) for x in itertools.permutations(monomers)
             ])
+
+        # add any terminal modifications back onto the sequence
+        if terminal_mod_monomers:
+            for terminus, mod_monomer in terminal_mod_monomers.items():
+                if terminus == 0:
+                    isomeric_sequences = [
+                        f'{mod_monomer}{s}' for s in isomeric_sequences]
+                if terminus == -1:
+                    isomeric_sequences = [
+                        f'{s}{mod_monomer}' for s in isomeric_sequences]
 
         #  returning compositions, so treat isomers as identical composition
         #  strings
@@ -1007,3 +1094,123 @@ def get_isomeric_seqs(target_sequences, sequencing=True):
         isomeric_sequences,
         key=lambda x: len(x)
     )))
+
+def add_modifications_strings(
+    sequence_list,
+    modifications,
+    universal_terminal_mod=True
+):
+    """ This function adds terminal modifications to sequences in the
+    sequence list. If applicable, the sequence list will already include
+    sidechain modifications at this point.
+
+    Args:
+        sequence_list (list): list of sequences.
+        modifications (dict): dictionary of all modification targets and their
+            modifications (sidechain and terminal).
+        universal_terminal_mod (bool, optional): Whether or not the terminal
+            modification is always present in sequences. Defaults to True.
+
+    Returns:
+        list: list of modified sequences.
+    """
+
+    modified_sequences = sequence_list
+
+    terminal_mods = {
+        k: v for k, v in modifications.items() if k in ['-1', '0']}
+
+    if not terminal_mods:
+        return sequence_list
+
+    if terminal_mods:
+        modified_sequences = add_terminal_mods_strings(
+            sequence_list=modified_sequences,
+            terminal_modifications=terminal_mods,
+            universal_mod=universal_terminal_mod)
+
+    return list(set(modified_sequences))
+
+def add_terminal_mods_strings(
+    sequence_list, terminal_modifications, universal_mod
+):
+    """ This function takes a list of sequence strings and adds terminal
+    modifications of the format [mod] to the desired terminus.
+
+    Args:
+        sequence_list (List[str]): list of sequence strings to be modified.
+        terminal_modifications (Dict[str, List[str]]): keys are target termini
+            and their corresponding key is a list of possible terminal
+            modifications.
+        universal_mod (Bool): states whether or not the terminal modification is
+            universal / all sequences must be terminally modified.
+
+    Returns:
+        List[str]: list of terminally modified sequences.
+    """
+
+    if not terminal_modifications:
+        return sequence_list
+
+    terminal_modified = sequence_list
+
+    for target, mods in terminal_modifications.items():
+
+        if type(mods) != list:
+            mods = [mods]
+        single_target = []
+
+        for sequence in terminal_modified:
+
+            for mod in mods:
+
+                # add terminally modified string to list if not modified already
+                if target == '0' and sequence[0] != '[':
+                    single_target.append(f'[{str(mod)}]{sequence}')
+
+                if target == '-1' and sequence[-1] != ']':
+                    single_target.append(f'{sequence}[{str(mod)}]')
+
+        terminal_modified.extend(single_target)
+
+    if universal_mod:
+        return list(
+            set([t for t in terminal_modified if t.count('[') == len(target)]))
+
+    return list(set(terminal_modified))
+
+def get_composition(sequence):
+    """ This function generates an alphabetically ordered composition string
+    from a sequence string, including those with terminal and/or sidechain
+    modifications.
+
+    Args:
+        sequence (str): sequence string.
+
+    Returns:
+        str: compositional sequence string.
+    """
+    if '[' in sequence:
+        modified_mons = {}
+        terminal_mods = return_terminal_mods(sequence=sequence)
+        seq_list = get_modified_monomer_ids(sequence=sequence, return_set=False)
+
+        for terminus in terminal_mods:
+
+            # remove terminal modifications but store their original position
+            modified_mons[terminus] = seq_list[terminus]
+            del seq_list[terminus]
+
+        # sort un-terminally-modified sequence
+        sorted_seq = sorted(seq_list)
+
+        # add terminal modification back into sequence
+        for terminus, mod in modified_mons.items():
+            if terminus == 0:
+                sorted_seq.insert(0, mod)
+            if terminus == -1:
+                sorted_seq.append(mod)
+        return ''.join(sorted_seq)
+
+    return ''.join(sorted(
+        get_modified_monomer_ids(sequence=sequence, return_set=False)))

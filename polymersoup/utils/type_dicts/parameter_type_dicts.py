@@ -55,8 +55,6 @@ SILICO_LIBRARY_TYPES = {
         "universal_sidechain_modifications": bool,
         "universal_terminal_modifications": bool,
         "optional": [
-            "terminal_modifications",
-            "sidechain_modifications",
             "max_neutral_losses",
             "min_z",
             "max_z",

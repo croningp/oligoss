@@ -6,10 +6,6 @@ from .helpers.helpers import (
     return_monomer_ids_sequence,
     get_full_neutral_masses_sequence
 )
-from ..utils.global_chemical_constants import (
-    ANIONS,
-    CATIONS
-)
 
 from functools import lru_cache
 
@@ -57,6 +53,8 @@ def build_linear_fragments_sequence_dict(
             for sequence, frag_dict in ms2_dict.items():
                 frag_dict.update(series_dict[sequence])
 
+        build_single_fragment.cache_clear()
+
     #  clear cache for memoized function to save memory
     get_memoized_ms2_neutral_masses.cache_clear()
 
@@ -83,12 +81,6 @@ def build_fragment_dict_for_sequences(
         Dict[str, Dict[str, List[float]]]: dict of sequences and corresponding
             fragment sub dictionaries for fragment series.
     """
-    #  get fragment intrinsic adduct
-    i_adduct = retrieve_intrinsic_adduct_series(
-        fragment_series=fragment_series,
-        polymer=polymer,
-        params=params
-    )
 
     #  build fragments for sequences
     ms2_dict = {
@@ -96,7 +88,6 @@ def build_fragment_dict_for_sequences(
             sequence=sequence,
             params=params,
             polymer=polymer,
-            i_adduct=i_adduct,
             series_id=fragment_series
         )
         for sequence in sequences
@@ -108,7 +99,6 @@ def build_single_fragment_series_sequence(
     sequence,
     params,
     polymer,
-    i_adduct,
     series_id
 ):
     """
@@ -118,15 +108,12 @@ def build_single_fragment_series_sequence(
         sequence (str): sequence string
         params (Parameters): Parameters object
         polymer (Polymer): Polymer object
-        i_adduct (List[float]): [mass, min_z, max_z] for fragment series'
-            intrinsic adduct
         series_id (str): fragment series id string
 
     Returns:
         Dict[str, List[float]]: dict of individual fragment ids and
             corresponding list of m/z values.
     """
-
     #  init dict to store fragments and m/z values for sequence / series
     fragment_subdict = {}
 
@@ -146,13 +133,23 @@ def build_single_fragment_series_sequence(
     sequence_length = len(monomer_ids)
     end = sequence_length - polymer.fragment_info[series_id]["end"]
 
+    #  get range of indices for possible exceptions to apply
+    exception_range = find_exception_range(
+        sequence_monomer_ids=tuple(sorted(monomer_ids)),
+        series_id=series_id,
+        polymer=polymer
+    )
+
     #  iterate through sequence backbone, creating subsequences and building
     #  fragments
     for i in range(polymer.fragment_info[series_id]["start"], end):
 
-        #  sort subsequence monomers so isomeric subsequences have same cache
-        #  entry - see below. Convert to make hashable for memoization
-        sorted_subsequence = tuple(sorted(monomer_ids[0:i + 1]))
+        # create tuple but leave modification in place if terminal (0)
+        if '[' in monomer_ids[0]:
+            sorted_subsequence = (
+                monomer_ids[0],) + tuple(sorted(monomer_ids[1:i + 1]))
+        else:
+            sorted_subsequence = tuple(sorted(monomer_ids[0:i + 1]))
 
         #  call memoized function to get neutral_masses for subsequence
         #  NOTE: for memoization to work, make sure subsequence monomers list
@@ -164,17 +161,17 @@ def build_single_fragment_series_sequence(
         )
 
         #  create subsequence from subsequence monomer id strings
-        subsequence = "".join(
+        subsequence_monomers = tuple(
             monomer_ids[polymer.fragment_info[series_id]["start"]:i + 1])
 
         #  call another memoized function to get m/z values for subsequence
         fragment_mz_list = build_single_fragment(
-            subsequence=subsequence,
+            exception_range=exception_range,
+            subsequence_monomers=subsequence_monomers,
             neutral_masses=tuple(neutral_masses),
             polymer=polymer,
             params=params,
-            series_id=series_id,
-            i_adduct=tuple(i_adduct)
+            series_id=series_id
         )
 
         #  add fragment m/z values to fragment_subdict for sequence
@@ -182,14 +179,69 @@ def build_single_fragment_series_sequence(
 
     return fragment_subdict
 
+@lru_cache(maxsize=10)
+def find_exception_range(
+    sequence_monomer_ids,
+    series_id,
+    polymer
+):
+    """
+    Takes a sequence monomer list and works out what range of indices to look
+    for possible exceptions to standard MS2 fragmentation rules.
+
+    Args:
+        sequence_monomer_ids (Tuple[str]): monomer id strings in sequence /
+            composition. NOTE: as this is a memoized function, it is better to
+            pass in monomer ids for composition, not unique sequences - this
+            will assume isomeric sequences have same cache entry.
+        series_id (str): fragment series id.
+        polymer (Polymer): polymer object.
+
+    Returns:
+        Tuple[int]: (e_start, e_end) where e_start, e_end = start, end index
+            in sequence for looking for potential fragmentation exceptions.
+    """
+
+    #  there are no polymer exceptions relevant to this fragment series, return
+    #  NoneType
+    if not polymer.exceptions or series_id not in polymer.exceptions:
+        return None
+
+    #  get list of monomer ids for monomers that potentially cause exceptions
+    #  for this fragment series. Return NoneType if none are present
+    exception_monomers = [
+        x for x in sequence_monomer_ids
+        if x in polymer.exceptions[series_id]]
+    if not exception_monomers:
+        return None
+
+    #  keep track of where exceptions start and end
+    e_start, e_end = 0, len(sequence_monomer_ids)
+
+    #  iterate through monomers that cause exceptions, keeping track of where
+    #  these potential exceptions start and end. Update absolute indices of
+    #  e_start and e_end accordingly
+    for mon in exception_monomers:
+        for j, info in enumerate(polymer.exceptions[series_id][mon].values()):
+            if j == 0:
+                if info["start"] > 0:
+                    e_start = info["start"]
+                    e_end = e_end - info["end"]
+            else:
+                e_start = min(e_start, info["start"])
+                e_end = max(e_end, len(sequence_monomer_ids) - info["end"])
+
+    #  finally, return range of indices to look for exceptions in sequence
+    return (e_start, e_end)
+
 @lru_cache(maxsize=100000)
 def build_single_fragment(
-    subsequence,
+    exception_range,
+    subsequence_monomers,
     neutral_masses,
     polymer,
     params,
-    series_id,
-    i_adduct
+    series_id
 ):
     """
     Builds a single fragment of a single type for a particular single
@@ -202,37 +254,51 @@ def build_single_fragment(
     dict for target fragment series as this will save memory.
 
     Args:
-        subsequence (str): subsequence string
+        exception_range (Tuple[int]): range of indices at which exceptions to
+            standard fragmentation rules are relevant. Format:
+                (e_start, e_end) where e_start, e_end = initial and final
+                absolute index in subsequence string at which exceptions could
+                apply.
+        subsequence_monomers (Tuple[str]): str monomer ids for subsequence.
+            NOTE: these MUST be in the order they appear in the subsequence.
         neutral_masses (List[float]): list of neutral masses for subsequence
         polymer (Polymer): Polymer object
         params (Parameters): Parameters object
         series_id (str): fragment series id string. NOTE: this is NOT the id
             of the individual fragment (e.g to build a 'b1' or 'b2' fragment,
             series_id == 'b')
-        i_adduct (List[float]): [mass, min_z, max_z] for intrinsic exchangeable
-            ion for fragment series
 
     Returns:
         List[float]: list of fragment m/z values.
     """
+
     #  get mass_diff for fragment series
-    mass_diff = polymer.fragment_info[series_id]["mass_diff"][params.mode]
+    mass_diff = polymer.fragment_info[series_id]["mass_diff"]
+
+    #  get intrinsic exchangeable ions in fragment series
+    i_adduct = polymer.fragment_info[series_id]["intrinsic_adduct"]
 
     #  get intrinsic charge for non-exchangeable ions in fragment series
-    i_charge = 0
-    if "intrinsic_charge" in polymer.fragment_info[series_id]:
-        if polymer.fragment_info[series_id]["intrinsic_charge"][params.mode]:
-            i_charge += polymer.fragment_info[
-                series_id]["intrinsic_charge"][params.mode]
+    i_charge = polymer.fragment_info[series_id]["intrinsic_charge"]
 
     #  intrinsic charge exceeds charge range, can't build fragments
     if i_charge > params.silico.ms2.max_z:
         return []
 
+    #  check whether exceptions to standard fragmentation rules could apply
+    if exception_range:
+        exceptions = apply_fragmentation_exceptions(
+            subsequence_monomers=subsequence_monomers,
+            exception_range=exception_range,
+            series_id=series_id,
+            polymer=polymer
+        )
+        mass_diff = exceptions["mass_diff"]
+        i_adduct = exceptions["intrinsic_adduct"]
+        i_charge = exceptions["intrinsic_charge"]
+
     #  apply fragment mass_diff to neutral masses to get default fragment masses
-    default_masses = [
-        mass + mass_diff for mass in neutral_masses
-    ]
+    default_masses = [mass + mass_diff for mass in neutral_masses]
 
     #  init list to store m/z values for MS2 fragments
     ms2_ions = []
@@ -364,40 +430,6 @@ def get_memoized_ms2_neutral_masses(
         ms_level=2
     )
 
-@lru_cache(maxsize=10)
-def retrieve_intrinsic_adduct_series(
-    fragment_series,
-    polymer,
-    params
-):
-    """
-    Checks for any intrinsic adducts for fragment series.
-
-    Args:
-        fragment_series (str): fragment series string id
-        polymer (Polymer): Polymer object
-        params (Parameters): Parameters object
-
-    Returns:
-        (float, float, float, optional): intrinsic adduct mass, minimum charge,
-            maximum charge
-    """
-    if "intrinsic_adducts" not in polymer.fragment_info[fragment_series]:
-        return None, None, None
-
-    if params.mode == "pos":
-        ions = CATIONS
-    else:
-        ions = ANIONS
-
-    if polymer.fragment_info[
-            fragment_series]["intrinsic_adducts"][params.mode]:
-        ion = polymer.fragment_info[
-            fragment_series]["intrinsic_adducts"][params.mode]
-        return ions[ion]
-
-    return None, None, None
-
 @lru_cache(maxsize=1000)
 def add_signature_ions_sequence(
     sequence,
@@ -440,3 +472,71 @@ def add_signature_ions_sequence(
                 ]
 
     return ms2_signatures
+
+def apply_fragmentation_exceptions(
+    subsequence_monomers,
+    exception_range,
+    series_id,
+    polymer
+):
+    """
+    Takes a subsequence with its possible fragmentation exceptions and works
+    out which exceptions to apply to the following MS2 fragmentation
+    properties:
+        1. mass_diff
+        2. intrinsic_adduct
+        3. intrinsic_charge
+
+    Args:
+        subsequence_monomers (List[str]): list of monomer strings for
+            subsequence. NOTE: these MUST be in the order they appear in the
+            subsequence.
+        exception_range (Tuple[int]): (e_start, e_end). e_start, e_end =
+            absolute index at which exceptions start and end, respectively.
+        series_id (str): fragnent series one letter code.
+        polymer (Polymer): polymer object.
+
+    Returns:
+        dict: dict of fragmentation properties in format:
+            {
+                "mass_diff": mass_diff (float),
+                "intrinsic_charge": intrinsic_charge (float),
+                "intrinsic_adduct": intrinsic_adduct (tuple)}
+    """
+    #  init dict to store values for fragmentation properties (m_diff, i_charge
+    #  and i_adduct). For each of these, if exceptions do not apply the default
+    #  values will be returned.
+    frag_prop_values, frag_index = {}, len(subsequence_monomers)
+
+    fragment_info = polymer.fragment_info[series_id]
+    if frag_index <= exception_range[0] or frag_index >= exception_range[1]:
+        return fragment_info
+
+    #  list of properties with potential exceptions to standard fragmentation
+    exception_props = ["mass_diff", "intrinsic_charge", "intrinsic_adduct"]
+
+    #  iterate through subsequence monomers, check if monomer can cause
+    #  fragmentation exceptions and apply as necessary
+    for monomer in subsequence_monomers:
+        if monomer in polymer.exceptions[series_id]:
+            for prop in exception_props:
+                if prop in polymer.exceptions[series_id][monomer]:
+                    exception_info = polymer.exceptions[
+                        series_id][monomer][prop]
+                    for position in exception_info["positions"]:
+                        if subsequence_monomers[position] == monomer:
+                            if prop == "mass_diff":
+                                frag_prop_values[prop] = exception_info[
+                                    "exception_value"]
+                            else:
+                                frag_prop_values[prop] = exception_info[
+                                    "exception_value"][prop]
+                else:
+                    frag_prop_values[prop] = fragment_info[prop]
+                if prop not in frag_prop_values:
+                    frag_prop_values[prop] = fragment_info[prop]
+
+    if not frag_prop_values:
+        return fragment_info
+
+    return frag_prop_values

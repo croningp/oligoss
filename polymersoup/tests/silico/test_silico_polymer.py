@@ -66,10 +66,11 @@ def test_monomers_match_parameters(simple_params):
             monomer_id=monomer.id,
             mode=simple_params.mode,
             ms2_signature_types=simple_params.silico.ms2.signatures,
-            polymer_info=simple_params.polymer_class)
+            polymer_info=simple_params.polymer_class,
+            modification_targets=None)
 
         for prop, value in monomer.__dict__.items():
-            if prop.find("config") == -1:
+            if prop.find("__") == -1:
                 if copy_monomer.__dict__[prop] != value:
                     raise Exception(prop)
 

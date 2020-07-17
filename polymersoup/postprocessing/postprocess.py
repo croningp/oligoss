@@ -2,6 +2,7 @@ import os
 import logging
 import pandas as pd
 from ..extractors.general_functions import open_json, write_to_json
+from ..silico.helpers.helpers import get_composition
 from .postprocess_helpers import (
     assign_confidence_sequences,
     assign_isomeric_groups,
@@ -103,7 +104,7 @@ def postprocess_ripper(ripper_folder, postprocess_parameters, ms2_data):
 
         # create 'Max Intensity' column
         postprocess_summary['Max Intensity'] = [
-            max(MS1_EICs[''.join(sorted(sequence))], key=lambda x:x[1])[1]
+            max(MS1_EICs[get_composition(sequence)], key=lambda x:x[1])[1]
             for sequence in sequences]
 
         # create 'Isomeric_Group' column by matching MS1 fragments

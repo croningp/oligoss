@@ -46,7 +46,6 @@ def generate_ms1_ions(
                 sequence=seq, return_modified=True, return_set=False)))
         else:
             sorted_seq = seq
-
         #  get precursor m/z values for compositions and add to precursor dict
         #  for sequence
         ms1_precursor_dict[seq] = ionize_sequence_precursors(

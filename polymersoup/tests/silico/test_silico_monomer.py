@@ -37,7 +37,8 @@ def test_monomer_props(simple_params, polymer_info):
             monomer_id=monomer_id,
             polymer_info=simple_params.polymer_class,
             mode=simple_params.mode,
-            ms2_signature_types=simple_params.silico.ms2.signatures
+            ms2_signature_types=simple_params.silico.ms2.signatures,
+            modification_targets=None
         )
         assert monomer.id == monomer_id
         assert monomer.neutral_mass == polymer_info["MONOMERS"][monomer.id][0]
@@ -76,7 +77,8 @@ def test_monomer_neutral_loss(simple_params, polymer_info):
             monomer_id=id,
             polymer_info=polymer_info,
             mode=simple_params.mode,
-            ms2_signature_types=simple_params.silico.ms2.signatures)
+            ms2_signature_types=simple_params.silico.ms2.signatures,
+            modification_targets=None)
 
     #  iterate through monomer tests and make sure loss products are correct
     for monomer_list in test_monomers:
@@ -129,7 +131,8 @@ def test_ionizable_sidechains(simple_params, polymer_info):
                 monomer_id=monomer,
                 polymer_info=polymer_info,
                 mode=mode,
-                ms2_signature_types=simple_params.silico.ms2.signatures)
+                ms2_signature_types=simple_params.silico.ms2.signatures,
+                modification_targets=None)
         if monomer in neutral_monomers:
             assert not monomer_obj.ionizable
             assert not monomer_obj.ion_info

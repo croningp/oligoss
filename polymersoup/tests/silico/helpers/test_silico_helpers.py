@@ -22,7 +22,10 @@ from ....silico.helpers.helpers import (
     ionize_sequence_precursors,
     generate_all_sequences,
     get_isomeric_seqs,
-    get_full_neutral_masses_sequence
+    get_full_neutral_masses_sequence,
+    add_terminal_mods_strings,
+    get_composition,
+    return_monomer_ids_sequence
 )
 
 HERE = os.path.abspath(os.path.dirname(__file__))
@@ -30,6 +33,13 @@ INPUTS_FOLDER = os.path.join(os.path.dirname(HERE), '..', 'input_param_files')
 
 @pytest.fixture
 def params():
+    return generate_parameters(
+        params_json=os.path.join(
+            INPUTS_FOLDER,
+            'full_input_parameters_without_silico_modifications.json'))
+
+@pytest.fixture
+def mods_params():
     return generate_parameters(
         params_json=os.path.join(
             INPUTS_FOLDER,
@@ -137,6 +147,49 @@ def test_sequence_masses(test_sequences, polymer):
             n_rounded=3)
 
         assert sequence_mass == round(test_sequences[sequence], 3)
+
+@pytest.mark.unit
+def test_sequence_list_with_sidechain_mods(mods_params):
+    """
+    Tests generation of sequence strings from monomers with targeted sidechain
+    modifications.
+
+    Args:
+        mods_params (Parameters): parameters object with targeted sidechain
+            modifications.
+    """
+    #  instantiate Polymer object with modifications in Parameters object
+    mod_polymer = Polymer(params_obj=mods_params)
+
+    #  generate full list of sequence strings with modified sidechains included
+    mod_seq_pool = generate_all_sequences(
+        polymer=mod_polymer,
+        params=mods_params,
+        sequencing=True)
+
+    #  get monomer ids as stored in Polymer object
+    monomer_ids = [
+        monomer.id for monomer in mod_polymer.monomers
+    ]
+
+    #  check monomer id strings contain appropriate modified monomer ids
+    assert sorted(monomer_ids) == sorted(
+        ["R", "N", "K(Ole)", "K(Pal)", "K(Ace)", "S(Trt)", "E(Bnz)"])
+
+    #  iterate through sequence strings and get unique monmer id strings
+    for seq in mod_seq_pool:
+        monomers = return_monomer_ids_sequence(
+            sequence=seq,
+            return_modified=True,
+            return_set=True
+        )
+
+        #  check that monomers targeted for modification are not present in
+        #  unmodified form
+        assert not [
+            monomer for monomer in monomers
+            if monomer in ["K", "S", "E"]
+        ]
 
 @pytest.mark.unit
 def test_core_sequence(modified_test_sequences):
@@ -269,8 +322,7 @@ def test_generate_all_sequence(params):
     def check_length_distribution():
         N_sequence_space = 0
         for x in range(1, local_params.silico.max_length + 1):
-            N_sequence_space += (len(local_params.monomers)
-                                 ** x)
+            N_sequence_space += (len(local_params.monomers) ** x)
 
         return N_sequence_space
 
@@ -325,3 +377,56 @@ def test_isomeric_targets(params):
 
         #  check function works for composition strings
         assert sorted(compositions) == sorted(isomeric_compositions)
+
+@pytest.mark.unit
+def test_add_terminal_mods_strings():
+
+    targets = ["FLOP", "F", "PLOP"]
+
+    terminal_modifications = {"0": ["Yas", "Wow"], "-1": "Boc"}
+
+    universal_positive_test = sorted(add_terminal_mods_strings(
+        sequence_list=targets,
+        terminal_modifications=terminal_modifications,
+        universal_mod=True))
+
+    universal_positive = sorted(
+        ["[Wow]FLOP[Boc]", "[Wow]F[Boc]", "[Wow]PLOP[Boc]", "[Yas]FLOP[Boc]",
+            "[Yas]F[Boc]", "[Yas]PLOP[Boc]"])
+
+    non_universal_positive_test = sorted(add_terminal_mods_strings(
+        sequence_list=targets,
+        terminal_modifications=terminal_modifications,
+        universal_mod=False))
+
+    non_universal_positive = sorted(
+        ["[Yas]FLOP[Boc]", "[Wow]FLOP[Boc]", "[Wow]F[Boc]", "[Yas]PLOP",
+            "[Wow]F", "F[Boc]", "FLOP", "[Yas]FLOP", "F", "[Yas]PLOP[Boc]",
+            "[Yas]F", "PLOP", "[Yas]F[Boc]", "[Wow]PLOP[Boc]", "[Wow]PLOP",
+            "PLOP[Boc]", "[Wow]FLOP", "FLOP[Boc]"])
+
+    negative_test = sorted(add_terminal_mods_strings(
+        sequence_list=targets,
+        terminal_modifications={},
+        universal_mod=True))
+
+    assert universal_positive_test == universal_positive
+    assert non_universal_positive_test == non_universal_positive
+    assert negative_test == sorted(targets)
+
+@pytest.mark.unit
+def test_get_composition():
+
+    # monomers should appear alphabetically
+    test_sidechain = get_composition(sequence='AB(Pop)VER')
+
+    # terminally modified monomers will remain in that position
+    # other monomers should be in alphabetical order
+    test_terminal = get_composition(sequence='[Boc]UTENEC[Yes]')
+    test_double_mod = get_composition(sequence='AB(Pop)VER[Trt]')
+    negative_test = get_composition(sequence='BDAEC')
+
+    assert test_sidechain == 'AB(Pop)ERV'
+    assert test_terminal == '[Boc]UEENTC[Yes]'
+    assert test_double_mod == 'AB(Pop)EVR[Trt]'
+    assert negative_test == 'ABCDE'

@@ -5,8 +5,8 @@ This file is used to run all PolymerSoup experiments.
 Artificial Life Team, Cronin Group, 2020
 """
 import os
-import sys
 import time
+import sys
 import logging
 from logging.config import dictConfig
 
@@ -18,7 +18,6 @@ from polymersoup.utils.parameter_handlers.parameter_handlers import (
     generate_parameters
 )
 from polymersoup.workflows.workflows import exhaustive_screen
-
 
 def run_polymersoup(input_file, data_folder, out_folder):
     """
