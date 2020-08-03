@@ -26,6 +26,7 @@ NH2 = 16.01872
 CH3CN = 41.02655
 CH3OH = 32.02622
 C2H5OH = 46.04187
+CO2 = 43.98984
 
 # Solvent Dictionary
 SOLVENTS = [
@@ -58,7 +59,9 @@ FUNCTIONAL_GROUPS = {
     "CH3OH": CH3OH,  # methanol
     "EtOH": C2H5OH,  # ethanol
     "etoh": C2H5OH,   # ethanol
-    "ethanol": C2H5OH  # ethanol
+    "ethanol": C2H5OH,  # ethanol
+    "CO2": CO2,  # carbon dioxide
+    "co2": CO2   # carbon dioxide
 }
 
 """

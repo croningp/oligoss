@@ -1,0 +1,47 @@
+{
+  "screening_method": "exhaustive",
+  "mode": "pos",
+  "instrument": "orbitrap_lumos_tribrid",
+  "polymer_class": "polyester",
+  "chromatography": "c18",
+  "monomers": ["g", "l"],
+  "silico": {
+    "max_length": 10,
+    "min_length": 1,
+    "isomeric_targets": null,
+    "ms1": {
+      "min_z": 1,
+      "max_z": null,
+      "adducts": ["Na"],
+      "max_neutral_losses": 1,
+      "universal_sidechain_modifications": false,
+      "universal_terminal_modifications": false
+    },
+    "ms2": {
+      "min_z": 1,
+      "max_z": 1,
+      "fragment_series": ["c", "i", "j"],
+      "adducts": null,
+      "max_neutral_losses": 2,
+      "signatures": ["Im"]
+    }
+  },
+  "extractors": {
+    "error": "0.01",
+    "error_units": "abs",
+    "rt_units": "min",
+    "min_ms2_peak_abundance": "90",
+    "min_ms1_total_intensity": null,
+    "min_ms2_total_intensity": null,
+    "pre_screen_filters": {
+    "min_ms1_max_intensity": 1E5,
+    "min_ms2_max_intensity": 1E3,
+    "max_rt": 17}},
+  "postprocess": {
+    "exclude_fragments": null,
+    "optional_core_fragments": ["b1"],
+    "core_linear_series": ["c", "i", "j"],
+    "dominant_signature_cap": 0,
+    "subsequence_weight": [0]
+  }
+}
