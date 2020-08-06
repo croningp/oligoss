@@ -42,6 +42,6 @@
     "optional_core_fragments": ["b1"],
     "core_linear_series": ["c", "i", "j"],
     "dominant_signature_cap": 0,
-    "subsequence_weight": [0]
+    "subsequence_weight": 0
   }
 }
