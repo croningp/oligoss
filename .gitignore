@@ -10,9 +10,9 @@ __pycache__/
 build/
 !Documentation/build/
 dist/
-.csv
+*.csv
 *.lnk
 *.coverage
 *.log
-*shortcut*
+*.dat
 !*.flake8.*

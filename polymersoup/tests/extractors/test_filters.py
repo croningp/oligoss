@@ -1,7 +1,7 @@
 import os
 import pytest
 import mzmlripper.extractor as ripper
-from ...extractors.general_functions import open_json
+from ...utils.file_io import open_json
 from ...extractors.filters import rt_filter, intensity_filter, find_precursor,\
     apply_prefilters_ms2, min_ms2_peak_abundance_filter, match_mass
 

@@ -8,6 +8,7 @@ import os
 import time
 import sys
 import logging
+
 from logging.config import dictConfig
 
 from polymersoup.utils.logging_utils.logger_utils import (
@@ -17,7 +18,10 @@ from polymersoup.utils.logging_utils.logger_utils import (
 from polymersoup.utils.parameter_handlers.parameter_handlers import (
     generate_parameters
 )
-from polymersoup.workflows.workflows import exhaustive_screen
+from polymersoup.workflows.workflows import (
+    exhaustive_screen_multi
+)
+
 
 def run_polymersoup(input_file, data_folder, out_folder):
     """
@@ -46,15 +50,16 @@ def run_polymersoup(input_file, data_folder, out_folder):
     #  log message at start of screen
     logging.info("beginning exhaustive screen")
 
-    exhaustive_screen(
+    exhaustive_screen_multi(
         params=run_params,
         data_folder=data_folder,
         out_folder=out_folder
     )
 
 
-run_polymersoup(
-    input_file=sys.argv[1],
-    data_folder=sys.argv[2],
-    out_folder=sys.argv[3]
-)
+if __name__ == '__main__':
+    run_polymersoup(
+        input_file=sys.argv[1],
+        data_folder=sys.argv[2],
+        out_folder=sys.argv[3]
+    )

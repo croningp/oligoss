@@ -2,6 +2,10 @@
 This file contains functions for the main Polymersoup experimental workflows
 """
 import os
+import time
+import concurrent.futures
+import multiprocessing
+
 from ..silico.polymer_info.polymer import Polymer
 from ..silico.ms1_silico import generate_ms1_ions
 from ..silico.silico_handler import (
@@ -9,19 +13,39 @@ from ..silico.silico_handler import (
     combine_ms1_ms2_silico_dicts
 )
 from ..extractors.extractor_classes import RipperDict
-from ..extractors.filters import (
-    mzml_to_json,
-    return_jsons,
-    prefilter_all
-)
 from ..extractors.data_extraction import (
     extract_MS1_EICs,
-    confirm_ms2_fragments_isomeric_sequences
+    confirm_all_fragments_concurrent
 )
-from ..extractors.general_functions import write_to_json, open_json
-from ..postprocessing.postprocess import postprocess_ripper
+from ..extractors.filters import mzml_to_json, prefilter_all
+from ..utils.file_io import (
+    write_locked_csv,
+    return_jsons,
+    open_json
+)
+from ..utils.run_utils import set_max_cores, check_child_process_fork
+from ..postprocessing.postprocess_helpers import list_unconfirmed_fragments
+from ..postprocessing.postprocess import postprocess_composition
 
-def exhaustive_screen(params, data_folder, out_folder):
+#  get lock object for synchronising access to summary csv file between
+#  processes
+CSV_LOCK = multiprocessing.Lock()
+
+def exhaustive_screen_multi(params, data_folder, out_folder):
+    """
+    Exhaustive screen with multiprocessing
+
+    Args:
+        params (Parameters): parameters object.
+        data_folder (str): ripper data dir.
+        out_folder (str): output data dir
+    """
+
+    #  make sure all out files get dumped in "extracted" subfolder
+    out_folder = os.path.join(out_folder, "extracted")
+    if not os.path.exists(out_folder):
+        print(out_folder)
+        os.mkdir(out_folder)
 
     #  convert mzml files to ripper JSONs
     mzml_to_json(
@@ -48,171 +72,374 @@ def exhaustive_screen(params, data_folder, out_folder):
         sequencing=False
     )
 
-    ms1_silico_o_file = os.path.join(
-        out_folder, "extracted", "MS1_pre_screening.json")
-    if not os.path.exists(ms1_silico_o_file):
-        os.mkdir(os.path.dirname(ms1_silico_o_file))
-    #  write MS1 compositional silico dict to file
-    write_to_json(
-        write_dict=compositional_ms1_dict,
-        output_json=ms1_silico_o_file
-    )
+    #  perform exhaustive screen on ripper files
+    screen_rippers(
+        filtered_rippers=filtered_rippers,
+        compositional_ms1_dict=compositional_ms1_dict,
+        params=params,
+        polymer=polymer,
+        out_folder=out_folder)
 
-    #  iterate through each ripper file, screening for ms1 hits and then ms2
-    #  fragments for potential hits
+
+def screen_rippers(
+    filtered_rippers: list,
+    compositional_ms1_dict: dict,
+    params: object,
+    polymer: object,
+    out_folder: str
+):
+    """
+    Takes a list of filtered rippers, compositional MS1 hits, and performs
+    exhaustive sc
+
+    Args:
+        filtered_rippers (List[str]): list of full filepaths to filtered
+            ripper files.
+        compositional_ms1_dict (Dict[str, List[float]]): compositional hits
+            and their MS1 precursors.
+        params (Parameters): Parameters object.
+        polymer (Polymer): Polymer object.
+        out_folder (str): output directory.
+    """
+    #  iterate through the ripper directories
     for ripper in filtered_rippers:
 
-        #  open ripper data, set output folder
-        ripper_data = RipperDict(open_json(ripper))
+        #  create ripper output dir
         ripper_output = os.path.join(
             out_folder, os.path.basename(ripper)).replace(".json", "")
         if not os.path.exists(ripper_output):
             os.mkdir(ripper_output)
 
-        #  screem ripper for ms1 compositions
-        ms1_hits = screen_ripper(
-            ripper_data=ripper_data,
-            compositional_ms1_dict=compositional_ms1_dict,
-            polymer=polymer,
-            params=params,
-            ripper_output=ripper_output
-        )
+        #  create summary csv for postprocessing results
+        ssw = params.postprocess.subsequence_weight
+        output_csv = os.path.join(ripper_output, f"{ssw}ssw_summary.csv")
+        write_locked_csv(
+            fpath=output_csv,
+            write_list=[
+                "sequence",
+                "confidence",
+                "confirmed_signatures",
+                "max_intensity",
+                "composition"],
+            lock=CSV_LOCK)
 
-        #  screen ripper for ms2 fragments for compositions found at ms1
-        screen_ripper_ms2(
-            ms1_hits=ms1_hits,
-            ripper_data=ripper_data,
-            compositional_ms1_dict=compositional_ms1_dict,
-            polymer=polymer,
-            params=params,
-            ripper_output_dir=ripper_output
-        )
+        #  get maximum number of cores to use in workflow
+        global MAX_CORES
+        MAX_CORES = set_max_cores(params)
 
-        postprocess_ripper(
-            ripper_folder=ripper_output,
-            postprocess_parameters=params.postprocess,
-            ms2_data=ripper_data.ms2
-        )
+        #  iterate through rippers, carry out exhaustive screens
+        for ripper in filtered_rippers:
 
-def screen_ripper(
-    ripper_data,
-    compositional_ms1_dict,
-    polymer,
-    params,
-    ripper_output
+            #  check whether OS is Linux or Windows
+            if check_child_process_fork:
+                exhaustive_screen_forked(
+                    ripper=ripper,
+                    compositional_ms1_dict=compositional_ms1_dict,
+                    polymer=polymer,
+                    params=params,
+                    ripper_output=ripper_output
+                )
+            else:
+                exhaustive_screen_spawned(
+                    ripper=ripper,
+                    compositional_ms1_dict=compositional_ms1_dict,
+                    params=params,
+                    polymer=polymer,
+                    ripper_output=ripper_output)
+
+def exhaustive_screen_forked(
+    ripper: str,
+    compositional_ms1_dict: dict,
+    polymer: object,
+    params: object,
+    ripper_output: str
 ):
     """
-    Screens a single RipperDict object for MS1 precursors.
+    Perform multiprocessed exhaustive screen on single ripper assuming child
+    processed are forked (i.e. Linux).
 
     Args:
-        ripper_data (RipperDict): RipperDict object
-        compositional_ms1_dict (Dict[str, List[float]]): dict of composition
-            strings and corresponding precursor m/z values (MS1 ions)
-        polymer (Polymer): Polymer object
-        params (Parameters): Parameters object
-        ripper_output (str): directory of output data folder for ripper
+        ripper (str): full filepath to ripper.
+        compositional_ms1_dict (Dict[str, List[float]]): compositional hits
+            and MS1 precursors.
+        polymer (Polymer): Polymer object.
+        params (Parameters): Parameters object.
+        ripper_output (str): output directory.
+    """
+    #  get Ripper object from ripper dir
+    ripper_data = RipperDict(open_json(ripper))
+
+    #  set ripper MS1, MS2 objects and unique tag for current ripper
+    global RIPPER_MS1
+    global RIPPER_MS2
+    global RIPPER_TAG
+    RIPPER_MS1, RIPPER_MS2 = ripper_data.ms1, ripper_data.ms2
+    RIPPER_TAG = str(time.time())
+
+    output_csv = os.path.join(
+        ripper_output,
+        f"{params.postprocess.subsequence_weight}ssw_summary.csv")
+
+    #   multiprocess screening for compositions => screen MS1, generate MS2
+    #   silico and then screen MS2 in parallel
+    with concurrent.futures.ProcessPoolExecutor(max_workers=MAX_CORES) \
+            as executor:
+        results = [executor.submit(
+            full_screen_composition_forked,
+            comp, masses, polymer, params, ripper_output)
+            for comp, masses in compositional_ms1_dict.items()]
+        for x in concurrent.futures.as_completed(results):
+            if x.result():
+                postprocess_composition(
+                    hit_info=x.result(),
+                    params=params,
+                    lock_obj=CSV_LOCK,
+                    output_csv=output_csv)
+
+def exhaustive_screen_spawned(
+    ripper: str,
+    compositional_ms1_dict: dict,
+    params: object,
+    polymer: object,
+    ripper_output: str
+):
+    """
+    Perform multiprocessed exhaustive screen on single ripper assuming child
+    processed are spawned (i.e. Windows).
+
+    Args:
+        ripper (str): full filepath to ripper.
+        compositional_ms1_dict (Dict[str, List[float]]): compositional hits and
+            their associated MS1 precursors.
+        params (object): Parameters object.
+        polymer (object): Polymer object.
+        ripper_output (str): output directory.
+    """
+
+    ripper_data = RipperDict(open_json(ripper))
+
+    #  create Manager objects for MS1 and MS2 ripper data for sharing
+    #  between processes
+    ripper_ms1 = multiprocessing.Manager().dict(ripper_data.ms1)
+    ripper_ms2 = multiprocessing.Manager().dict(ripper_data.ms2)
+    ripper_tag = os.path.abspath(ripper)
+
+    output_csv = os.path.join(
+        ripper_output,
+        f"{params.postprocess.subsequence_weight}ssw_summary.csv")
+
+    with concurrent.futures.ProcessPoolExecutor(max_workers=MAX_CORES) \
+            as executor:
+        results = [executor.submit(
+            full_screen_composition_spawned,
+            ripper_ms1, ripper_ms2, ripper_tag, comp,
+            masses, polymer, params, ripper_output)
+            for comp, masses in compositional_ms1_dict.items()]
+        for x in concurrent.futures.as_completed(results):
+            if x.result():
+                postprocess_composition(
+                    hit_info=x.result(),
+                    params=params,
+                    lock_obj=CSV_LOCK,
+                    output_csv=output_csv)
+
+
+def full_screen_composition_spawned(
+    ripper_ms1: object,
+    ripper_ms2: object,
+    ripper_tag: str,
+    composition: str,
+    precursor_masses: list,
+    polymer: object,
+    params: object,
+    out_folder: str
+) -> dict:
+    """
+    Screens a single ripper for a single composition. Called on as part of
+    multiprocessed when screen when child processes have been spawned.
+
+    Args:
+        ripper_ms1 (object): Manager dict for ripper MS1 data.
+        ripper_ms2 (object): Manager dict for ripper MS2 data.
+        ripper_tag (str): unique tag for ripper file. Used for caching.
+        composition (str): composition string for composition being screened.
+        precursor_masses (List[float]): list of m/z values for composition
+            precursors.
+        polymer (object): Polmyer object.
+        params (object): Parameters object.
+        out_folder (str): output directory for saving results.
 
     Returns:
-        List[str]: list of compositions that have been found in MS1 data of
-            input ripper_data
+        (Dict[str, dict], optional): dict of results summarised in following
+            format:
+            {
+                "max_intensity": (float),
+                "composition": (str)
+                seq: {
+                    "confirmed_fragments": (Dict[str, List[float]]),
+                    "spectral_assignments": (Dict[str, List[str]])
+                }
+                for seq in isomeric_sequences
+            }
     """
-    #  get list of compositions with MS1 ions of sufficent abundance
-    #  MS1 EICs for these sequences are also dumped to file
-    ms1_hits = extract_MS1_EICs(
-        MS1_silico=compositional_ms1_dict,
+    #  set out folder for individual composition
+    f_basename = f"{os.path.basename(out_folder)}_{composition}"
+
+    #  get MS1 EIC for target composition
+    ms1_hit = extract_MS1_EICs(
+        MS1_silico={composition: precursor_masses},
         extractor_parameters=params.extractors,
-        MS1_dict=ripper_data.ms1,
-        filename=os.path.basename(ripper_output),
-        output_folder=ripper_output
-    ).keys()
+        filename=f_basename,
+        MS1_dict=ripper_ms1
+    )
 
-    return ms1_hits
+    #  precursors not present so no point in doing MS2
+    if not ms1_hit:
+        return None
 
+    ms2_hits = generate_screen_ms2(
+        composition=composition,
+        precursors=precursor_masses,
+        params=params,
+        polymer=polymer,
+        out_folder=out_folder,
+        ripper_ms2=ripper_ms2,
+        ripper_tag=ripper_tag)
 
-def screen_ripper_ms2(
-    ripper_data,
-    ms1_hits,
-    compositional_ms1_dict,
-    ripper_output_dir,
+    if ms2_hits and ms2_hits[0]:
+        seq_ms2 = {
+            seq: {
+                "confirmed_fragments": ms2_hits[0][seq],
+                "spectral_assignments": ms2_hits[0][seq]
+            }
+            for seq in ms2_hits[0]}
+        seq_ms2.update({
+            "max_intensity": ms1_hit[composition][0][1],
+            "composition": composition})
+
+        return seq_ms2
+
+    return None
+
+def full_screen_composition_forked(
+    composition: str,
+    precursor_masses: list,
+    polymer: object,
+    params: object,
+    out_folder: str
+) -> dict:
+
+    """
+    Screens a single ripper for a single composition. Called on as part of
+    multiprocessed when screen when child processes have been spawned.
+
+    Returns:
+        (Dict[str, dict], optional): dict of results summarised in following
+            format:
+            {
+                "max_intensity": (float),
+                "composition": (str)
+                seq: {
+                    "confirmed_fragments": (Dict[str, List[float]]),
+                    "spectral_assignments": (Dict[str, List[str]])
+                }
+                for seq in isomeric_sequences
+            }
+    """
+
+    #  set out folder for individual composition
+    f_basename = f"{os.path.basename(out_folder)}_{composition}"
+
+    #  get MS1 EIC for target composition
+    ms1_hit = extract_MS1_EICs(
+        MS1_silico={composition: precursor_masses},
+        extractor_parameters=params.extractors,
+        filename=f_basename,
+        MS1_dict=RIPPER_MS1
+    )
+
+    #  precursors not present so no point in doing MS2
+    if not ms1_hit:
+        return None
+
+    ms2_hits = generate_screen_ms2(
+        composition=composition,
+        precursors=precursor_masses,
+        params=params,
+        polymer=polymer,
+        out_folder=out_folder,
+        ripper_ms2=RIPPER_MS2,
+        ripper_tag=RIPPER_TAG)
+
+    if ms2_hits and ms2_hits[0]:
+        seq_ms2 = {
+            seq: {
+                "confirmed_fragments": ms2_hits[0][seq],
+                "spectral_assignments": ms2_hits[0][seq]
+            }
+            for seq in ms2_hits[0]}
+        seq_ms2.update({
+            "max_intensity": ms1_hit[composition][0][1],
+            "composition": composition})
+
+        return seq_ms2
+
+    return None
+
+def generate_screen_ms2(
+    composition,
+    precursors,
     params,
-    polymer
+    polymer,
+    out_folder,
+    ripper_ms2,
+    ripper_tag
 ):
     """
-    Screens single ripper object for MS1 precursor - MS2 product associations
-    for sequences.
+    Takes a composition and corresponding MS1 precursors, generates full MS/MS
+    silico dict for all sequences isomeric to composition. Screens ripper data
+    for all isomeric sequences.
 
     Args:
-        ripper_data (RipperDict): RipperDict object
-        ms1_hits (List[str]): list of compositions that have been found in
-            sufficient abundance in ripper_data MS1 spectra
-        compositional_ms1_dict (Dict[str, List[float]]): dict of compositions
-            and corresponding precursor m/z values
-        ripper_output_dir (str): directory of output folder for ripper output
-        params (Parameters): Parameters object
-        polymer (Polymer): Polymer object
-    """
+        composition (str): composition string.
+        precursors (List[float]): precursor m/z values.
+        params (Parameters): parameters object.
+        polymer (Polymer): polymer object.
+        out_folder (str): output data dir.
+        ripper_ms2 (dict): ripper MS2 data.
 
-    #  get silico dict of MS2 ions
-    ms2_silico_dict = get_ms2_silico_dict_from_compositions(
-        ms1_hits=ms1_hits,
+    Returns:
+        dict, dict: confirmed fragments, spectral matches
+    """
+    #  get MS2 silico then full MS/MS silico dict
+    silico_dict = get_ms2_silico_dict_from_compositions(
+        ms1_hits=[composition],
         params=params,
         polymer=polymer
     )
-
-    #  combine ms1 and ms2 silico dicts to create full MS/MS silico dict
-    full_msms_silico_dict = combine_ms1_ms2_silico_dicts(
-        ms1_silico_dict={
-            k: v for k, v in compositional_ms1_dict.items()
-            if k in ms1_hits
-        },
-        ms2_silico_dict=ms2_silico_dict
+    silico_dict = combine_ms1_ms2_silico_dicts(
+        ms1_silico_dict={composition: precursors},
+        ms2_silico_dict=silico_dict
     )
 
-    out_basename = os.path.basename(ripper_output_dir)
+    #  iterate through isomeric seqs, getting any confirmed fragments and
+    #  their spectral matches
+    confirmed_fragments, spectral_matches = {}, {}
+    for sequence, fragment_dict in silico_dict.items():
+        if sequence != "compositions":
+            confirmed = confirm_all_fragments_concurrent(
+                fragment_dict=fragment_dict,
+                ms2_spectra=ripper_ms2,
+                params=params,
+                ripper_tag=ripper_tag)
 
-    #  set filename for MS/MS silico dict and dump to json
-    out_silico_json = os.path.join(
-        ripper_output_dir,
-        f"{out_basename}_PRE_fragment_screening_silico_dict.json"
-    )
+            if confirmed and confirmed[0]:
+                confirmed_fragments[sequence] = confirmed[0]
+                confirmed_fragments[sequence].update(
+                    {"unconfirmed": list_unconfirmed_fragments(
+                        confirmed_fragments=confirmed[0],
+                        silico_dict=silico_dict[sequence]["MS2"]
+                    )})
 
-    write_to_json(
-        write_dict=full_msms_silico_dict,
-        output_json=os.path.join(
-            ripper_output_dir,
-            out_silico_json
-        )
-    )
-
-    #  init dict to store confirmed fragments and spectral matches for all
-    #  sequences
-    confirmed_fragment_dict, spectral_matches = {}, {}
-
-    for composition in full_msms_silico_dict["compositions"]:
-
-        confirmed_ms2 = confirm_ms2_fragments_isomeric_sequences(
-            target_composition=composition,
-            precursors=compositional_ms1_dict[composition],
-            full_msms_silico_dict=full_msms_silico_dict,
-            ripper_data=ripper_data,
-            params=params
-        )
-
-        confirmed_fragment_dict.update(confirmed_ms2[0])
-        spectral_matches.update(confirmed_ms2[1])
-
-    write_to_json(
-        write_dict=confirmed_fragment_dict,
-        output_json=os.path.join(
-            ripper_output_dir,
-            f"{out_basename}_confirmed_fragment_dict.json"
-        )
-    )
-
-    write_to_json(
-        write_dict=spectral_matches,
-        output_json=os.path.join(
-            ripper_output_dir,
-            f"{out_basename}_spectra_matches.json"
-        )
-    )
+                spectral_matches[sequence] = confirmed[1]
+    return confirmed_fragments, spectral_matches

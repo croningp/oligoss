@@ -9,6 +9,8 @@ CORE_PARAM_FALLBACKS = {
     "silico": None,
     "extractors": None,
     "postprocess": None,
+    "free_cores": 3,
+    "max_cores": 12,
     "instrument_dependent": {
         "mass_spec": None,
         "chromatography": None
@@ -48,7 +50,14 @@ POSTPROCESS_FALLBACKS = {
     "essential_fragments": None,
     "exclude_fragments": None,
     "spectral_assignment_plots": False,
-    "min_plot_confidence": 70
+    "min_plot_confidence": 70,
+    "molecular_assembly": {
+        "min_confidence": 70,
+        "consensus": True,
+        "min_peak_identity": 0.7,
+        "combine_precursors": False,
+        "ppm_window": 5
+    }
 }
 
 # list of parameters which must ALWAYS be supplied in input file

@@ -27,6 +27,8 @@ CORE_PARAM_TYPES = {
     "polymer_class": str,
     "instrument": str,
     "chromatography": str,
+    "free_cores": int,
+    "max_cores": int,
     "instrument_dependent": {
         "instrument_only": {
             "mass_spec": None,
@@ -151,12 +153,13 @@ POSTPROCESS_TYPES = {
     "optional_core_fragments": List[str],
     "dominant_signature_cap": float,
     "essential_fragments": List[str],
-    "subsequence_weight": List[float],
+    "subsequence_weight": float,
     "core_linear_series": List[str],
     "rt_bin": float,
     "ms2_rt_bin": float,
     "spectral_assignment_plots": bool,
     "min_plot_confidence": int,
+    "molecular_assembly": dict,
     "optional": [
         "exclude_fragments",
         "optional_core_fragments",
@@ -167,7 +170,8 @@ POSTPROCESS_TYPES = {
         "dominant_signature_cap",
         "core_linear_series",
         "spectral_assignment_plots",
-        "min_plot_confidence"
+        "min_plot_confidence",
+        "molecular_assembly"
     ],
     "instrument_dependent": {
         "instrument_only": {

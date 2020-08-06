@@ -1,12 +1,14 @@
 import os
 import logging
 import pandas as pd
-from ..extractors.general_functions import open_json, write_to_json
+
+from ..utils.file_io import open_json, write_to_json, append_locked_csv
 from ..silico.helpers.helpers import get_composition
 from .postprocess_helpers import (
     assign_confidence_sequences,
     assign_isomeric_groups,
-    all_spectral_assignment_plots
+    all_spectral_assignment_plots,
+    assign_confidence_sequence_concurrent
 )
 
 def postprocess_ripper(ripper_folder, postprocess_parameters, ms2_data):
@@ -22,7 +24,7 @@ def postprocess_ripper(ripper_folder, postprocess_parameters, ms2_data):
     """
 
     all_ssw = postprocess_parameters.subsequence_weight
-    ripper_name = ripper_folder.split('\\')[-1]
+    ripper_name = os.path.basename(ripper_folder)
 
     # retrieve full silico MSMS dict from extracted data
     full_silico_MSMS = open_json(
@@ -119,3 +121,56 @@ def postprocess_ripper(ripper_folder, postprocess_parameters, ms2_data):
             index=False)
 
     logging.info(f'postprocessing complete for {ripper_name}')
+
+
+def postprocess_composition(
+    hit_info,
+    params,
+    lock_obj,
+    output_csv
+):
+
+    #  get composition string
+    composition = hit_info["composition"]
+
+    #  get max intensity @ MS1
+    max_intensity = hit_info["max_intensity"]
+
+    #  get subsequence weights for calculating confidence
+    ssw = params.postprocess.subsequence_weight
+
+    #  iterate through confirmed sequences, assigning confidence values
+    for seq, info in hit_info.items():
+        if seq not in ["composition", "max_intensity"]:
+            fragments = info["confirmed_fragments"]
+
+            confidence = assign_confidence_sequence_concurrent(
+                confirmed_fragments=fragments["core"],
+                unconfirmed=fragments["unconfirmed"],
+                ssw=ssw,
+                params=params
+            )
+
+            if confidence > 0:
+                core_confirmed = [
+                    frag for frag in hit_info[seq][
+                        "confirmed_fragments"]["core"]
+                    if frag not in [
+                        "signatures", "terminal_modifications"]]
+                sig_confirmed = [
+                    frag for frag in hit_info[seq][
+                        "confirmed_fragments"]["signatures"]
+                    if frag != "terminal_modifications"]
+
+                write_list = [
+                    seq,
+                    confidence,
+                    core_confirmed,
+                    sig_confirmed,
+                    max_intensity,
+                    composition]
+
+                append_locked_csv(
+                    fpath=output_csv,
+                    lock=lock_obj,
+                    write_list=write_list)
