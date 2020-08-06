@@ -131,7 +131,7 @@ def screen_rippers(
         for ripper in filtered_rippers:
 
             #  check whether OS is Linux or Windows
-            if check_child_process_fork:
+            if check_child_process_fork():
                 exhaustive_screen_forked(
                     ripper=ripper,
                     compositional_ms1_dict=compositional_ms1_dict,
