@@ -3,7 +3,7 @@ import logging
 import mzmlripper.extractor as ripper
 from bisect import bisect_left, bisect_right
 from .extractor_classes import RipperDict
-from .general_functions import open_json, write_to_json, return_jsons
+from ..utils.file_io import open_json, write_to_json, return_jsons
 
 def mzml_to_json(input_folder, extractor_parameters):
     """ This function takes all mzml files in the input folder and converts them

@@ -443,6 +443,123 @@ def assign_isomeric_groups(sequences):
 
     return assignments
 
+def list_unconfirmed_fragments(confirmed_fragments, silico_dict):
+    """
+    Takes a confirmed fragment dict and silico MS2 dict for a single sequence,
+    returns list of fragment ids for fragments that have not been confirmed
+    for sequence.
+
+    Args:
+        confirmed_fragments (Dict[str, List[float]]): dict of confirmed
+            fragment ids and their m/z values.
+        silico_dict (Dict[str, List[float]]): Dict of silico fragment ids and
+            their m/z values.
+
+    Returns:
+        List[str]: list of fragment ids for fragments that have not been
+            confirmed (including signature fragments).
+    """
+
+    #  list non-signatures fragments
+    unconfirmed = [
+        frag for frag in silico_dict
+        if (frag not in ["signatures", "composition"]
+            and frag not in confirmed_fragments["core"])]
+
+    #  add signatures to unconfirmed fragments
+    unconfirmed.extend([
+        sig for sig in silico_dict["signatures"]
+        if (sig != "terminal_modifications"
+            and sig not in confirmed_fragments["signatures"])])
+
+    return unconfirmed
+
+def assign_confidence_sequence_concurrent(
+    confirmed_fragments: dict,
+    unconfirmed: list,
+    params: object,
+    ssw: float
+) -> float:
+    """
+    Takes a confirmed fragment dict, list of unconfirmed fragments for a
+    target sequence and returns confidence value at specified subsequence
+    weight value.
+
+    Args:
+        confirmed_fragments (Dict[str, List[float]]): dict of confirmed
+            fragments and corresponding m/z values.
+        unconfirmed (List[str]): list of unconfirmed fragment ids.
+        params (object): Parameters object.
+        ssw (float): subsequence weighting for calculating confidence.
+
+    Returns:
+        float: final confidene value in %.
+    """
+
+    #  get non-signature silico fragments
+    core_silico = [
+        frag for frag in confirmed_fragments
+        if frag not in ["signatures", "terminal_modifications"]]
+    core_silico.extend([
+        frag for frag in unconfirmed
+        if frag[0] in params.postprocess.core_linear_series])
+
+    #  get core confirmed
+    core_confirmed = [
+        frag for frag in core_silico if frag not in unconfirmed]
+
+    core_confirmed = [
+        frag for frag in core_confirmed
+        if frag[0] in params.postprocess.core_linear_series]
+
+    if not core_confirmed:
+        return 0
+
+    #   check whether there are any optional core fragments that have not
+    #   been confirmed - if so, remove these from consideration
+    if params.postprocess.optional_core_fragments:
+        core_silico = [
+            frag for frag in core_silico
+            if frag not in params.postprocess.optional_core_fragments]
+
+    #  get % found fragments
+    percent_found = (len(core_confirmed) / len(core_silico)) * 100
+
+    #  ssw = 0 so only % found frags matters
+    if ssw == 0:
+        return round(percent_found, 2)
+
+    coverage = calculate_subsequence_coverage_concurrent(
+        core_confirmed=core_confirmed,
+        core_silico=core_silico,
+        params=params)
+
+    return ((1 - ssw) * percent_found) + (ssw * coverage)
+
+def calculate_subsequence_coverage_concurrent(
+    core_confirmed,
+    core_silico,
+    params
+):
+    #  init list to store coverage values for core fragment series
+    coverage_values = []
+
+    for core_series in params.postprocess.core_linear_series:
+        confirmed = [
+            frag for frag in core_confirmed if frag[0] == core_series]
+        confirmed_indices = sorted([int(frag[1::]) for frag in confirmed])
+        core_indices = sorted([int(frag[1::]) for frag in core_silico])
+        obs_coverage = calculate_subsequence_coverage(confirmed_indices)
+
+        if obs_coverage > 0:
+            max_coverage = calculate_subsequence_coverage(core_indices)
+            coverage = (obs_coverage / max_coverage) * 100
+            coverage_values.append(coverage)
+        else:
+            coverage_values.append(obs_coverage)
+
+    return sum(coverage_values) / len(coverage_values)
+
 def single_spectrum_plot(
     sequence,
     confirmed_frags,

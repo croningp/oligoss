@@ -9,7 +9,7 @@
     "min_ms2_max_intensity": null
   },
   "dominant_signature_cap": 80,
-  "subsequence_weight": [0],
+  "subsequence_weight": 0,
   "fragmentation": {
     "ms1": "neutral",
     "ms2": ["HCD", "neutral"],

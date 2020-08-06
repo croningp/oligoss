@@ -1,9 +1,7 @@
-import os
 import logging
 
 from functools import lru_cache
 
-from .general_functions import write_to_json
 from .filters import (
     find_precursors,
     min_ms2_peak_abundance_filter,
@@ -15,8 +13,7 @@ def extract_MS1_EICs(
     MS1_silico,
     extractor_parameters,
     MS1_dict,
-    filename,
-    output_folder
+    filename
 ):
     """ This function extracts EICs for each sequence in the MS1 silico dict
     from the MS1_ripper_dict.
@@ -27,7 +24,6 @@ def extract_MS1_EICs(
         extractor_parameters (object): full extractor parameters
         MS1_dict (Dict[str, dict]): MS1 ripper mass spectrometry data
         filename (str): str name of sample (ripper json name without .json)
-        output_folder (str): full filepath to output folder
 
     Returns:
         Dict[str, List[List[float]]]: dict of compositions / sequences that have
@@ -35,6 +31,7 @@ def extract_MS1_EICs(
             {"sequence": [[rt, I]...] ...} where rt, I = retention time and I =
             sequence intensity at rt.
     """
+
     # format sequence sequence: [[rt, I], ..]
     retention_times = retrieve_retention_times(ripper_dict=MS1_dict)
     ms1_EICs = {}
@@ -59,14 +56,9 @@ def extract_MS1_EICs(
     #  add list of retention times for all ms1 spectra for saving to output
     ms1_EICs['retention_times'] = retention_times
 
-    # write MS1 EIC to json
-    write_to_json(ms1_EICs, os.path.join(
-        output_folder, f'{filename}_MS1_EICs.json'))
-
     #  log summary of MS1 extraction
     logging.info(
-        f"EICs generated for {len(ms1_EICs) - 1} compositions and written to\n"
-        f"{os.path.join(output_folder, f'{filename}_MS1_EICs.json')}")
+        f"EICs generated for {len(ms1_EICs) - 1} compositions")
 
     return ms1_EICs
 
@@ -187,9 +179,154 @@ def confirm_fragment(masses, error, error_units, spectra):
                 spectra_matches[spectrum_id] = match
 
     # sort matches by ascending number
-    matches = list(set(matches))
-    matches.sort()
+    matches = sorted(list(set(matches)))
+
     return matches, spectra_matches
+
+def confirm_ms2_fragments_isomeric_sequences_concurrent(
+    composition,
+    silico_dict,
+    ripper_ms2,
+    params,
+    ripper_tag
+):
+
+    #  get spectra with matching precursors for target composition
+    candidate_spectra = find_precursors(
+        ms2_precursors=silico_dict[composition]["MS1"],
+        spectra=ripper_ms2,
+        error=params.extractors.error,
+        error_units=params.extractors.error_units
+    )
+    if not candidate_spectra:
+        return None, None
+
+    candidate_spectra = min_ms2_peak_abundance_filter(
+        spectra=candidate_spectra,
+        peak_list=silico_dict[composition]["MS2"]["peak_list"],
+        error=params.extractors.error,
+        min_ms2_peak_abundance=params.extractors.min_ms2_peak_abundance
+    )
+    if not candidate_spectra:
+        return None, None
+
+def confirm_all_fragments_concurrent(
+    fragment_dict,
+    ms2_spectra,
+    ripper_tag,
+    params
+):
+    """
+    Takes MS/MS silico dict for isomeric sequences and screens MS2 spectra for
+    target sequences.
+
+    Args:
+        fragment_dict (Dict[str, dict]): dict of sequences and corresponding
+            MS1 precursor and MS2 fragment info.
+        ms2_spectra (List[dict]): list of ripper spectra.
+        ripper_tag (str): unique str tag for original ripper file. NOTE: this
+            is only used in caching, but is essential when screening multiple
+            rippers in multiprocessing workflows.
+        params (Parameters): parameters object.
+
+    Returns:
+        dict, dict: confirmed fragments, spectral matches
+    """
+    # separate out 'core' fragments from signatures
+    silico_fragments = {
+        k: v for k, v in fragment_dict["MS2"].items()
+        if k not in ["composition", "signatures"]
+    }
+    silico_signatures = fragment_dict["MS2"]["signatures"]
+    silico_signatures_list = {
+        k: v for k, v in silico_signatures.items()
+        if k != 'terminal_modifications'}
+    confirmed_fragments = {
+        "core": {}, "signatures": {"terminal_modifications": {}}}
+    all_spectra_matches = {}
+
+    #  get spectra with precursor matches
+    ms2_spectra = find_precursors(
+        ms2_precursors=fragment_dict["MS1"],
+        spectra=ms2_spectra,
+        error=params.extractors.error,
+        error_units=params.extractors.error_units
+    )
+    if not ms2_spectra:
+        return None, None
+
+    #  make sure spectra meet MAPI criteria
+    ms2_spectra = min_ms2_peak_abundance_filter(
+        spectra=ms2_spectra,
+        error=params.extractors.error,
+        peak_list=fragment_dict["peak_list"],
+        min_ms2_peak_abundance=params.extractors.min_ms2_peak_abundance
+    )
+
+    @lru_cache(maxsize=1000)
+    def confirm_masses_internal(masses, spectrum_ids, tag):
+        """
+        Inner function for searching MS2 spectra for fragment masses. NOTE:
+        this is a memoized function. tag MUST be assigned to the correct
+        source RipperDict.
+
+        Args:
+            masses (Tuple[float]): target m/z values.
+            spectrum_ids (Tuple[str]): spectrum_ids for spectra matching
+                precursors and MAPI. NOTE: used only for caching.
+            tag (str): unique string tag for source ripper. NOTE: used purely
+                for caching.
+
+        Returns:
+            List[float]: list of fragments with match in target spectra.
+        """
+        return confirm_fragment(
+            masses=masses,
+            error=params.extractors.error,
+            error_units=params.extractors.error_units,
+            spectra=ms2_spectra
+        )
+
+    #  get spectrum ids for caching
+    spectrum_ids = tuple(sorted([spectrum_id for spectrum_id in ms2_spectra]))
+
+    # confirm 'core' fragments
+    for fragment, masses in silico_fragments.items():
+        fragment_matches, spectra_matches = confirm_masses_internal(
+            masses=tuple(masses),
+            spectrum_ids=spectrum_ids,
+            tag=ripper_tag)
+
+        if fragment_matches:
+            confirmed_fragments["core"][fragment] = fragment_matches
+            all_spectra_matches[fragment] = spectra_matches
+
+    # confirm signatures
+    for signature, masses in silico_signatures_list.items():
+        signature_matches, sig_spectra_matches = confirm_masses_internal(
+            masses=tuple(masses),
+            spectrum_ids=spectrum_ids,
+            tag=ripper_tag)
+
+        if signature_matches:
+            confirmed_fragments["signatures"][signature] = signature_matches
+            all_spectra_matches[signature] = sig_spectra_matches
+
+    # confirm terminal modifications
+    if "terminal_modifications" in silico_signatures:
+        for mod, masses in silico_signatures["terminal_modifications"].items():
+
+            mod_matches, mod_spectra_matches = confirm_masses_internal(
+                masses=tuple(masses),
+                spectrum_ids=spectrum_ids,
+                tag=ripper_tag)
+
+            if mod_matches:
+                confirmed_fragments[
+                    "signatures"]["terminal_modifications"][mod] = mod_matches
+                all_spectra_matches[mod] = mod_spectra_matches
+
+    return confirmed_fragments, all_spectra_matches
 
 def confirm_ms2_fragments_isomeric_sequences(
     target_composition,

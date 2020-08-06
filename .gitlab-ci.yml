@@ -10,18 +10,23 @@ lint:
     FLAKE8_MAX_LINE_LENGTH: 80
     FLAKE8_IGNORE: E302,W503
 
+  before_script:
+  - pip install flake8
+
   script:
-    - pip install flake8
     - flake8 . --max-line-length=$FLAKE8_MAX_LINE_LENGTH --ignore=$FLAKE8_IGNORE
 
 test:
   stage: testing
+
   before_script: 
     - pip install git+https://$MZMLRIPPER_USER:$MZMLRIPPER_PW@gitlab.com/croningroup/origins/mzmlripper.git@master
     - pip install matplotlib
     - pip install numpy
-    - pip install regex
-  script:
     - pip install pytest
     - pip install coverage
+    - pip install memory_profiler
+    - pip install pandas
+
+  script:
     - coverage run -m pytest polymersoup/tests -m unit -rf -x
