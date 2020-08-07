@@ -11,6 +11,8 @@ CORE_PARAM_FALLBACKS = {
     "postprocess": None,
     "free_cores": 3,
     "max_cores": 12,
+    "data_folder": None,
+    "output_folder": None,
     "instrument_dependent": {
         "mass_spec": None,
         "chromatography": None

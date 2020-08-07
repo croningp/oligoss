@@ -29,6 +29,8 @@ CORE_PARAM_TYPES = {
     "chromatography": str,
     "free_cores": int,
     "max_cores": int,
+    "data_folder": str,
+    "output_folder": str,
     "instrument_dependent": {
         "instrument_only": {
             "mass_spec": None,
@@ -39,7 +41,13 @@ CORE_PARAM_TYPES = {
             "chromatography": None
         }
     },
-    "optional": ["instrument", "chromatography"]
+    "optional": [
+        "instrument",
+        "chromatography",
+        "max_cores",
+        "free_cores",
+        "data_folder",
+        "output_folder"]
 }
 
 #  types for nested silico parameters
