@@ -24,7 +24,8 @@ def open_json(filepath):
 
 def write_to_json(
     write_dict,
-    output_json
+    output_json,
+    type=dict
 ):
     """
     Writes a dict to a json.
@@ -34,7 +35,10 @@ def write_to_json(
         filepath (str): full file path to output json.
     """
     with open(output_json, 'w') as fp:
-        json.dump(write_dict, fp, indent=4)
+        if type == dict:
+            json.dump(write_dict, fp, indent=4)
+        elif type == str:
+            json.dumps(obj=write_dict)
 
 def return_jsons(input_folder):
     """
@@ -83,4 +87,30 @@ def append_locked_csv(fpath, lock, write_list, delimiter=','):
     with open(fpath, 'a') as o:
         writer = csv.writer(o, delimiter=delimiter)
         writer.writerow(write_list)
+    lock.release()
+
+def append_locked_json(fpath, lock, dump_dict):
+    """
+    Appends contents of a dict to a new line in JSON as string.
+
+    Args:
+        fpath (str): full file path to output JSON.
+        lock (Lock): Lock object.
+        dump_dict (dict): dict to dump as string.
+    """
+    #  acquire lock, open and dump dict to JSON, release lock
+    lock.acquire()
+
+    #   open JSON file for reading and writing
+    with open(fpath, mode="r+") as o:
+
+        #  go to end of file, set position at end of file so dict can be
+        #  dicted in new line
+        o.seek(0, 2)
+        position = o.tell()
+        o.seek(position)
+
+        #  dump dict as string on a new line
+        o.write(f"{json.dumps(dump_dict)}")
+
     lock.release()

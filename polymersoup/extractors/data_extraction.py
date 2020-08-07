@@ -36,8 +36,10 @@ def extract_MS1_EICs(
     retention_times = retrieve_retention_times(ripper_dict=MS1_dict)
     ms1_EICs = {}
 
-    #  log number of compositions being screened for
-    logging.info(f"generating MS1 EICs for {len(MS1_silico)} compositions")
+    if len(MS1_silico) > 1:
+
+        #  log number of compositions being screened for
+        logging.info(f"generating MS1 EICs for {len(MS1_silico)} compositions")
 
     # generate EIC for each
     for sequence, masses in MS1_silico.items():
@@ -52,13 +54,10 @@ def extract_MS1_EICs(
 
         if sequence_EIC:
             ms1_EICs[sequence] = sequence_EIC
+            logging.info(f"{sequence} MS1 hit found")
 
     #  add list of retention times for all ms1 spectra for saving to output
     ms1_EICs['retention_times'] = retention_times
-
-    #  log summary of MS1 extraction
-    logging.info(
-        f"EICs generated for {len(ms1_EICs) - 1} compositions")
 
     return ms1_EICs
 

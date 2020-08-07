@@ -3,6 +3,7 @@ This file contains functions for the main Polymersoup experimental workflows
 """
 import os
 import time
+import logging
 import concurrent.futures
 import multiprocessing
 
@@ -21,15 +22,21 @@ from ..extractors.filters import mzml_to_json, prefilter_all
 from ..utils.file_io import (
     write_locked_csv,
     return_jsons,
-    open_json
+    open_json,
+    write_to_json,
+    append_locked_json
 )
 from ..utils.run_utils import set_max_cores, check_child_process_fork
 from ..postprocessing.postprocess_helpers import list_unconfirmed_fragments
 from ..postprocessing.postprocess import postprocess_composition
 
-#  get lock object for synchronising access to summary csv file between
-#  processes
-CSV_LOCK = multiprocessing.Lock()
+#  get lock object for synchronising access to summary csv, silico and spectral
+#   assignment JSON files between processes
+CSV_LOCK, JSON_LOCK, SILICO_LOCK = (
+    multiprocessing.Lock(),
+    multiprocessing.Lock(),
+    multiprocessing.Lock()
+)
 
 def exhaustive_screen_multi(params, data_folder, out_folder):
     """
@@ -62,8 +69,12 @@ def exhaustive_screen_multi(params, data_folder, out_folder):
         extractor_parameters=params.extractors
     )
 
+    logging.info("generating Polymer object")
+
     #  get Polymer object from input parameters
     polymer = Polymer(params_obj=params)
+
+    logging.info("generating MS1 compositional dict")
 
     #  generate dict of compositions and MS1 precursors for screening
     compositional_ms1_dict = generate_ms1_ions(
@@ -71,6 +82,19 @@ def exhaustive_screen_multi(params, data_folder, out_folder):
         polymer=polymer,
         sequencing=False
     )
+
+    logging.info(
+        f"MS1 silico dict generated for {len(compositional_ms1_dict)}\n"
+        "compositions".rstrip("\n"))
+
+    #  dump MS1 compositional dict to JSON
+    ms1_silico_json = os.path.join(out_folder, "ms1_silico.json")
+    write_to_json(
+        write_dict=compositional_ms1_dict,
+        output_json=ms1_silico_json
+    )
+
+    logging.info(f"MS1 silico dict written to {ms1_silico_json}")
 
     #  perform exhaustive screen on ripper files
     screen_rippers(
@@ -104,11 +128,16 @@ def screen_rippers(
     #  iterate through the ripper directories
     for ripper in filtered_rippers:
 
+        logging.info(f"screening ripper file ({ripper})")
+
         #  create ripper output dir
         ripper_output = os.path.join(
             out_folder, os.path.basename(ripper)).replace(".json", "")
         if not os.path.exists(ripper_output):
             os.mkdir(ripper_output)
+
+        logging.info(
+            f"output data for screen will be stored in {ripper_output}")
 
         #  create summary csv for postprocessing results
         ssw = params.postprocess.subsequence_weight
@@ -122,7 +151,17 @@ def screen_rippers(
                 "max_intensity",
                 "composition"],
             lock=CSV_LOCK)
-
+        output_json = os.path.join(ripper_output, "spectral_assignments.json")
+        write_to_json(
+            write_dict={"source_ripper": ripper},
+            output_json=output_json,
+            type=str
+        )
+        write_to_json(
+            write_dict={"silico": f"{len(compositional_ms1_dict)}"},
+            output_json=os.path.join(ripper_output, "MSMS_silico.json"),
+            type=str
+        )
         #  get maximum number of cores to use in workflow
         global MAX_CORES
         MAX_CORES = set_max_cores(params)
@@ -179,6 +218,14 @@ def exhaustive_screen_forked(
     output_csv = os.path.join(
         ripper_output,
         f"{params.postprocess.subsequence_weight}ssw_summary.csv")
+    output_json = os.path.join(
+        ripper_output,
+        "spectral_assignments.json"
+    )
+    # output_silico_json = os.path.join(
+    #     ripper_output,
+    #     "MS/MS_silico.json"
+    # )
 
     #   multiprocess screening for compositions => screen MS1, generate MS2
     #   silico and then screen MS2 in parallel
@@ -193,8 +240,10 @@ def exhaustive_screen_forked(
                 postprocess_composition(
                     hit_info=x.result(),
                     params=params,
-                    lock_obj=CSV_LOCK,
-                    output_csv=output_csv)
+                    csv_lock=CSV_LOCK,
+                    json_lock=JSON_LOCK,
+                    output_csv=output_csv,
+                    output_json=output_json)
 
 def exhaustive_screen_spawned(
     ripper: str,
@@ -228,6 +277,10 @@ def exhaustive_screen_spawned(
         ripper_output,
         f"{params.postprocess.subsequence_weight}ssw_summary.csv")
 
+    output_json = os.path.join(
+        ripper_output,
+        "spectral_assignments.json")
+
     with concurrent.futures.ProcessPoolExecutor(max_workers=MAX_CORES) \
             as executor:
         results = [executor.submit(
@@ -240,8 +293,10 @@ def exhaustive_screen_spawned(
                 postprocess_composition(
                     hit_info=x.result(),
                     params=params,
-                    lock_obj=CSV_LOCK,
-                    output_csv=output_csv)
+                    csv_lock=CSV_LOCK,
+                    json_lock=JSON_LOCK,
+                    output_csv=output_csv,
+                    output_json=output_json)
 
 
 def full_screen_composition_spawned(
@@ -252,7 +307,8 @@ def full_screen_composition_spawned(
     precursor_masses: list,
     polymer: object,
     params: object,
-    out_folder: str
+    out_folder: str,
+    silico_lock: object
 ) -> dict:
     """
     Screens a single ripper for a single composition. Called on as part of
@@ -268,6 +324,7 @@ def full_screen_composition_spawned(
         polymer (object): Polmyer object.
         params (object): Parameters object.
         out_folder (str): output directory for saving results.
+        silico_lock (Lock): Lock object for controlling access to silico JSON.
 
     Returns:
         (Dict[str, dict], optional): dict of results summarised in following
@@ -304,7 +361,8 @@ def full_screen_composition_spawned(
         polymer=polymer,
         out_folder=out_folder,
         ripper_ms2=ripper_ms2,
-        ripper_tag=ripper_tag)
+        ripper_tag=ripper_tag,
+        silico_lock=SILICO_LOCK)
 
     if ms2_hits and ms2_hits[0]:
         seq_ms2 = {
@@ -369,13 +427,14 @@ def full_screen_composition_forked(
         polymer=polymer,
         out_folder=out_folder,
         ripper_ms2=RIPPER_MS2,
-        ripper_tag=RIPPER_TAG)
+        ripper_tag=RIPPER_TAG,
+        silico_lock=SILICO_LOCK)
 
-    if ms2_hits and ms2_hits[0]:
+    if ms2_hits and ms2_hits[1]:
         seq_ms2 = {
             seq: {
                 "confirmed_fragments": ms2_hits[0][seq],
-                "spectral_assignments": ms2_hits[0][seq]
+                "spectral_assignments": ms2_hits[1][seq]
             }
             for seq in ms2_hits[0]}
         seq_ms2.update({
@@ -393,7 +452,8 @@ def generate_screen_ms2(
     polymer,
     out_folder,
     ripper_ms2,
-    ripper_tag
+    ripper_tag,
+    silico_lock
 ):
     """
     Takes a composition and corresponding MS1 precursors, generates full MS/MS
@@ -407,10 +467,13 @@ def generate_screen_ms2(
         polymer (Polymer): polymer object.
         out_folder (str): output data dir.
         ripper_ms2 (dict): ripper MS2 data.
+        silico_lock (Lock): Lock object.
 
     Returns:
         dict, dict: confirmed fragments, spectral matches
     """
+    logging.info(
+        f"generating isomeric sequences and MS2 fragments for {composition}")
     #  get MS2 silico then full MS/MS silico dict
     silico_dict = get_ms2_silico_dict_from_compositions(
         ms1_hits=[composition],
@@ -421,6 +484,10 @@ def generate_screen_ms2(
         ms1_silico_dict={composition: precursors},
         ms2_silico_dict=silico_dict
     )
+
+    logging.info(
+        f"{len(silico_dict)} sequences to be screened for composition\n"
+        f"{composition}".rstrip("\n"))
 
     #  iterate through isomeric seqs, getting any confirmed fragments and
     #  their spectral matches
@@ -442,4 +509,14 @@ def generate_screen_ms2(
                     )})
 
                 spectral_matches[sequence] = confirmed[1]
+    logging.info(
+        f"MS2 fragments screened for sequences isomeric to {composition}")
+
+    #  if sequences have been confimed, save their silico fragments
+    if confirmed_fragments:
+        append_locked_json(
+            fpath=os.path.join(out_folder, "MSMS_silico.json"),
+            dump_dict=silico_dict,
+            lock=silico_lock)
+
     return confirmed_fragments, spectral_matches
