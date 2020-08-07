@@ -5,7 +5,8 @@ creating instance of Parameters class for use in PolymerSoup workflows
 import json
 import copy
 from .parameters import Parameters
-from ..type_dicts.parameter_fallbacks import ESSENTIAL_CORE_PARAMS, CORE_CLASSES
+from ..type_dicts.parameter_fallbacks import (
+    ESSENTIAL_CORE_PARAMS, CORE_CLASSES, CORE_PARAM_FALLBACKS)
 
 def generate_parameters(
     params_json,
@@ -46,6 +47,12 @@ def generate_parameters(
     for param in ESSENTIAL_CORE_PARAMS:
         if param not in formatted_params:
             formatted_params[param] = params_dict[param]
+    for param in CORE_PARAM_FALLBACKS:
+        if param not in formatted_params:
+            if param in params_dict:
+                formatted_params[param] = params_dict[param]
+            else:
+                formatted_params[param] = CORE_PARAM_FALLBACKS[param]
 
     #  create instance of Parameters ready to be used in other modules
     #  and return

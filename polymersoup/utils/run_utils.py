@@ -1,5 +1,6 @@
 import sys
 import logging
+import argparse
 import multiprocessing
 
 def set_max_cores(params: object) -> int:
@@ -47,3 +48,44 @@ def check_child_process_fork() -> bool:
         return True
     logging.info(f"{log_msg}{sys.platform}. Child processes spawned")
     return False
+
+def arg_parser() -> object:
+    """
+    Sets arguments for Polymersoup execute.py CLI.
+
+    Returns:
+        object: Namespace object with args as properties.
+    """
+
+    #  create ArgumentParser object
+    my_parser = argparse.ArgumentParser(
+        description="executes a Polymersoup sequencing workflow",
+        epilog="Happy Sequencing!"
+    )
+
+    #  add arguments for input (run parameters file), ripper directory (folder
+    #  containing ripper JSONs and / or mzML files) and output directory for
+    #  dumping results
+    my_parser.add_argument(
+        "-input",
+        action="store",
+        required=True,
+        help="full filepath to input run parameters file"
+    )
+    my_parser.add_argument(
+        "-ripper",
+        action="store",
+        required=False,
+        help="directory containing mzML files or ripper JSONs. If this is not\n"
+        "specified in command line, it must be supplied in input\n"
+        "parameters"
+    )
+    my_parser.add_argument(
+        "-output",
+        action="store",
+        required=False,
+        help="directory containing mzML files or ripper JSONs. If this is not\n"
+        "specified in command line, it must be supplied in input parameters"
+    )
+
+    return my_parser.parse_args()

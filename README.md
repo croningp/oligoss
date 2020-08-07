@@ -39,7 +39,7 @@ pip install mzmlripper --user
 To run a Polymersoup sequencing workflow, run the following command:
 
 ```
-python polymersoup/execute.py input_params.json ripper_folder out_dir
+python polymersoup/execute.py -i input_params.json -r ripper_folder -o output_folder
 
 ```
 - __input_params.json__ = input parameters file
@@ -47,11 +47,12 @@ python polymersoup/execute.py input_params.json ripper_folder out_dir
 This should contain all relevant input parameters for executing a Polymersoup
 sequencing workflow (see __Input Parameters__, below).
 
-- __ripper_folder__ = data directory
+- __ripper_folder__ = data directory. __NOTE__: this argument can either be passed in via the command line directly (as above) or specified in the input parameters file using the _data_folder_ parameter.
 
 This folder should contain input MS data in either mzML or ripper JSON format.
 
-- __out_dir__ = output directory
+- __out_dir__ = output directory. __NOTE__: this argument can either be passed in via the command line directly (as above) or specified in the input parameters file using the _output_folder_ parameter.
+
 
 All output data will be dumped to this folder.
 
