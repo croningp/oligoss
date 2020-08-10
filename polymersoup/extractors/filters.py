@@ -491,10 +491,15 @@ def prefilter_all(rippers, extractor_parameters):
     """
     if extractor_parameters.pre_screen_filters:
 
+        logging.info(
+            f"applying pre-screen filters to {len(rippers)} ripper JSONs")
+
         filtered_rippers = []
 
-        for ripper_file in rippers:
-            logging.info(f'applying prefilters to {ripper_file}')
+        for i, ripper_file in enumerate(rippers):
+            logging.info(
+                f'applying prefilters to {ripper_file} (file {i + 1} of\n'
+                f'{len(rippers)})'.rstrip('\n'))
 
             # pre filter spectra
             filtered_rippers.append(prefilter(

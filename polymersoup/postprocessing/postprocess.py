@@ -2,7 +2,12 @@ import os
 import logging
 import pandas as pd
 
-from ..utils.file_io import open_json, write_to_json, append_locked_csv
+from ..utils.file_io import (
+    open_json,
+    write_to_json,
+    append_locked_csv,
+    append_locked_json
+)
 from ..silico.helpers.helpers import get_composition
 from .postprocess_helpers import (
     assign_confidence_sequences,
@@ -126,8 +131,10 @@ def postprocess_ripper(ripper_folder, postprocess_parameters, ms2_data):
 def postprocess_composition(
     hit_info,
     params,
-    lock_obj,
-    output_csv
+    csv_lock,
+    json_lock,
+    output_csv,
+    output_json
 ):
 
     #  get composition string
@@ -172,5 +179,10 @@ def postprocess_composition(
 
                 append_locked_csv(
                     fpath=output_csv,
-                    lock=lock_obj,
+                    lock=csv_lock,
                     write_list=write_list)
+                append_locked_json(
+                    fpath=output_json,
+                    lock=json_lock,
+                    dump_dict={seq: info["spectral_assignments"]}
+                )
