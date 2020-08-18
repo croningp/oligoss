@@ -147,6 +147,7 @@ def screen_rippers(
             write_list=[
                 "sequence",
                 "confidence",
+                "confirmed_linear_fragments",
                 "confirmed_signatures",
                 "max_intensity",
                 "composition"],
@@ -222,10 +223,6 @@ def exhaustive_screen_forked(
         ripper_output,
         "spectral_assignments.json"
     )
-    # output_silico_json = os.path.join(
-    #     ripper_output,
-    #     "MS/MS_silico.json"
-    # )
 
     #   multiprocess screening for compositions => screen MS1, generate MS2
     #   silico and then screen MS2 in parallel
