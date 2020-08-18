@@ -499,7 +499,8 @@ def assign_confidence_sequence_concurrent(
     #  get non-signature silico fragments
     core_silico = [
         frag for frag in confirmed_fragments
-        if frag not in ["signatures", "terminal_modifications"]]
+        if (frag not in ["signatures", "terminal_modifications"]
+            and frag[0] in params.postprocess.core_linear_series)]
     core_silico.extend([
         frag for frag in unconfirmed
         if frag[0] in params.postprocess.core_linear_series])
@@ -508,19 +509,19 @@ def assign_confidence_sequence_concurrent(
     core_confirmed = [
         frag for frag in core_silico if frag not in unconfirmed]
 
-    core_confirmed = [
-        frag for frag in core_confirmed
-        if frag[0] in params.postprocess.core_linear_series]
-
     if not core_confirmed:
         return 0
 
     #   check whether there are any optional core fragments that have not
     #   been confirmed - if so, remove these from consideration
     if params.postprocess.optional_core_fragments:
-        core_silico = [
-            frag for frag in core_silico
-            if frag not in params.postprocess.optional_core_fragments]
+        unconfirmed_optional = [
+            frag for frag in unconfirmed
+            if frag in params.postprocess.optional_core_fragments]
+        if unconfirmed_optional:
+            core_silico = [
+                frag for frag in core_silico
+                if frag not in unconfirmed_optional]
 
     #  get % found fragments
     percent_found = (len(core_confirmed) / len(core_silico)) * 100
