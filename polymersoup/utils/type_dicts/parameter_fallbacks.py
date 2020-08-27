@@ -9,7 +9,7 @@ CORE_PARAM_FALLBACKS = {
     "silico": None,
     "extractors": None,
     "postprocess": None,
-    "free_cores": 3,
+    "free_cores": 0,
     "max_cores": 12,
     "data_folder": None,
     "output_folder": None,

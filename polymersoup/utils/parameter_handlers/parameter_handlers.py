@@ -54,6 +54,13 @@ def generate_parameters(
             else:
                 formatted_params[param] = CORE_PARAM_FALLBACKS[param]
 
+    for param in CORE_PARAM_FALLBACKS:
+        if param not in formatted_params:
+            if param in params_dict:
+                formatted_params[param] = params_dict[param]
+            else:
+                formatted_params[param] = CORE_PARAM_FALLBACKS[param]
+
     #  create instance of Parameters ready to be used in other modules
     #  and return
     return Parameters(

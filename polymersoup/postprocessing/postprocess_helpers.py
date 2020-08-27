@@ -461,8 +461,14 @@ def list_unconfirmed_fragments(confirmed_fragments, silico_dict):
     """
 
     #  list non-signatures fragments
+
+    if "series" in silico_dict:
+        silico_frags = silico_dict["series"]
+    else:
+        silico_frags = silico_dict
+
     unconfirmed = [
-        frag for frag in silico_dict
+        frag for frag in silico_frags
         if (frag not in ["signatures", "composition"]
             and frag not in confirmed_fragments["core"])]
 

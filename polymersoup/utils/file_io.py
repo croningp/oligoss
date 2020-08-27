@@ -7,6 +7,7 @@ to files.
 import os
 import csv
 import json
+from bson.json_util import dumps, default
 
 def open_json(filepath):
     """
@@ -114,3 +115,39 @@ def append_locked_json(fpath, lock, dump_dict):
         o.write(f"{json.dumps(dump_dict)}")
 
     lock.release()
+
+def mongodb_to_json(
+    collection_name,
+    output_json
+):
+    """ This function dumps a single mongoDB collection to a json file.
+
+    Args:
+        collection_name (str): database collection name.
+        output_json (str): full filepath of output json.
+    """
+
+    cursor = collection_name.find({})
+
+    with open(output_json, 'w') as file:
+        file.write('[')
+        doc_count = 0
+        for document in cursor:
+
+            # keep count of documents
+            doc_count += 1
+            num_max = cursor.count()
+
+            if (num_max >= 1) and (doc_count <= num_max - 1):
+                dump = dumps(
+                    document, sort_keys=False, indent=4, default=default)
+                file.write(dump)
+                file.write(',')
+
+            # if document is last, don't add comma
+            elif (num_max == doc_count):
+                dump = dumps(
+                    document, sort_keys=False, indent=4, default=default)
+                file.write(dump)
+
+        file.write(']')

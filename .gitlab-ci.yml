@@ -19,11 +19,21 @@ lint:
 test:
   stage: testing
 
+  services:
+  - mongo
+
+  variables:
+    MONGO_URI: mongodb://mongo:27017/polymersoup
+
   before_script: 
     - pip install git+https://$MZMLRIPPER_USER:$MZMLRIPPER_PW@gitlab.com/croningroup/origins/mzmlripper.git@master
     - pip install matplotlib
     - pip install numpy
+    - pip uninstall pymongo
+    - pip uninstall bson
     - pip install pytest
+    - pip install bson
+    - pip install pymongo
     - pip install coverage
     - pip install memory_profiler
     - pip install pandas

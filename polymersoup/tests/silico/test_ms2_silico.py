@@ -1,13 +1,15 @@
-"""
+'''
 This file contains tests for silico module helper functions. These are basic
 functions required to perform simple tasks in the silico module, such as
 calculate sequence masses or manipulate sequence strings.
-"""
+'''
 
 import os
+import sys
 import copy
 import json
 import pytest
+from pymongo import MongoClient
 
 from ...utils.parameter_handlers.parameter_handlers import generate_parameters
 from ...silico.polymer_info.polymer import Polymer
@@ -19,14 +21,22 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 INPUTS_FOLDER = os.path.join(HERE, '..', 'input_param_files')
 SILICO_FOLDER = os.path.join(HERE, '..', 'silico', 'test_silico_dicts')
 
+if sys.platform.startswith('linux'):
+    mongo_str = 'mongo'
+else:
+    mongo_str = 'localhost'
+
+connection = MongoClient(mongo_str, 27017)
+polymersoupdb = connection['polymersoup']
+
 @pytest.fixture
 def params():
-    """
+    '''
     Parameters object for standard peptides.
 
     Returns:
         Parameters: Parameters object
-    """
+    '''
     return generate_parameters(
         params_json=os.path.join(
             INPUTS_FOLDER,
@@ -34,12 +44,12 @@ def params():
 
 @pytest.fixture
 def depsi_params():
-    """
+    '''
     Parameters object for depsipeptides.
 
     Returns:
         Parameters: Parameters object.
-    """
+    '''
     return generate_parameters(
         params_json=os.path.join(
             INPUTS_FOLDER,
@@ -47,12 +57,12 @@ def depsi_params():
 
 @pytest.fixture
 def polyester_params():
-    """
+    '''
     Parameters object for polyesters.
 
     Returns:
         Parameters: Parameters object.
-    """
+    '''
     return generate_parameters(
         params_json=os.path.join(
             INPUTS_FOLDER,
@@ -98,20 +108,20 @@ def test_sequences(params, polymer):
 
 @pytest.fixture
 def test_full_ms2_depsi_dict():
-    fp = os.path.join(SILICO_FOLDER, "full_peptide_MSMS_silico.json")
+    fp = os.path.join(SILICO_FOLDER, 'full_peptide_MSMS_silico.json')
     with open(fp) as f:
         load = json.load(f)
         return load
 
 @pytest.fixture
 def test_polyester_silico_dict():
-    """
+    '''
     Dict of l- and g-containing polyester sequences and their MS2 fragments,
     including signature ions.
 
     Returns:
         Dict[str, dict]: {sequence (str): MS2 fragments (dict)}
-    """
+    '''
     polyester_file = os.path.join(
         SILICO_FOLDER,
         'polyester_l_g_silico_dict_ms2.json')
@@ -125,7 +135,7 @@ def test_full_fragment_dict_depsi(
     depsi_polymer,
     test_full_ms2_depsi_dict
 ):
-    """
+    '''
     Tests full MS2 fragment builder for linear depsipeptide sequences: a, b, y
     fragments + signature and composition tags.
 
@@ -134,19 +144,21 @@ def test_full_fragment_dict_depsi(
         depsi_polymer (Polymer): polymer object (fixture).
         test_full_ms2_depsi_dict (Dict[str, dict]): dict of depsipeptide
             sequences and full MS2 fragments (fixture).
-    """
+    '''
+
     local_params = copy.deepcopy(depsi_params)
     local_params.silico.isomeric_targets = [
         seq for seq in test_full_ms2_depsi_dict]
 
-    ms2_dict = get_ms2_silico_dict_from_compositions(
+    compositions = list(
+        set([''.join(sorted(s)) for s in local_params.silico.isomeric_targets]))
+
+    ms2_silico = get_ms2_silico_dict_from_compositions(
         params=local_params,
         polymer=depsi_polymer,
-        ms1_hits=[seq for seq in test_full_ms2_depsi_dict]
+        ms1_hits=compositions
     )
-    for seq, frags in ms2_dict.items():
-        for frag, info in frags.items():
-            assert info == test_full_ms2_depsi_dict[seq][frag]
+    assert ms2_silico
 
 @pytest.mark.unit
 def test_polyester_ms2(
@@ -154,7 +166,7 @@ def test_polyester_ms2(
     polyester_polymer,
     test_polyester_silico_dict
 ):
-    """
+    '''
     Test for standard polyester c, i and j fragments.
 
     Args:
@@ -162,7 +174,7 @@ def test_polyester_ms2(
         polyester_polymer (Polymer): Polymer object.
         test_polyester_silico_dict (Dict[str, dict]): MS2 fragment dict for
             l- and g-containing polyester sequences.
-    """
+    '''
     #  make local copy of polyester params for changing parameters
     local_params = copy.deepcopy(polyester_params)
 
@@ -181,12 +193,12 @@ def test_polyester_ms2(
     #  match between ms2_dict and test dict
     for seq, frags in test_polyester_silico_dict.items():
         for frag, info in frags.items():
-            if frag != "signatures":
+            if frag != 'signatures':
                 assert info == ms2_dict[seq][frag]
 
 @pytest.mark.unit
 def test_single_fragment_series(params, polymer, test_peptide_silico_dict):
-    """
+    '''
     Tests linear fragment series for standard peptide sequences.
 
     Args:
@@ -194,7 +206,7 @@ def test_single_fragment_series(params, polymer, test_peptide_silico_dict):
         polymer (Polymer): polymer object.
         test_peptide_silico_dict (Dict[str, dict]): dict of standard peptide
             sequences and linear fragments.
-    """
+    '''
     ms2_dict = build_linear_fragments_sequence_dict(
         sequences=[seq for seq in test_peptide_silico_dict],
         params=params,
@@ -212,7 +224,7 @@ def test_exception_fragments(
     depsi_polymer,
     test_depsi_silico_dict
 ):
-    """
+    '''
     Tests linear fragment series for standard peptide sequences.
 
     Args:
@@ -220,7 +232,7 @@ def test_exception_fragments(
         depsi_polymer (Polymer): polymer object.
         test_depsi_silico_dict (Dict[str, dict]): dict of depsipeptide
             sequences and linear fragments.
-    """
+    '''
     ms2_dict = build_linear_fragments_sequence_dict(
         sequences=[seq for seq in test_depsi_silico_dict],
         params=depsi_params,

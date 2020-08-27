@@ -153,7 +153,7 @@ def postprocess_composition(
 
             confidence = assign_confidence_sequence_concurrent(
                 confirmed_fragments=fragments["core"],
-                unconfirmed=fragments["unconfirmed"],
+                unconfirmed=info["unconfirmed"],
                 ssw=ssw,
                 params=params
             )

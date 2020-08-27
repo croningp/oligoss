@@ -3,6 +3,8 @@ This file contains classes for storing information on polymer-specific
 features that are passed in from parameter handlers and passed on to
 silico modules
 """
+import logging
+
 from ...utils.parameter_handlers.polymer_param_handlers import load_polymer_info
 from ...utils.global_chemical_constants import (
     FUNCTIONAL_GROUPS,
@@ -68,6 +70,7 @@ class Polymer():
 
         #  set internal properties, params and polymer_config
         self.__params = params_obj
+        self.__polymer_class = params_obj.polymer_class
         self.__polymer_config = load_polymer_info(params_obj.polymer_class)
 
         #  set remaining properties
@@ -82,6 +85,18 @@ class Polymer():
         self.signatures = self.__polymer_config["MS2_SIGNATURE_IONS"]
         self.fragment_info = self.retrieve_fragment_info()
         self.reactivity_classes = self.__polymer_config["REACTIVITY_CLASSES"]
+
+    def __len__(self):
+        return len(self.monomers)
+
+    def __str__(self):
+        return (
+            f"Polymer object of class {self.__polymer_class}. With \n"
+            f"{len(self.monomers)} monomers:\n"
+            f"{', '.join([x.id for x in self.monomers])}")
+
+    def log_record(self):
+        logging.info(str(self))
 
     def instantiate_monomers(self):
         """
