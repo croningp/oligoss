@@ -1,7 +1,8 @@
 """
-This file contains tests for silico module helper functions. These are basic
-functions required to perform simple tasks in the silico module, such as
-calculate sequence masses or manipulate sequence strings.
+This file contains tests for ms1 silico module functions. These are functions
+used to generate precursor ions. NOTE: all functions tested here do NOT
+interface with MongoDB via pymongo. There is a separate _db file for ms1 silico
+functions that use pymongo.
 """
 
 import os

@@ -236,15 +236,28 @@ def min_total_intensity_filter(spectra, min_total_intensity=None):
 
     return total_int_filtered
 
-def find_precursor(spectra, ms2_precursor, error, error_units):
+def find_precursor(
+    ms2_precursor,
+    error,
+    error_units,
+    connection=None,
+    ripper_name=None,
+    spectra=None
+):
     """ This function returns MS2 spectra which parent ion matches the target
     mass.
     Args:
-        spectra (dict): dictionary of format {spectrum_id : {m/z: intensity}}
         ms2_precursor (float): precursor m/z value
         error (float): acceptable difference between target mass and found
             parent mass
-        error_units (str): 'abs' or 'ppm'
+        error_units (str): 'abs' or 'ppm'.
+        connection (str): polymersoup localhost connection string.
+            Defaults to None as not needed during prefiltering.
+        ripper_name (str): unique str tag for original ripper file.
+            Defaults to None as not needed during prefiltering.
+        spectra (dict]): dictionary of multiple spectra, format:
+            {spectrum_id : {m/z: intensity}}. Defaults to None.
+            Spectra needed for prefiltering but not for later database queries.
 
     Returns:
         precursor_filtered dict: dict of MS2 spectra whos parent ion matches the
@@ -259,40 +272,74 @@ def find_precursor(spectra, ms2_precursor, error, error_units):
     # get list of target precursor masses
     target = [float(ms2_precursor) - error, float(ms2_precursor) + error]
 
-    # find whether precursor ion mass matches a target
-    for spectrum_id, spectrum_dict in spectra.items():
-        parent_mass = float(spectrum_dict["parent"])
+    # if spectra is provided, including empty spectra, ie for prefiltering
+    # functions iterate through & return filtered spectra with precursor matches
+    if spectra or spectra == {}:
 
-        # iterate through targets checking if the parent mass is a match
-        if parent_mass >= target[0] and parent_mass <= target[1]:
-            precursor_filtered[spectrum_id] = spectrum_dict
+        # find whether precursor ion mass matches a target
+        for spectrum_id, spectrum_dict in spectra.items():
+            parent_mass = float(spectrum_dict["parent"])
+
+            # iterate through targets checking if the parent mass is a match
+            if parent_mass >= target[0] and parent_mass <= target[1]:
+                precursor_filtered[spectrum_id] = spectrum_dict
+
+    # if no spectra is provided, ie for ms2 screening functions,
+    # find spectra matches in database
+    else:
+
+        # return spectra with parent masses are within the target range
+        # $gt = greater than, $lt = less than for range query
+        ms2_spectra = list(
+            connection.polymersoup[f"{ripper_name}_ms2_data"].find(
+                {"parent": {"$gt": target[0], "$lt": target[1]}}))
+
+        # add all 'spectrum' parts of each match to a dict
+        precursor_filtered = {
+            entry["spectrum_id"]: entry["spectrum"] for entry in ms2_spectra}
+
+        connection.close()
 
     return precursor_filtered
 
-def find_precursors(spectra, ms2_precursors, error, error_units):
+def find_precursors(
+    ms2_precursors,
+    error,
+    error_units,
+    spectra=None,
+    connection=None,
+    ripper_name=None
+):
     """ This function returns MS2 spectra which parent ion matches the target
     mass for all targets.
 
     Args:
-        spectra (dict]): dictionary of multiple spectra, format:
-            {spectrum_id : {m/z: intensity}}
         ms2_precursors (List[float]): list of MS2 precrursor m/z values
         error (float): acceptable difference between target mass and found
             parent mass. Can either be in absolute units (u) or relative (ppm).
-        error_units (str): 'ppm' or 'abs'
+        error_units (str): 'ppm' or 'abs'.
+        connection (str): polymersoup localhost connection string
+        ripper_name (str): unique str tag for original ripper file.
+        spectra (dict]): dictionary of multiple spectra, format:
+            {spectrum_id : {m/z: intensity}}.
+            Defaults to None as not needed during ms2 screening when spectra is
+            retrieved from database queries.
 
     Returns:
         precursor_filtered (dict): dict of MS2 spectra whos parent ion matches
             any target mass
     """
-    if not ms2_precursors:
+    precursor_filtered = {}
+
+    # if ms2_precursor argument isn't given for prefiltering, return spectra
+    if not ms2_precursors and spectra:
         return spectra
 
-    precursor_filtered = {}
     for ms2_precursor in ms2_precursors:
         precursor_filtered.update(find_precursor(
             spectra=spectra, ms2_precursor=ms2_precursor, error=error,
-            error_units=error_units))
+            error_units=error_units, connection=connection,
+            ripper_name=ripper_name))
 
     return precursor_filtered
 
