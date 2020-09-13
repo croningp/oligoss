@@ -44,20 +44,33 @@ def get_git_info_for_log():
     Returns:
         str: git info message for logging.
     """
+    git_logging = False
 
-    #  get git username
-    user = str(subprocess.check_output(
-        ["git", "config", "user.name"]
-    ), "utf-8").rstrip("\n")
+    try:
+        #  get git username
+        user = str(subprocess.check_output(
+            ["git", "config", "user.name"]
+        ), "utf-8").rstrip("\n")
+        git_logging = True
+    except subprocess.CalledProcessError:
+        user = "unknown"
 
-    #  get git branch
-    branch = str(subprocess.check_output(
-        ["git", "rev-parse", "--abbrev-ref", "HEAD"]
-    ), "utf-8").rstrip("\n")
+    try:
+        #  get git branch
+        branch = str(subprocess.check_output(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"]
+        ), "utf-8").rstrip("\n")
+    except subprocess.CalledProcessError:
+        branch = "unknown"
 
-    #  get git version tag
-    version = str(subprocess.check_output(
-        ["git", "describe"]
-    ), "utf-8").rstrip("\n")
+    try:
+        #  get git version tag
+        version = str(subprocess.check_output(
+            ["git", "describe"]
+        ), "utf-8").rstrip("\n")
+    except subprocess.CalledProcessError:
+        version = "unknown"
 
-    return f"ran on branch {branch} by {user}. Version = {version}"
+    if git_logging:
+        return f"ran on branch {branch} by {user}. Version = {version}"
+    return "No git information available for run"
