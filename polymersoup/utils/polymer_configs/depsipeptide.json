@@ -5,43 +5,43 @@
     "C": 
       [121.01975, [["amine", 1], ["carboxyl", 1]], "cysteine"],
     "D": 
-      [133.03752, [["amine", 1], ["carboxyl", 1]], "aspartic acid"],
+      [133.03751, [["amine", 1], ["carboxyl", 1]], "aspartic acid"],
     "E": 
-      [147.05318, [["amine", 1], ["carboxyl", 1]], "glutamic acid"],
+      [147.05316, [["amine", 1], ["carboxyl", 1]], "glutamic acid"],
     "F": 
-      [165.07899, [["amine", 1], ["carboxyl", 1]], "phenylalanine"],
+      [165.07898, [["amine", 1], ["carboxyl", 1]], "phenylalanine"],
     "G": 
-      [75.03204, [["amine", 1], ["carboxyl", 1]], "glycine"],
+      [75.03203, [["amine", 1], ["carboxyl", 1]], "glycine"],
     "H": 
-      [155.06949, [["amine", 1], ["carboxyl", 1]], "histidine"],
+      [155.06948, [["amine", 1], ["carboxyl", 1]], "histidine"],
     "I": 
-      [131.09464, [["amine", 1], ["carboxyl", 1]], "isoleucine"],
+      [131.09463, [["amine", 1], ["carboxyl", 1]], "isoleucine"],
     "K": 
-      [146.10554, [["amine", 1], ["carboxyl", 1]], "lysine"],
+      [146.10553, [["amine", 1], ["carboxyl", 1]], "lysine"],
     "L": 
-      [131.09464, [["amine", 1], ["carboxyl", 1]], "leucine"],
+      [131.09463, [["amine", 1], ["carboxyl", 1]], "leucine"],
     "M": 
-      [149.05106, [["amine", 1], ["carboxyl", 1]], "methionine"],
+      [149.05105, [["amine", 1], ["carboxyl", 1]], "methionine"],
     "N": 
-      [132.05351, [["amine", 1], ["carboxyl", 1]], "asparagine"],
+      [132.05349, [["amine", 1], ["carboxyl", 1]], "asparagine"],
     "P": 
-      [115.06334, [["amine", 1], ["carboxyl", 1]], "proline"],
+      [115.06333, [["amine", 1], ["carboxyl", 1]], "proline"],
     "Q": 
-      [146.06916, [["amine", 1], ["carboxyl", 1]], "glutamine"],
+      [146.06914, [["amine", 1], ["carboxyl", 1]], "glutamine"],
     "R": 
-      [174.11169, [["amine", 1], ["carboxyl", 1]], "arginine"],
+      [174.11168, [["amine", 1], ["carboxyl", 1]], "arginine"],
     "S": 
-      [105.0426, [["amine", 1], ["carboxyl", 1]], "serine"],
+      [105.04259, [["amine", 1], ["carboxyl", 1]], "serine"],
     "T": 
-      [119.05826, [["amine", 1], ["carboxyl", 1]], "threonine"],
+      [119.05824, [["amine", 1], ["carboxyl", 1]], "threonine"],
     "V": 
-      [117.07899, [["amine", 1], ["carboxyl", 1]], "valine"],
+      [117.07898, [["amine", 1], ["carboxyl", 1]], "valine"],
     "W": 
-      [204.08989, [["amine", 1], ["carboxyl", 1]], "tryptophan"],
+      [204.08988, [["amine", 1], ["carboxyl", 1]], "tryptophan"],
     "Y": 
-      [181.07391, [["amine", 1], ["carboxyl", 1]], "tyrosine"],
+      [181.07389, [["amine", 1], ["carboxyl", 1]], "tyrosine"],
     "g": 
-      [76.01606, [["hydroxyA", 1], ["carboxyl", 1]], "glycolic acid"],
+      [76.01604, [["hydroxyA", 1], ["carboxyl", 1]], "glycolic acid"],
     "n":
       [91.02594, [["amine", 1], ["carboxyl", 1]], "N-hydroxyglycine"]},
 

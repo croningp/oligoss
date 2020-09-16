@@ -1,13 +1,13 @@
 {
   "MONOMERS": {
     "g": 
-      [76.01606, [["hydroxyA", 1], ["carboxyl", 1]], "glycolic acid"],
+      [76.01604, [["hydroxyA", 1], ["carboxyl", 1]], "glycolic acid"],
     "l":
-      [90.03171, [["hydroxyA", 1], ["carboxyl", 1]], "glycolic acid"],
+      [90.03169, [["hydroxyA", 1], ["carboxyl", 1]], "glycolic acid"],
     "M": 
-      [152.04736, [["hydroxyA", 1], ["carboxyl", 1]], "mandelic acid"],
+      [152.04734, [["hydroxyA", 1], ["carboxyl", 1]], "mandelic acid"],
     "m":
-      [134.02155, [["hydroxyA", 1], ["carboxyl", 1]], "maleic acid"]
+      [134.02152, [["hydroxyA", 1], ["carboxyl", 1]], "maleic acid"]
   },
 
   "SIDE_CHAIN_CROSSLINKS": {},
