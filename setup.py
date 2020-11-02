@@ -1,11 +1,30 @@
-from distutils.core import setup
-from setuptools import find_packages
+import os
+from setuptools import find_packages, setup
+
+HERE = os.path.dirname(__file__)
+with open(os.path.join(HERE, "README.md")) as o:
+    readme = o.read()
 
 setup(
-    name='polymersoup',
-    version='2.0.0',
-    description='de novo sequencer for heterogeneous polymer mixtures',
+    name='oligoss',
+    version='0.0.1',
+    description='de novo sequencer for heterogeneous oligomer mixtures',
+    long_description=readme,
+    long_description_content_type="text/markdown",
     author='ALife Team, Cronin Group',
-    author_email='d.doran.1@research.gla.ac.uk',
-    packages=find_packages()
+    author_email='daviddoran20161@gmail.com',
+    packages=find_packages(),
+    install_requires=["bson", "psutil", "mzmlripper"],
+    entry_points={
+        "console_scripts": [
+            "oligoss=oligoss.__main__:main"
+        ]
+    },
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.7",
+        "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+        "Operating System :: Unix"
+    ],
+    include_package_data=True
 )

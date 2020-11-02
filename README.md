@@ -1,6 +1,6 @@
-# Polymersoup
+# Oligomer Soup Sequencing (OLIGOSS)
 
-Polymersoup is a package for _de novo_ sequencing of linear oligomers from
+OLIGOSS is a package for _de novo_ sequencing of linear oligomers from
 tandem mass spectrometry data. 
 
 __Note__: proper use of this package requires a good working knowledge of both
@@ -36,15 +36,15 @@ pip install mzmlripper --user
 ```
 ## Run
 
-To run a Polymersoup sequencing workflow, run the following command:
+To run a OLIGOSS sequencing workflow, run the following command:
 
 ```
-python polymersoup/execute.py -i input_params.json -r ripper_folder -o output_folder
+python -m oligoss -i input_params.json -r ripper_folder -o output_folder
 
 ```
 - __input_params.json__ = input parameters file
 
-This should contain all relevant input parameters for executing a Polymersoup
+This should contain all relevant input parameters for executing a OLIGOSS
 sequencing workflow (see __Input Parameters__, below).
 
 - __ripper_folder__ = data directory. __NOTE__: this argument can either be passed in via the command line directly (as above) or specified in the input parameters file using the _data_folder_ parameter.
@@ -58,7 +58,7 @@ All output data will be dumped to this folder.
 
 ## Sequencing Workflows
 
-There is currently only one sequencing workflow available in Polymersoup. The
+There is currently only one sequencing workflow available in OLIGOSS. The
 __exhaustive screening__ workflow is to be used for sequencing oligomers with
 well-characterised fragmentation pathways and known monomer libraries. For
 oligomer classes with poorly characterised fragmentation pathways and / or 
@@ -92,7 +92,7 @@ are used only as defaults, and can be overwritten in the input parameters file.
 All parameters which vary between individual experiments are specified in the
 input parameters file (see __Input Parameters__ section, below).
 
-<img src="img/typical_polymersoup_execution.png" width = 350 height = 350>
+<img src="img/typical_OLIGOSS_execution.png" width = 350 height = 350>
 
 ### Input Parameters
 
@@ -640,7 +640,7 @@ oligomer class. This includes both linear fragment series and signature ion frag
   - Example: see __Defining  FRAG_SERIES__ section.
 11. __MS2_SIGNATURE_IONS__:
   - Description: this defines any monomer-specific signature ions that may occur. __NOTE__: the same
-  fragmentation events that produce linear fragment series can also produce signature ions. However, Polymersoup
+  fragmentation events that produce linear fragment series can also produce signature ions. However, OLIGOSS
   considers these as separate events due to the diversity of possible signature ions.
   - Type: `Dict[str, list]`
   - Options: Keys correspond to signature ion str code, values lists of monomer one-letter codes and corresponding
@@ -760,7 +760,7 @@ Instrument configuration files are used to store information on mass spectromete
   - Type: `str`
   - Options: either "ppm" or "abs" for relative and absolute error thresholding, respectively.
 3. __rt_units__:
-  - Description: specifies the default retention time units in mzML files. This is a vendor-specific property outside the control of Polymersoup (e.g. mzML files generated from Bruker mass specs have retention time units of seconds, while ThermoScientific mass spec units are in minutes).
+  - Description: specifies the default retention time units in mzML files. This is a vendor-specific property outside the control of OLIGOSS (e.g. mzML files generated from Bruker mass specs have retention time units of seconds, while ThermoScientific mass spec units are in minutes).
   - Type: `str`
   - Options: either "min" or "sec" for seconds or minutes, respectively.
   - __NOTE__: if you are unsure about the retention time units in your mzML files, this is usually not specified in the raw mzML itself. Spectra in output rippers are sorted by retention time, so it should be straightforward to work out __rt_units__ for your mass spec from the recorded retention times of the first and last spectra (assuming you know total acquisition time).

@@ -1,0 +1,497 @@
+{
+  "MONOMERS": {
+    "A": 
+      [89.04768, [["amine", 1], ["carboxyl", 1]], "alanine"],
+    "C": 
+      [121.01975, [["amine", 1], ["carboxyl", 1]], "cysteine"],
+    "D": 
+      [133.03752, [["amine", 1], ["carboxyl", 1]], "aspartic acid"],
+    "E": 
+      [147.05318, [["amine", 1], ["carboxyl", 1]], "glutamic acid"],
+    "F": 
+      [165.07899, [["amine", 1], ["carboxyl", 1]], "phenylalanine"],
+    "G": 
+      [75.03204, [["amine", 1], ["carboxyl", 1]], "glycine"],
+    "H": 
+      [155.06949, [["amine", 1], ["carboxyl", 1]], "histidine"],
+    "I": 
+      [131.09464, [["amine", 1], ["carboxyl", 1]], "isoleucine"],
+    "K": 
+      [146.10554, [["amine", 1], ["carboxyl", 1]], "lysine"],
+    "L": 
+      [131.09464, [["amine", 1], ["carboxyl", 1]], "leucine"],
+    "M": 
+      [149.05106, [["amine", 1], ["carboxyl", 1]], "methionine"],
+    "N": 
+      [132.05351, [["amine", 1], ["carboxyl", 1]], "asparagine"],
+    "P": 
+      [115.06334, [["amine", 1], ["carboxyl", 1]], "proline"],
+    "Q": 
+      [146.06916, [["amine", 1], ["carboxyl", 1]], "glutamine"],
+    "R": 
+      [174.11169, [["amine", 1], ["carboxyl", 1]], "arginine"],
+    "S": 
+      [105.0426, [["amine", 1], ["carboxyl", 1]], "serine"],
+    "T": 
+      [119.05826, [["amine", 1], ["carboxyl", 1]], "threonine"],
+    "V": 
+      [117.07899, [["amine", 1], ["carboxyl", 1]], "valine"],
+    "W": 
+      [204.08989, [["amine", 1], ["carboxyl", 1]], "tryptophan"],
+    "Y": 
+      [181.07391, [["amine", 1], ["carboxyl", 1]], "tyrosine"],
+    "g": 
+      [76.01606, [["hydroxyA", 1], ["carboxyl", 1]], "glycolic acid"],
+    "n": 
+      [91.02594, [["amine", 1], ["carboxyl", 1]], "N-hydroxyglycine"]},
+
+  "SIDE_CHAIN_CROSSLINKS": {
+    "C": {
+      "monomers": ["C"],
+      "crosslink_massdiff": "-2H",
+      "permissible_crosslink_charges": [0],
+      "disrupt_ms2": true
+    },
+    "K": {
+      "monomers": ["E", "D"],
+      "crosslink_massdiff": "-H2O",
+      "permissible_crosslink_charges": [0],
+      "disrupt_ms2": false
+    },
+    "R": {
+      "monomers": ["E", "D"],
+      "crosslink_massdiff": "-H2O",
+      "permissible_crosslink_charges": [0],
+      "disrupt_ms2": false
+    },
+    "D": {
+      "monomers": ["K", "R"],
+      "crosslink_massdiff": "-H2O",
+      "permissible_crosslink_charges": [0],
+      "disrupt_ms2": false
+    },
+    "E": {
+      "monomers": ["K", "R"],
+      "crosslink_massdiff": "-H2O",
+      "permissible_crosslink_charges": [0],
+      "disrupt_ms2": false
+    }
+  },
+
+  "MASS_DIFF": "H2O",
+
+  "ELONGATION": 1,
+
+  "REACTIVITY_CLASSES": {
+    "amine": [
+      ["carboxyl", "hydroxyA"],
+      [
+        "A",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "I",
+        "K",
+        "L",
+        "M",
+        "N",
+        "P",
+        "Q",
+        "R",
+        "S",
+        "T",
+        "V",
+        "W",
+        "Y",
+        "n"
+      ]
+    ],
+
+    "carboxyl": [
+      ["amine", "hydroxyA"],
+      [
+        "A",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "I",
+        "K",
+        "L",
+        "M",
+        "N",
+        "P",
+        "Q",
+        "R",
+        "S",
+        "T",
+        "V",
+        "W",
+        "Y",
+        "n"
+      ]
+    ],
+
+    "hydroxyA": [["amine", "carboxyl", "hydroxyA"], ["g"]]
+  },
+
+  "SYMMETRY": false,
+
+  "CHAIN_TERMINATORS": {},
+
+  "LOSS_PRODUCTS": {
+    "S": ["H2O"],
+    "T": ["H2O"],
+    "E": ["H2O"],
+    "D": ["H2O"],
+    "N": ["NH3", "H2O"],
+    "R": ["NH3"],
+    "K": ["NH3"],
+    "Q": ["NH3"],
+    "c": ["H2O"],
+    "e": ["NH3"],
+    "x": ["NH3"],
+    "p": ["NH3"],
+    "h": ["H2O"],
+    "o": ["H2O"],
+    "t": ["H2O"],
+    "n": ["H2O"]
+  },
+
+  "IONIZABLE_SIDECHAINS": {
+    "K": {
+      "pos": ["H", 1, 1],
+      "neg": null
+    },
+    "R": {
+      "pos": ["H", 1, 1],
+      "neg": null
+    },
+    "E": {
+      "pos": null,
+      "neg": ["-H", 1, 1]
+    },
+    "D": {
+      "pos": null,
+      "neg": ["H", 1, 1]
+    },
+    "H": {
+      "pos": ["H", 1, 1],
+      "neg": null
+    }
+  },
+
+  "INTRINSICALLY_CHARGE_MONOMERS": {},
+
+  "FRAG_SERIES": {
+    "default_linear": {
+      "CID": ["b", "y"],
+      "HCD": ["b", "y", "a"]
+    },
+    "default_core": {
+      "CID": ["b", "y"],
+      "HCD": ["b", "y"]
+    },
+    "signatures": {
+      "CID": ["Im"],
+      "HCD": ["Im"]
+    },
+    "a": {
+      "terminus": 0,
+      "mass_diff": {
+        "pos": "-COOH",
+        "neg": null
+      },
+      "fragmentation_unit": {
+        "pos": "ELONGATION_UNIT",
+        "neg": "ELONGATION_UNIT"
+      },
+      "start": 0,
+      "end": 1
+    },
+
+    "x": {
+      "terminus": -1,
+      "mass_diff": {
+        "pos": ["-OH", "NH3"],
+        "neg": null
+      },
+      "fragmentation_unit": {
+        "pos": "ELONGATION_UNIT",
+        "neg": "ELONGATION_UNIT"
+      },
+      "start": 1,
+      "end": 0
+    },
+
+    "b": {
+      "terminus": 0,
+      "mass_diff": {
+        "pos": "-OH",
+        "neg": null
+      },
+      "fragmentation_unit": {
+        "pos": "ELONGATION_UNIT",
+        "neg": "ELONGATION_UNIT"
+      },
+      "start": 0,
+      "end": 1,
+      "intrinsic_charge": {
+        "pos": 1,
+        "neg": null
+      }
+    },
+
+    "y": {
+      "terminus": -1,
+      "mass_diff": {
+        "pos": "H",
+        "neg": "-H"
+      },
+      "fragmentation_unit": {
+        "pos": "ELONGATION_UNIT",
+        "neg": "ELONGATION_UNIT"
+      },
+      "start": 0,
+      "end": 0,
+      "intrinsic_adduct": {
+        "pos": "H",
+        "neg": "-H"
+      },
+      "exceptions": {
+        "pos": {
+          "hydroxyA": {
+            "mass_diff": {
+              "positions": [-1],
+              "start": 0,
+              "end": 1,
+              "exception_value": 26.98709
+            },
+            "intrinsic_ions": {
+              "positions": [-1],
+              "start": 0,
+              "end": 1,
+              "exception_value": {
+                "intrinsic_adduct": null,
+                "intrinsic_charge": 1
+              }
+            }
+          }
+        }
+      },
+      "neg": null
+    },
+
+    "c": {
+      "terminus": 0,
+      "mass_diff": {
+        "pos": ["-OH", "NH3"],
+        "neg": null
+      },
+      "fragmentation_unit": {
+        "pos": "ELONGATION_UNIT",
+        "neg": "ELONGATION_UNIT"
+      },
+      "start": 1,
+      "end": 0
+    },
+    "z": {
+      "terminus": -1,
+      "mass_diff": {
+        "pos": "-NH2",
+        "neg": null
+      },
+      "fragmentation_unit": {
+        "pos": "ELONGATION_UNIT",
+        "neg": "ELONGATION_UNIT"
+      },
+      "start": 0,
+      "end": 1
+    }
+  },
+
+  "MS2_SIGNATURE_IONS": {
+    "Im": [
+      ["F", 120.0813],
+      ["D", 88.0399],
+      ["E", 102.0555],
+      ["I", 86.0969],
+      ["L", 86.0969],
+      ["H", 110.0718],
+      ["C", 76.0221, 133.0436, 134.0276, 147.0772],
+      ["K", 101.1079],
+      ["S", 60.0449],
+      ["Y", 136.0762],
+      ["V", 72.08133],
+      ["T", 74.06059],
+      ["A", 44.05003],
+      ["M", 104.0534, 120.0483],
+      ["Q", 101.0715],
+      ["P", 70.06568],
+      ["N", 87.05584, 70.02864],
+      ["c", 124.00629],
+      ["x", 77.03913, 106.06567],
+      ["p", 77.03913, 92.05002],
+      ["h", 77.03913, 133.02897],
+      ["n", 46.02874]
+    ],
+
+    "dominant": ["F", "I", "L", "P", "H", "Y"]
+  },
+
+  "MODIFICATIONS": {
+    "Ole": {
+      "mass": 282.25589,
+      "termini": [0],
+      "side_chain_attachments": ["K", "R"],
+      "disrupt_neutral_loss": true,
+      "free_mod_fragments": {
+        "pos": [265.2532],
+        "neg": [281.2181]
+      },
+      "mass_diff": {
+        "ms1": "H2O",
+        "ms2": "H2O"
+      },
+      "universal_ms2_shift": false
+    },
+    "Pal": {
+      "mass": 256.24024,
+      "termini": [0],
+      "side_chain_attachments": ["K", "R"],
+      "disrupt_neutral_loss": true,
+      "free_mod_fragments": {
+        "pos": [239.2375],
+        "neg": [255.2324]
+      },
+      "mass_diff": {
+        "ms1": "H2O",
+        "ms2": "H2O"
+      },
+      "universal_ms2_shift": false
+    },
+    "Ace": {
+      "mass": 60.02114,
+      "termini": [0],
+      "side_chain_attachments": ["K", "R"],
+      "disrupt_neutral_loss": true,
+      "free_mod_fragments": {
+        "pos": [],
+        "neg": []
+      },
+      "mass_diff": {
+        "ms1": "H2O",
+        "ms2": "H2O"
+      },
+      "universal_ms2_shift": false
+    },
+    "Fmc": {
+      "mass": 240.07866,
+      "termini": [-1],
+      "side_chain_attachments": ["D", "E"],
+      "disrupt_neutral_loss": true,
+      "free_mod_fragments": {
+        "pos": [],
+        "neg": []
+      },
+      "mass_diff": {
+        "ms1": "H2O",
+        "ms2": "H2O"
+      },
+      "universal_ms2_shift": false
+    },
+    "Tbu": {
+      "mass": 74.07317,
+      "termini": null,
+      "side_chain_attachments": [],
+      "free_mod_fragments": {
+        "pos": [],
+        "neg": []
+      },
+      "mass_diff": {
+        "ms1": "H2O",
+        "ms2": "H2O"
+      },
+      "universal_ms2_shift": false
+    },
+    "Trt": {
+      "mass": 260.12012,
+      "termini": null,
+      "side_chain_attachments": ["S", "T"],
+      "disrupt_neutral_loss": true,
+      "free_mod_fragments": {
+        "pos": [],
+        "neg": []
+      },
+      "mass_diff": {
+        "ms1": "H2O",
+        "ms2": "H2O"
+      },
+      "universal_ms2_shift": false
+    },
+    "Boc": {
+      "mass": 118.06301,
+      "termini": [0],
+      "side_chain_attachments": [],
+      "free_mod_fragments": {
+        "pos": [],
+        "neg": []
+      },
+      "mass_diff": {
+        "ms1": "H2O",
+        "ms2": "H2O"
+      },
+      "universal_ms2_shift": false
+    },
+    "Bnz": {
+      "mass": 108.05751,
+      "termini": [-1],
+      "side_chain_attachments": ["E", "D"],
+      "disrupt_neutral_loss": true,
+      "free_mod_fragments": {
+        "pos": [105.03349],
+        "neg": [121.0295]
+      },
+      "mass_diff": {
+        "ms1": "H2O",
+        "ms2": "H2O"
+      },
+      "universal_ms2_shift": false
+    },
+    "Tfa": {
+      "mass": 113.99287,
+      "termini": null,
+      "side_chain_attachments": ["K", "R"],
+      "disrupt_neutral_loss": true,
+      "free_mod_fragments": {
+        "pos": [96.99012],
+        "neg": [112.98504]
+      },
+      "mass_diff": {
+        "ms1": "H2O",
+        "ms2": "H2O"
+      },
+      "universal_ms2_shift": false
+    },
+    "BtA": {
+      "mass": 73.08915,
+      "termini": [-1],
+      "side_chain_attachments": ["D", "E"],
+      "disrupt_neutral_loss": true,
+      "free_mod_fragments": {
+        "pos": [74.09643],
+        "neg": null
+      },
+      "mass_diff": {
+        "ms1": "H2O",
+        "ms2": "H2O"
+      },
+      "universal_ms2_shift": false
+    }
+  }
+}
