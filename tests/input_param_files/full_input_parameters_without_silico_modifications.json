@@ -1,0 +1,46 @@
+{
+  "screening_method": "exhaustive",
+  "mode": "pos",
+  "instrument": "orbitrap_lumos_tribrid",
+  "polymer_class": "depsipeptide",
+  "chromatography": "c18",
+  "monomers": ["K", "E", "R", "S", "N"],
+
+  "silico": {
+    "max_length": 5,
+    "min_length": 3,
+    "isomeric_targets": ["CBA", "BBA"],
+    "modifications": {},
+    "ms1": {
+      "min_z": 1,
+      "max_z": null,
+      "adducts": ["H", "Na"],
+      "max_neutral_losses": 3
+    },
+    "ms2": {
+      "min_z": 1,
+      "max_z": 1,
+      "adducts": null,
+      "max_neutral_losses": 1
+    }
+  },
+  "extractors": {
+    "error": "5",
+    "error_units": "ppm",
+    "min_ms2_peak_abundance": "100",
+    "min_ms1_total_intensity": null,
+    "min_ms2_total_intensity": null,
+    "pre_screen_filters": {
+      "min_ms1_max_intensity": 1e3,
+      "min_ms2_max_intensity": "0.3",
+      "ms2_precursors": null
+    }
+  },
+  "postprocess": {
+    "exclude_fragments": null,
+    "optional_core_fragments": ["b1"],
+    "core_linear_series": ["b", "y"],
+    "dominant_signature_cap": 0,
+    "subsequence_weight": 0
+  }
+}

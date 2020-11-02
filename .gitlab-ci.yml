@@ -19,12 +19,6 @@ lint:
 test:
   stage: testing
 
-  services:
-  - mongo
-
-  variables:
-    MONGO_URI: mongodb://mongo:27017/polymersoup
-
   before_script: 
     - pip install git+https://$MZMLRIPPER_USER:$MZMLRIPPER_PW@gitlab.com/croningroup/origins/mzmlripper.git@master
     - pip install matplotlib
@@ -39,4 +33,4 @@ test:
     - pip install pandas
 
   script:
-    - coverage run -m pytest polymersoup/tests -m unit -rf -x
+    - coverage run -m pytest tests -m unit -rf -x

@@ -1,0 +1,105 @@
+{
+  "MONOMERS": {
+    "g": 
+      [76.01606, [["hydroxyA", 1], ["carboxyl", 1]], "glycolic acid"],
+    "l":
+      [90.03171, [["hydroxyA", 1], ["carboxyl", 1]], "glycolic acid"],
+    "M": 
+      [152.04736, [["hydroxyA", 1], ["carboxyl", 1]], "mandelic acid"],
+    "m":
+      [134.02155, [["hydroxyA", 1], ["carboxyl", 1]], "maleic acid"]
+  },
+
+  "SIDE_CHAIN_CROSSLINKS": {},
+
+  "MASS_DIFF": "H2O",
+
+  "ELONGATION": 1,
+
+  "REACTIVITY_CLASSES": {
+    "carboxyl": [
+      ["amine", "hydroxyA"],
+      ["g", "l", "m"]],
+
+    "hydroxyA": [["carboxyl", "hydroxyA"], ["g", "l", "m"]]
+  },
+
+  "SYMMETRY": false,
+
+  "CHAIN_TERMINATORS": {},
+
+  "LOSS_PRODUCTS": {
+    "l": ["H"],
+    "m": ["H"],
+    "g": ["H"]
+  },
+
+  "IONIZABLE_SIDECHAINS": {},
+
+  "INTRINSICALLY_CHARGE_MONOMERS": {},
+
+  "FRAG_SERIES": {
+    "default_linear": {
+      "CID": ["b", "y"],
+      "HCD": ["c", "i", "j"]
+    },
+    "default_core": {
+      "CID": ["b", "y"],
+      "HCD": ["c", "i", "j"]
+    },
+    "signatures": {
+      "CID": ["Im"],
+      "HCD": ["Im"]
+    },
+    "c": {
+      "terminus": 0,
+      "mass_diff": {
+        "pos": "-H2O",
+        "neg": "-H2O"
+      },
+      "fragmentation_unit": {
+        "pos": "ELONGATION_UNIT",
+        "neg": "ELONGATION_UNIT"
+      },
+      "start": 0,
+      "end": 0
+    },
+    "i": {
+      "terminus": 0,
+      "mass_diff": {
+        "pos": "-H",
+        "neg": null
+      },
+      "fragmentation_unit": {
+        "pos": "ELONGATION_UNIT",
+        "neg": "ELONGATION_UNIT"
+      },
+      "start": 0,
+      "end": 0
+    },
+    "j": {
+      "terminus": 0,
+      "mass_diff": {
+        "pos": "-CO2",
+        "neg": null
+      },
+      "fragmentation_unit": {
+        "pos": "ELONGATION_UNIT",
+        "neg": "ELONGATION_UNIT"
+      },
+      "start": 0,
+      "end": 0
+    }
+  },
+
+  "MS2_SIGNATURE_IONS": {
+    "Im": [
+      ["g", 32.02622],
+      ["l", 46.04187]
+    ],
+
+    "dominant": []
+  },
+
+  "MODIFICATIONS": {}
+}

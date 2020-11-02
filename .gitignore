@@ -1,4 +1,4 @@
-!polymersoup/insilico/Config_files/*.json
+!oligoss/insilico/Config_files/*.json
 .md
 !*read*.md
 __pycache__/

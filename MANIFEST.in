@@ -1,0 +1,3 @@
+include oligoss/*.json
+include tests/*.json
+include tests/*.mzML
