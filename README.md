@@ -10,6 +10,25 @@ all raw mass spectrometry data input to the package is of good quality. All
 results should be checked and validated wherever possible, especially if running
 data from a new instrument and / or oligomer class.
 
+## Installation
+
+OLIGOSS is available through Pip (Python Package Index):
+
+```
+pip install oligoss --user
+
+```
+
+## Source Code
+
+Source code can be viewedon github: https://github.com/croningp/oligoss.git
+
+## System Requirements
+
+OLIGOSS was developed and tested on Ubuntu 19.10, and should therefore be compatible
+with any Unix OS. As of version 0.0.1, OLIGOSS is incompabitible with Windows. Windows
+compatibility will be introduced in a later version.
+
 ## Dependencies
 
 - Python (version 3.6.0 or later)
@@ -36,7 +55,7 @@ pip install mzmlripper --user
 ```
 ## Run
 
-To run a OLIGOSS sequencing workflow, run the following command:
+To run an OLIGOSS sequencing workflow, run the following command:
 
 ```
 python -m oligoss -i input_params.json -r ripper_folder -o output_folder
@@ -55,6 +74,7 @@ This folder should contain input MS data in either mzML or ripper JSON format.
 
 
 All output data will be dumped to this folder.
+
 
 ## Sequencing Workflows
 

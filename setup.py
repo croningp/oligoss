@@ -20,11 +20,13 @@ setup(
             "oligoss=oligoss.__main__:main"
         ]
     },
+    license="AGPLv3",
     classifiers=[
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
         "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
-        "Operating System :: Unix"
+        "Operating System :: Unix",
+        "Development Status :: 3 - Alpha"
     ],
     include_package_data=True
 )
