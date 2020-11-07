@@ -26,7 +26,7 @@ Source code can be viewedon github: https://github.com/croningp/oligoss.git
 ## System Requirements
 
 OLIGOSS was developed and tested on Ubuntu 19.10, and should therefore be compatible
-with any Unix OS. As of version 0.0.1, OLIGOSS is incompabitible with Windows. Windows
+with any Unix OS. As of version 0.0.2, OLIGOSS is incompabitible with Windows. Windows
 compatibility will be introduced in a later version.
 
 ## Dependencies
