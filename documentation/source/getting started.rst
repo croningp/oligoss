@@ -22,7 +22,13 @@ data from a new instrument and / or oligomer class.
 Fragmentation and ionization of oligomers under MS/MS depends on many factors relating to
 the specific oligomer class, mass spectrometry instrumentation and set-up, as
 well as the analyte matrix. With this in mind, OLIGOSS allows for maximum
-flexibility in defining experimental parameters.  
+flexibility in defining experimental parameters.
+
+OLIG
+----
+There are often many possible ionization and fragmentation pathways for a single
+oligomer (or oligomer class). The relative predominance of these pathways will
+depend on specific conditions, mainly instrumentation. The full
 
 
 .. image:: img/OLIGOSS_execution.png
@@ -66,14 +72,10 @@ installed and run from Windows 10. For instructions on
 Installation
 =============
 
-OLIGOSS is avaialable through The Python Package Index (`PyPI`_).
+OLIGOSS is avaialable through The Python Package Index (`PyPI<https://pypi.org/project/oligoss/>`_).
 
-.._PyPI: https://pypi.org/project/oligoss/
 
-Alternatively, the source code can be cloned directly from the OLIGOSS GitHub
-`repository`_.
-
-.. _repository: https://github.com/croningp/oligoss.git
+Alternatively, the source code can be cloned directly from the OLIGOSS `GitHub repository<https://github.com/croningp/oligoss.git>`_.
 
 
 .. _Running-OLIGOSS:
