@@ -1,4 +1,4 @@
-image: "python:3.8"
+image: "python:3.7.5"
 
 stages:
   - lint
@@ -41,7 +41,7 @@ pages:
   script:
   - pip install -U sphinx
   - pip install sphinx_rtd_theme
-  - sphinx-build -b html documentation/build public
+  - sphinx-build -b html documentation/source public
   artifacts:
     paths:
     - public
