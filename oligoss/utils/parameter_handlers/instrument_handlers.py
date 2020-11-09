@@ -119,7 +119,7 @@ def retrieve_instrument_alias_info(params_dict, inst_key, configs=None):
                     f'instrument {params_dict[inst_key]} not\n'
                     'configured. Please choose a valid instrument alias or\n'
                     'create a new instrument config file. Valid aliases:\n'
-                    f'{configs.keys}')
+                    f'{[k for k in configs.keys()]}')
     return {}
 
 def retrieve_mass_spec_info_params_obj(params_obj):

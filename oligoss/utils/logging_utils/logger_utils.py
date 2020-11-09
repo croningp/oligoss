@@ -82,41 +82,42 @@ def get_git_info_for_log():
     """
     git_logging = False
 
+    latest_commit = "unknown"
     try:
         #  get git username
-        user = str(subprocess.check_output(
-            ["git", "config", "user.name"]
-        ), "utf-8")
+        user = str(subprocess.run(
+            ["git", "config", "user.name"], capture_output=True
+        ).stdout, "utf-8")
         git_logging = True
     except subprocess.CalledProcessError:
         user = "unknown"
 
     try:
         #  get git branch
-        branch = str(subprocess.check_output(
-            ["git", "rev-parse", "--abbrev-ref", "HEAD"]
-        ), "utf-8")
+        branch = str(subprocess.run(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"], capture_output=True
+        ).stdout, "utf-8")
         git_logging = True
     except subprocess.CalledProcessError:
         branch = "unknown"
 
     if branch != "unknown":
         try:
-            latest_commit = str(subprocess.check_output(
-                ["git", "rev-parse", branch]
-            ))
+            latest_commit = str(subprocess.run(
+                ["git", "rev-parse", branch], capture_output=True
+            ).stdout)
         except subprocess.CalledProcessError:
             try:
-                latest_commit = str(subprocess.check_output(
-                    ["git", "rev-parse", "HEAD"]
-                ), "utf-8")
+                latest_commit = str(subprocess.run(
+                    ["git", "rev-parse", "HEAD"], capture_output=True
+                ).stdout, "utf-8")
             except subprocess.CalledProcessError:
                 latest_commit = "unknown"
     try:
         #  get git version tag
-        version = str(subprocess.check_output(
-            ["git", "describe"]
-        ), "utf-8")
+        version = str(subprocess.run(
+            ["git", "describe"], capture_output=True
+        ).stdout, "utf-8")
         git_logging = True
     except subprocess.CalledProcessError:
         version = "unknown"

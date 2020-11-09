@@ -1,5 +1,5 @@
 """
-OLIGOSS Version 0.0.1
+OLIGOSS Version 0.0.2
 
 This file is used to run all OLIGOSS experiments.
 Artificial Life Team, Cronin Group, 2020
@@ -51,7 +51,7 @@ faulthandler.enable(all_threads=True)
 
 manager = multiprocessing.Manager()
 
-def run_oligoss(input_file, data_folder=None, out_folder=None):
+def main(input_file, data_folder=None, out_folder=None):
     """
     Reads input file and runs a PolymerSoup workflow
 
@@ -359,7 +359,7 @@ def full_screen_composition_forked(
 
 
 if __name__ == '__main__':
-    run_oligoss(
+    main(
         input_file=args.input,
         data_folder=args.ripper,
         out_folder=args.output

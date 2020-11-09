@@ -1,3 +1,11 @@
 include oligoss/*.json
 include tests/*.json
 include tests/*.mzML
+include oligoss/utils/polymer_configs/*.json
+include oligoss/utils/instrument_standards/chromatography/*.json
+include oligoss/utils/instrument_standards/mass_spec_models/*.json
+include oligoss/utils/polymer_configs/*.json
+include *.json
+recursive-include oligoss/*.json
+recursive-include *.json
+include oligoss/utils/instrument_standards/mass_spec_models/orbitrap_lumos_tribrid.JSON
