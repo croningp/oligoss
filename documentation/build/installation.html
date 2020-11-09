@@ -1,0 +1,312 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Installation and Requirements &mdash; polymersoup 0.0.3 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Input Parameters File" href="input_parameters/index.html" />
+    <link rel="prev" title="Getting Started" href="getting started.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #99b7d3" >
+          
+
+          
+            <a href="index.html">
+          
+
+          
+            
+            <img src="_static/full_logo_0.0.3.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation and Requirements</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#dependencies">Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#system-requirments">System Requirments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#standard-installation">Standard Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#install-from-pypi">Install From PyPI</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#download-from-github">Download From GitHub</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#windows-10-installation">Windows 10 Installation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#installing-wsl-and-ubuntu-on-windows-10">Installing WSL and Ubuntu on Windows 10</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#running-oligoss">Running OLIGOSS</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="input_parameters/index.html">Input Parameters File</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration_files/index.html">Configuration Files</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">polymersoup</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Installation and Requirements</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/installation.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="installation-and-requirements">
+<span id="installation-requirements"></span><h1>Installation and Requirements<a class="headerlink" href="#installation-and-requirements" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="dependencies">
+<span id="id1"></span><h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
+<p><strong>Python (version 3.6.0 or later)</strong></p>
+<p>OLIGOSS was written in Python 3.7.5, but should be compatible with version 3.6
+or later.</p>
+<p><strong>mzML</strong></p>
+<ul class="simple">
+<li><p>Mass spectrometry data must be in .mzML file format. mzML files can be generated from a variety of vendors, including Proteowizard MS Convert, which is freely available here: <a class="reference external" href="http://proteowizard.sourceforge.net/download.html">http://proteowizard.sourceforge.net/download.html</a></p></li>
+<li><p>mzMLs are automatically converted to JSON format using Graham Keenan’s mzmlripper, documentation for which can be found on <a class="reference external" href="https://github.com/croningp/mzmlripper.git">GitHub</a>.</p></li>
+</ul>
+</div>
+<div class="section" id="system-requirments">
+<span id="system-requirements"></span><h2>System Requirments<a class="headerlink" href="#system-requirments" title="Permalink to this headline">¶</a></h2>
+<p>OLIGOSS was developed and tested on Ubuntu 19.10, and should therefore be
+compatible with any Unix OS. As of version 0.0.3, OLIGOSS is incompabitible
+with Windows. Windows compatibility will be introduced in a later version.
+Luckily for Windows 10 users, the latest distributions of Ubuntu can be easily
+installed and run from Windows 10. For instructions on how to set up Ubuntu on Windows 10
+and install OLIGOSS, see our instructions <cite>here&lt;Install-Windows&gt;</cite>.</p>
+</div>
+<div class="section" id="standard-installation">
+<span id="standard-install"></span><h2>Standard Installation<a class="headerlink" href="#standard-installation" title="Permalink to this headline">¶</a></h2>
+<p>OLIGOSS is avaialable through The Python Package Index (<a class="reference external" href="https://pypi.org/project/oligoss/">PyPI</a>).</p>
+<div class="section" id="install-from-pypi">
+<span id="install-pypi"></span><h3>Install From PyPI<a class="headerlink" href="#install-from-pypi" title="Permalink to this headline">¶</a></h3>
+<p>To install OLIGOSS from PyPi, use pip:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip3</span> <span class="n">install</span> <span class="n">oligoss</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="download-from-github">
+<span id="install-source"></span><h3>Download From GitHub<a class="headerlink" href="#download-from-github" title="Permalink to this headline">¶</a></h3>
+<p>Alternatively, the source code can be cloned directly from the <a class="reference external" href="https://github.com/croningp/oligoss.git">OLIGOSS GitHub repository</a>.</p>
+</div>
+<div class="section" id="windows-10-installation">
+<span id="install-windows"></span><h3>Windows 10 Installation<a class="headerlink" href="#windows-10-installation" title="Permalink to this headline">¶</a></h3>
+<p>OLIGOSS was largely written and tested using Python 3.7.5 on operating system Ubuntu 19.04. It is currently not compatible with
+Windows. Luckily for Windows 10 users, Ubuntu can be easily installed and run for Windows computers using the Windows Subsystem for Linux
+(WSL).</p>
+<div class="section" id="installing-wsl-and-ubuntu-on-windows-10">
+<h4>Installing WSL and Ubuntu on Windows 10<a class="headerlink" href="#installing-wsl-and-ubuntu-on-windows-10" title="Permalink to this headline">¶</a></h4>
+<ol class="arabic">
+<li><p>To install WSL and Ubuntu for Windows 10, follow the instructions from <cite>Microsoft &lt;https://docs.microsoft.com/en-us/windows/wsl/install-win10&gt;</cite>
+* For new users, we recommend using the recommended options in the Microsoft instructions (WSL2, most recent distribution of Ubuntu).</p></li>
+<li><p>Once Ubuntu has been installed succesfully, launch Ubuntu.</p></li>
+<li><p>Within the Ubuntu shell, make sure the package list is up-to-date with the following command:</p>
+<p>sudo apt update</p>
+</li>
+<li><p>Install <cite>pip &lt;https://pip.pypa.io/en/stable/installing/&gt;</cite> using the command:</p>
+<p>sudo apt install python3-pip</p>
+</li>
+<li><p>Finally, use pip to install OLIGOSS:</p>
+<p>pip3 install oligoss</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="section" id="running-oligoss">
+<span id="id2"></span><h2>Running OLIGOSS<a class="headerlink" href="#running-oligoss" title="Permalink to this headline">¶</a></h2>
+<p>To run an OLIGOSS sequencing workflow, run the following command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">oligoss</span> <span class="o">-</span><span class="n">i</span> <span class="n">input_params</span><span class="o">.</span><span class="n">json</span> <span class="o">-</span><span class="n">r</span> <span class="n">ripper_folder</span> <span class="o">-</span><span class="n">o</span> <span class="n">output_folder</span>
+</pre></div>
+</div>
+<p><strong>input_params.json = input parameters file</strong></p>
+<blockquote>
+<div><p>This should contain all relevant input parameters for executing an
+OLIGOSS sequencing workflow (see <a class="reference internal" href="input_parameters/index.html#input-parameters"><span class="std std-ref">Input Parameters File</span></a>).</p>
+</div></blockquote>
+<p><strong>ripper_folder = data directory</strong>.</p>
+<blockquote>
+<div><p>This argument can either be passed in via the command line directly (as above) or specified in the input parameters file using the data_folder parameter.
+This folder should contain input MS data in either mzML or ripper JSON format.</p>
+</div></blockquote>
+<p><strong>out_dir = output directory</strong>.</p>
+<blockquote>
+<div><p>This argument can either be passed in via the command line directly (as above) or specified in the input parameters file using the output_folder parameter.
+All output data will be dumped to this folder.</p>
+</div></blockquote>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="input_parameters/index.html" class="btn btn-neutral float-right" title="Input Parameters File" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="getting started.html" class="btn btn-neutral float-left" title="Getting Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, D. Doran, E. Clarke, G. Keenan, E. Carrick, C. Mathis and L. Cronin
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

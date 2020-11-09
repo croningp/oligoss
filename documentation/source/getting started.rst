@@ -24,12 +24,30 @@ the specific oligomer class, mass spectrometry instrumentation and set-up, as
 well as the analyte matrix. With this in mind, OLIGOSS allows for maximum
 flexibility in defining experimental parameters.
 
+OLIGOSS input files are in `JavaScript Object Notation (JSON) <https://www.json.org/json-en.html>`_ file format.
+
 OLIG
 ----
+
 There are often many possible ionization and fragmentation pathways for a single
 oligomer (or oligomer class). The relative predominance of these pathways will
-depend on specific conditions, mainly instrumentation. The full
+depend on specific conditions, mainly instrumentation. The full scope of possible ionization
+and fragmentation pathways is defined for each oligomer class is defined in oligomer-specific
+OLIG configuration files.
 
+Instrument Configuration
+------------------------
+
+Instrumentation (mass analyzer, fragmentation method, chromatography) plays a huge role in determining
+which fragmentation pathways (defined in OLIG files) will occur, and how MS1 precursor and MS2 product ions
+will be detected. OLIGOSS allows for maximum flexibility in dealing with instruments with different
+sensitivities, resolutions and fragmentation methods. Standard settings for each
+instrument can be saved to instrument-specific configuration files.
+
+Experiment Run files / Input Parameters
+---------------------------------------
+
+These define all non-OLIG parameters that are relevant to sequencing and screening. See `input parameters<Input-Parameters>`.
 
 .. image:: img/OLIGOSS_execution.png
     :width: 600
@@ -52,9 +70,8 @@ or later.
 generated from a variety of vendors, including Proteowizard MS Convert, which is
 freely available here: http://proteowizard.sourceforge.net/download.html
 * mzMLs are automatically converted to JSON format using Graham Keenan's
-mzmlripper, documentation for which can be found on `GitHub`_.
+mzmlripper, documentation for which can be found on `GitHub <https://github.com/croningp/mzmlripper.git>`_.
 
-.._GitHub: https://github.com/croningp/mzmlripper.git
 
 .. _System-Requirements:
 
@@ -72,10 +89,10 @@ installed and run from Windows 10. For instructions on
 Installation
 =============
 
-OLIGOSS is avaialable through The Python Package Index (`PyPI<https://pypi.org/project/oligoss/>`_).
+OLIGOSS is avaialable through The Python Package Index (`PyPI <https://pypi.org/project/oligoss/>`_).
 
 
-Alternatively, the source code can be cloned directly from the OLIGOSS `GitHub repository<https://github.com/croningp/oligoss.git>`_.
+Alternatively, the source code can be cloned directly from the OLIGOSS `GitHub repository <https://github.com/croningp/oligoss.git>`_.
 
 
 .. _Running-OLIGOSS:

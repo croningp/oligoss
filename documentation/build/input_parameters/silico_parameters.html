@@ -1,0 +1,434 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Silico Parameters &mdash; polymersoup 0.0.3 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Extractor Parameters" href="extractor_parameters.html" />
+    <link rel="prev" title="Core Parameters" href="general_parameters.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #99b7d3" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/full_logo_0.0.3.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../getting started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation and Requirements</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Input Parameters File</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="general_parameters.html">Core Parameters</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Silico Parameters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ms1-silico-parameters">MS1 Silico Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ms2-silico-parameters">MS2 Silico Parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="extractor_parameters.html">Extractor Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="postprocess_parameters.html">Postprocess Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#indices-and-tables">Indices and tables</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration_files/index.html">Configuration Files</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">polymersoup</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">Input Parameters File</a> &raquo;</li>
+        
+      <li>Silico Parameters</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/input_parameters/silico_parameters.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="silico-parameters">
+<span id="id1"></span><h1>Silico Parameters<a class="headerlink" href="#silico-parameters" title="Permalink to this headline">¶</a></h1>
+<p>Silico parameters define the properties required to construst theoretical MS1 precursors and MS2 product ions.
+There are general silico parameters, as well as parameters specific to MS1 and MS2 ions, defined in silico.ms1 and silico.ms2 subparameters, respectively.</p>
+<ol class="arabic">
+<li><dl class="simple">
+<dt><strong>min_length</strong>:</dt><dd><ul class="simple">
+<li><p>Description: specifies minimum length (in monomer units) of oligomers in product mixtures.</p></li>
+<li><p>Type: <cite>int</cite></p></li>
+<li><p>Options: Any integer value.</p></li>
+<li><p>Default: no Default available</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Length of target oligomers affects size of the sequence space to screen.</p></li>
+<li><p>Limits on sequence space for screening will depend on oligomer class, types of monomers, length of oligomers and computing resources avaialable.</p></li>
+</ul>
+</div>
+</li>
+<li><dl class="simple">
+<dt><strong>max_length</strong>:</dt><dd><ul class="simple">
+<li><p>Description: specifies maximum length (in monomer units) of oligomers in product mixtures.</p></li>
+<li><p>Type: <cite>int</cite></p></li>
+<li><p>Options:Any integer value.</p></li>
+<li><p>Default: no Default available</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>length of target oligomers affects size of the sequence space to screen.</p></li>
+<li><p>Limits on sequence space for screening will depend on oligomer class,    * Types of monomers, length of oligomers and computing resources avaialable.</p></li>
+</ul>
+</div>
+</li>
+<li><dl class="simple">
+<dt><strong>isomeric_targets</strong>:</dt><dd><ul class="simple">
+<li><p>Description: specifies isomeric sequence pool for targetting. If specified, only sequences isomeric to one or more isomeric targets will be included in the screen.</p></li>
+<li><p>Type: <cite>List[str]</cite></p></li>
+<li><p>Options: list of any sequence strings that would be generated from input monomers and length distribution.</p></li>
+<li><p>Default: None (<strong>not required</strong>).</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>modifications</strong>:</dt><dd><ul class="simple">
+<li><p>Description: specifies targets for any covalent modifications.</p></li>
+<li><p>Type: <cite>Dict[str or int, List[str]]</cite></p></li>
+<li><dl class="simple">
+<dt>Options: keys specify modification targets (terminal and sidechain).</dt><dd><ul>
+<li><p>Terminal Keys: -1 or “-1” / 0 or “0” for terminus -1 and 0, respectively.</p></li>
+<li><p>Sidechain Keys: keys must be one-letter codes for monomers with compatible sidechains (see <strong>Polymer Configs</strong>).</p></li>
+<li><p>Modification Values: list of modification strings. Strings must correspond to valid modification alias (see <strong>Polymer Configs</strong>).</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>Example: {“K”: [“Ole”, “Pal”], 0: [“Ole”]}</p></li>
+<li><p>Default: None (<strong>not required</strong>).</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>ms1</strong>:</dt><dd><ul class="simple">
+<li><p>Description: specifies parameters for MS1 silico ions.</p></li>
+<li><p>Type <cite>dict</cite></p></li>
+<li><p>Options: many sub-parameters (see <a class="reference internal" href="#ms1-silico"><span class="std std-ref">**MS1 Silico Parameters**</span></a>).</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>ms2</strong>:</dt><dd><ul class="simple">
+<li><p>Description: specifies parameters for MS2 silico ions.</p></li>
+<li><p>Type <cite>dict</cite></p></li>
+<li><p>Options: many sub-parameters (see <strong>MS2 Silico Parameters</strong>).</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ol>
+<div class="section" id="ms1-silico-parameters">
+<span id="ms1-silico"></span><h2>MS1 Silico Parameters<a class="headerlink" href="#ms1-silico-parameters" title="Permalink to this headline">¶</a></h2>
+<p>MS1 silico parameters define properties required for generating theoretical MS1 precursor ions.</p>
+<ol class="arabic">
+<li><dl class="simple">
+<dt><strong>min_z</strong>:</dt><dd><ul class="simple">
+<li><p>Description: specifies minimum <strong>absolute</strong> charge of MS1 precursor ions.</p></li>
+<li><p>Type: <cite>int</cite></p></li>
+<li><p>Options: Any integer value.</p></li>
+<li><p>Default: Default value specified by instrument. If no instrument is specified, Default value == <strong>1</strong>.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>max_z</strong>:</dt><dd><ul class="simple">
+<li><p>Description: specifies maximum <strong>absolute</strong> charge of MS1 precursor ions.</p></li>
+<li><p>Type: <cite>int</cite></p></li>
+<li><p>Options: Any integer value &gt;= <strong>min_z</strong>.</p></li>
+<li><p>Default: None (<strong>not required</strong>). Instrument defaults can be specified in instrument config file.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>universal_sidechain_modifications</strong>:</dt><dd><ul class="simple">
+<li><p>Description: specifies whether all sidechains targeted for modification will be modified by one or more modifying agent.</p></li>
+<li><p>Type: <cite>bool</cite></p></li>
+<li><p>Options: true or false.</p></li>
+<li><p>Default: Default can be specified in polymer config file (see <strong>Polymer Configs</strong>). If not default is specified in config, default value == <strong>True</strong>.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>universal_terminal_modifications</strong>:</dt><dd><ul class="simple">
+<li><p>Description: specifies whether all termini targeted for modification will be modified by one or more modifying agent.</p></li>
+<li><p>Type: <cite>bool</cite></p></li>
+<li><p>Options: true or false.</p></li>
+<li><p>Default: Default can be specified in polymer config file (see <strong>Polymer Configs</strong>). If not default is specified in config, default value == <strong>True</strong>.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>max_neutral_losses</strong>:</dt><dd><ul class="simple">
+<li><p>Description: specifies cap on maximum number of neutral loss fragmentation events at MS1.</p></li>
+<li><p>Type: <cite>int</cite></p></li>
+<li><p>Options: any integer value.</p></li>
+<li><p>Default: Default can be specified in instrument config file (see <strong>Instrument Configs</strong>). If default is not specified in config, default value == <strong>None</strong>.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>adducts</strong>:</dt><dd><ul class="simple">
+<li><p>Description: specifies extrinsic ions present in analyte matrix that will affect MS1 ionization.</p></li>
+<li><p>Type: <cite>List[str]</cite></p></li>
+<li><p>Options: list of ion strings.</p></li>
+<li><p>Default: varies with instrument and polymer class. If no instrumentor polymer-specific defaults, this must be specified.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>All ions must be defined in <strong>Global Chemical Constants</strong>.</p></li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+<div class="section" id="ms2-silico-parameters">
+<h2>MS2 Silico Parameters<a class="headerlink" href="#ms2-silico-parameters" title="Permalink to this headline">¶</a></h2>
+<p>MS2 silico parameters define properties required for generating theoretical MS2 product ions.</p>
+<ol class="arabic simple">
+<li><dl class="simple">
+<dt><strong>fragment series</strong>:</dt><dd><ul class="simple">
+<li><p>Description: linear fragment types to be included in MS2 silico libraries.</p></li>
+<li><p>Type: <cite>List[str]</cite></p></li>
+<li><p>Options: list of any valid MS2 fragment one letter codes in polymer config file (see <strong>Polymer Configs</strong>).</p></li>
+<li><p>Defaults: Defaults vary depending on specific instrument and polymer class. If no default is specified in instrument config, this <strong>MUST</strong> be supplied in input parameters.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>max_neutral_losses</strong>:</dt><dd><ul class="simple">
+<li><p>Description: specifies cap on maximum number of neutral loss fragmentation events at MS2.</p></li>
+<li><p>Type: <cite>int</cite></p></li>
+<li><p>Options: any integer value.</p></li>
+<li><p>Default: default can be specified in instrument config file (see <strong>Instrument Configs</strong>). If default is not specified in config, default value == <strong>None</strong>.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>signatures</strong>:</dt><dd><ul class="simple">
+<li><p>Description: specifies signature ion types to be included in MS2 silico libraries.</p></li>
+<li><p>Type: <cite>List[str]</cite></p></li>
+<li><p>Options: list of any valid signature ion types in polymer config file.</p></li>
+<li><p>Defaults: Defaults vary depending on instrument and polymer class. If no default is specified in config files, default value == <strong>None</strong>.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>min_z</strong>:</dt><dd><ul class="simple">
+<li><p>Description: specifies minimum <strong>absolute</strong> charge of MS2 product ions.</p></li>
+<li><p>Type: <cite>int</cite></p></li>
+<li><p>Options: Any integer value.</p></li>
+<li><p>Default: Default value specified by instrument. If no instrument is specified, no fallback default value is available so this must be supplied.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ol>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="extractor_parameters.html" class="btn btn-neutral float-right" title="Extractor Parameters" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="general_parameters.html" class="btn btn-neutral float-left" title="Core Parameters" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, D. Doran, E. Clarke, G. Keenan, E. Carrick, C. Mathis and L. Cronin
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,326 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Core Parameters &mdash; polymersoup 0.0.3 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Silico Parameters" href="silico_parameters.html" />
+    <link rel="prev" title="Input Parameters File" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #99b7d3" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/full_logo_0.0.3.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../getting started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation and Requirements</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Input Parameters File</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Core Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="silico_parameters.html">Silico Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extractor_parameters.html">Extractor Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="postprocess_parameters.html">Postprocess Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#indices-and-tables">Indices and tables</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration_files/index.html">Configuration Files</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">polymersoup</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">Input Parameters File</a> &raquo;</li>
+        
+      <li>Core Parameters</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/input_parameters/general_parameters.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="core-parameters">
+<span id="id1"></span><h1>Core Parameters<a class="headerlink" href="#core-parameters" title="Permalink to this headline">¶</a></h1>
+<p>Input parameter files must be in JSON format.
+The following core parameters must be explictly defined in each input parameters file:</p>
+<ol class="arabic simple">
+<li><dl class="simple">
+<dt><strong>mode</strong>:</dt><dd><ul class="simple">
+<li><p>Description: specifies the charge of ions.</p></li>
+<li><p>Type: <cite>str</cite></p></li>
+<li><p>Options: either “pos” or “neg” for positive and negative ion mode, respectively.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>monomers</strong>:</dt><dd><ul class="simple">
+<li><p>Description: monomers used in experiment.</p></li>
+<li><p>Type: <cite>List[str]</cite></p></li>
+<li><p>Options: any combination of monomer one letter codes from polymer-specific configuration files.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>screening method</strong>:</dt><dd><ul class="simple">
+<li><p>Description: specifies which sequencing workflow to use.</p></li>
+<li><p>Type: <cite>str</cite></p></li>
+<li><p>Options: currently only option is “exhaustive”.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>polymer_class</strong>:</dt><dd><ul class="simple">
+<li><p>Description: specifies the backbone of oligomers being fragmented.</p></li>
+<li><p>Type: <cite>str</cite></p></li>
+<li><p>Options: any valid alias associated with a polymer config file (see <strong>Polymer Configs</strong>).</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ol>
+<p>In addition to these required parameters, optional instrument configuration files can be defined.
+<strong>NOTE</strong>: if these are defined, some parameters for silico, extractors and postprocessing are
+assigned default instrument values.</p>
+<ol class="arabic">
+<li><dl class="simple">
+<dt><strong>instrument</strong>:</dt><dd><ul class="simple">
+<li><p>Description: specifies the mass spec model used to acquire MS/MS data.</p></li>
+<li><p>Type: <cite>str</cite>, optional</p></li>
+<li><p>Options: any valid alias for a pre-configured instrument file.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>chromatography</strong>:</dt><dd><ul class="simple">
+<li><p>Description: specifies the chromatography used to separate products prior to detection via MS.</p></li>
+<li><p>Type: <cite>str</cite>, optional</p></li>
+<li><p>Options: any valid alias for a pre-configured chromatography file.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p><strong>max_cores</strong>:
+* Description: specifies the maximum number of logical cores to utilise for sequecing workflows -</p>
+<blockquote>
+<div><p>OLIGOSS utilises multiprocessing to speed up data processing.</p>
+</div></blockquote>
+<ul class="simple">
+<li><p>Type: <cite>int</cite>, optional</p></li>
+<li><p>Options: any number of cores. See Python’s <a class="reference external" href="https://docs.python.org/3.7/library/multiprocessing.html">documentation for multiprocessing</a> for more information.</p></li>
+<li><p>Default: 4.</p></li>
+</ul>
+</li>
+<li><dl class="simple">
+<dt><strong>free_cores</strong>:</dt><dd><ul class="simple">
+<li><p>Description: specifies the minimum number of free logical cores to be left unused during sequencing workflows.</p></li>
+<li><p>Type: <cite>int</cite>, optional</p></li>
+<li><p>Options any number of cores from 0 to N - 1, where N = number of logical cores (threads) in system.</p></li>
+<li><p>Default: 2.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>hard_memory_limit</strong>:</dt><dd><ul class="simple">
+<li><p>Description: maximum amount of virtual memory to allocate to the OLIGOSS run (in Gb).</p></li>
+<li><p>Type: <cite>float</cite>, optional</p></li>
+<li><p>Options: RAM usage (in Gb). If a run exceeds this limit, it will be terminated prematurely.</p></li>
+<li><p>Default: None.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p><strong>relative_memory_limit</strong>:
+* Description: maximum amount of virtual memory to allocate to OLIGOSS run (as % of total virtual memory).
+* Type: <cite>float</cite>, optional
+* Options: any value &gt; 0 and &lt;= 100.
+* Default: 90.</p></li>
+</ol>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="silico_parameters.html" class="btn btn-neutral float-right" title="Silico Parameters" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="Input Parameters File" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, D. Doran, E. Clarke, G. Keenan, E. Carrick, C. Mathis and L. Cronin
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

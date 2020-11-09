@@ -1,18 +1,18 @@
-Polymer Config Files 
-####################
+.. _OLIG-Files:
 
-.. image:: img/typical_polymersoup_execution.png
-    :width: 600
-    :align: center
+##########
+OLIG Files
+##########
+
+OLIG files define the full scope of known ionization and fragmentation pathways for an oligomer class.
 
 Layout
 ======
 
-Polymer-specific configuration files define the full scope of possible ionization and fragmentation for an oligomer class.
-A proper configuration file should contain all information required to generate full possible sequence libraries for target oligomer class, as well as MS1 precursors and MS2 product ions.
+A proper OLIG configuration file should contain all information required to generate full possible sequence libraries for target oligomer class, as well as MS1 precursors and MS2 product ions.
 It should be divided into three sections:
 
-#. **General Polymer Properties**:
+#. **General Oligomer Properties**:
 
     This defines properties required for generating MS1 precursor libraries.
 
@@ -24,7 +24,8 @@ It should be divided into three sections:
 
     This defines any covalent modifications and their appropriate targets.
 
-General Polymer Properties
+.. _General-Properties:
+General Oligomer Properties
 ==========================
 
 #. **MONOMERS**:
@@ -103,6 +104,8 @@ General Polymer Properties
 
     * Example: The following example defines cross-linking events for the monomer "K" which, in its non-crosslinked state can be ionized at its sidechain (see **IONIZABLE_SIDECHAINS**). It can crosslink with monomers "E" and "D" via sidechain links. However, this type of crosslinking event does not disrupt standard linear MS2 fragmentation pathways: {"K": {"monomers": ["E", "D"], "crosslink_massdiff": "H2O", "permissible_crosslink_charges": [0], "disrupt_ms2": false}}
 
+.. MS2-Properties:
+
 MS2 Fragmentation Properties
 ============================
 
@@ -129,8 +132,10 @@ This includes both linear fragment series and signature ion fragments.
     * Type: `Dict[str, dict]`
     * Options: Keys must be strings corresponding to modification three-letter codes. Values are subdicts defining modification properties (see **Defining MODIFICATIONS**, below).
 
+.. _Frag-Series:
+
 Defining FRAG_SERIES
-====================
+--------------------
 
 The **FRAG_SERIES** dict is used to define properties relevant to linear fragment series (i.e. fragment series that are indexed stepwise along the oligomer backbone).
 
@@ -222,54 +227,3 @@ The **FRAG_SERIES** dict is used to define properties relevant to linear fragmen
       * *end*: specifies number of indices away from end terminus at which exception no longer applies
       * *exception_value*: the substituted value to use for the property if exception applies.
     * Example: The following example is for a fragment series with exception to **mass_diff** in cases where a bond between a "hydroxyA"-containing monomer is being fragmented. The exception applies when the "hydroxyA"-containing monomer occurs at the final index of the subsequence. The exception applies from the very first index of the fragment series but ends one index away from the end terminus: {"pos": {"hydroxyA": {"mass_diff": {"positions": [-1], "start": 0, "end": 1, "exception_value": 26.98709}}}}
-
-Instrument Configs
-==================
-
-Instrument configuration files are used to store information on mass spectrometers used routinely for experiments. These can define resolution (in terms of error tolerance for matching peaks), sensitivity (in terms of minimum intensity thresholds for detection), and fragmentation methods.
-
-#. **error**:
-    * Description: this defines the default error threshold for an instrument when matching peaks.
-    * Type: `float`
-    * Options: any valid float >= 0. This can correspond to relative error threshold (parts per million, ppm) or absolute error threshold (mass units, u).
-
-#. **error_units**:
-    * Descriptions: specifies units of default **error**.
-    * Type: `str`
-    * Options: either "ppm" or "abs" for relative and absolute error thresholding, respectively.
-
-#. **rt_units**:
-    * Description: specifies the default retention time units in mzML files. This is a vendor-specific property outside the control of Polymersoup (e.g. mzML files generated from Bruker mass specs have retention time units of seconds, while ThermoScientific mass spec units are in minutes).
-    * Type: `str`
-    * Options: either "min" or "sec" for seconds or minutes, respectively.
-
-    .. note::
-        If you are unsure about the retention time units in your mzML files, this is usually not specified in the raw mzML itself. Spectra in output rippers are sorted by retention time, so it should be straightforward to work out **rt_units** for your mass spec from the recorded retention times of the first and last spectra (assuming you know total acquisition time).
-
-#. **min_ms1_max_intensity**:
-    * Description: specifies default minimum peak in intensity for accepting an MS1 EIC as valid.
-    * Type: `float`
-    * Options: any valid float >= 0.
-
-#. **min_ms2_max_intensity**:
-    * Description: specifies default minimum peak in intensity for accepting an MS2 EIC as valid.
-    * Type: `float`
-    * Options: any valid float >= 0.
-
-#. **fragmentation**:
-    * Description: specifies fragmentation methods available at every stage of tandem mass spectrometry for an instrument.
-    * Type: `Dict[str, List[str] or str]`
-    * Options: keys must include "ms1", "ms2" and (optionally) "msn" for defining fragmentation methods at MS1, MS2 and MS3+ levels respectively.
-    * Example: for a mass spec with "neutral" fragmentation (i.e. is-CID) at MS1, and "HCD" and "CID" at MS2-n: {"ms1": "neutral", "ms2": ["HCD", "CID", "neutral"], "msn": ["HCD", "CID", "neutral"]}.
-
-#. **pre_screen_filters**:
-    * Description: specifies default intensity thresholds for pre-filtering spectra before screening.
-    * Type: `Dict[str, float]`
-    * Options: keys:
-      * *min_ms1_max_intensity*: specifies minimum intensity of base peak for MS1 spectra to be included in screening.
-      * *min_ms2_max_intensity*: specifies minimum intensity of dominant ion for MS2 spectra to be included in screening.
-
-#. **polymer_classes**:
-    * Description: defines default fragmentation ionization, fragmentation and some postprocessing parameters for individual oligomer classes when using the instrument.
-    * Types: `Dict[str, dict]`
-    * Options: keys must be valid polymer config aliases. Values are subdicts defining default parameters for **silico_ms1**, **silico_ms2**, **extractors** and **postprocessing**.

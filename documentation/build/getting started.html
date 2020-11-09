@@ -1,0 +1,316 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Getting Started &mdash; polymersoup 0.0.3 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation and Requirements" href="installation.html" />
+    <link rel="prev" title="OLIGOSS Documentation" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #99b7d3" >
+          
+
+          
+            <a href="index.html">
+          
+
+          
+            
+            <img src="_static/full_logo_0.0.3.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview:</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#olig">OLIG</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#instrument-configuration">Instrument Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#experiment-run-files-input-parameters">Experiment Run files / Input Parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#dependencies">Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#system-requirments">System Requirments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-oligoss">Running OLIGOSS</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation and Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="input_parameters/index.html">Input Parameters File</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration_files/index.html">Configuration Files</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">polymersoup</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Getting Started</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/getting started.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="getting-started">
+<span id="id1"></span><h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<span id="id2"></span><h2>Overview:<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>OLIGOSS is a package for <em>de novo</em> sequencing of linear oligomers from
+tandem mass spectrometry data.</p>
+<p><strong>Note</strong>: proper use of this package requires a good working knowledge of both
+the chemistry and analytical methods used to obtain results. It is not a
+magic bullet to solve all of your oligomer sequencing needs. Please ensure that
+all raw mass spectrometry data input to the package is of good quality. All
+results should be checked and validated wherever possible, especially if running
+data from a new instrument and / or oligomer class.</p>
+<p>Fragmentation and ionization of oligomers under MS/MS depends on many factors relating to
+the specific oligomer class, mass spectrometry instrumentation and set-up, as
+well as the analyte matrix. With this in mind, OLIGOSS allows for maximum
+flexibility in defining experimental parameters.</p>
+<p>OLIGOSS input files are in <a class="reference external" href="https://www.json.org/json-en.html">JavaScript Object Notation (JSON)</a> file format.</p>
+<div class="section" id="olig">
+<h3>OLIG<a class="headerlink" href="#olig" title="Permalink to this headline">¶</a></h3>
+<p>There are often many possible ionization and fragmentation pathways for a single
+oligomer (or oligomer class). The relative predominance of these pathways will
+depend on specific conditions, mainly instrumentation. The full scope of possible ionization
+and fragmentation pathways is defined for each oligomer class is defined in oligomer-specific
+OLIG configuration files.</p>
+</div>
+<div class="section" id="instrument-configuration">
+<h3>Instrument Configuration<a class="headerlink" href="#instrument-configuration" title="Permalink to this headline">¶</a></h3>
+<p>Instrumentation (mass analyzer, fragmentation method, chromatography) plays a huge role in determining
+which fragmentation pathways (defined in OLIG files) will occur, and how MS1 precursor and MS2 product ions
+will be detected. OLIGOSS allows for maximum flexibility in dealing with instruments with different
+sensitivities, resolutions and fragmentation methods. Standard settings for each
+instrument can be saved to instrument-specific configuration files.</p>
+</div>
+<div class="section" id="experiment-run-files-input-parameters">
+<h3>Experiment Run files / Input Parameters<a class="headerlink" href="#experiment-run-files-input-parameters" title="Permalink to this headline">¶</a></h3>
+<p>These define all non-OLIG parameters that are relevant to sequencing and screening. See <cite>input parameters&lt;Input-Parameters&gt;</cite>.</p>
+<a class="reference internal image-reference" href="_images/OLIGOSS_execution.png"><img alt="_images/OLIGOSS_execution.png" class="align-center" src="_images/OLIGOSS_execution.png" style="width: 600px;" /></a>
+</div>
+</div>
+<div class="section" id="dependencies">
+<span id="id3"></span><h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
+<p><strong>Python (version 3.6.0 or later)</strong></p>
+<p>OLIGOSS was written in Python 3.7.5, but should be compatible with version 3.6
+or later.</p>
+<p><strong>mzML</strong></p>
+<ul class="simple">
+<li><p>Mass spectrometry data must be in .mzML file format. mzML files can be</p></li>
+</ul>
+<p>generated from a variety of vendors, including Proteowizard MS Convert, which is
+freely available here: <a class="reference external" href="http://proteowizard.sourceforge.net/download.html">http://proteowizard.sourceforge.net/download.html</a>
+* mzMLs are automatically converted to JSON format using Graham Keenan’s
+mzmlripper, documentation for which can be found on <a class="reference external" href="https://github.com/croningp/mzmlripper.git">GitHub</a>.</p>
+</div>
+<div class="section" id="system-requirments">
+<span id="system-requirements"></span><h2>System Requirments<a class="headerlink" href="#system-requirments" title="Permalink to this headline">¶</a></h2>
+<p>OLIGOSS was developed and tested on Ubuntu 19.10, and should therefore be
+compatible with any Unix OS. As of version 0.0.3, OLIGOSS is incompabitible
+with Windows. Windows compatibility will be introduced in a later version.
+Luckily for Windows 10 users, the latest distributions of Ubuntu can be easily
+installed and run from Windows 10. For instructions on</p>
+</div>
+<div class="section" id="installation">
+<span id="id4"></span><h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>OLIGOSS is avaialable through The Python Package Index (<a class="reference external" href="https://pypi.org/project/oligoss/">PyPI</a>).</p>
+<p>Alternatively, the source code can be cloned directly from the OLIGOSS <a class="reference external" href="https://github.com/croningp/oligoss.git">GitHub repository</a>.</p>
+</div>
+<div class="section" id="running-oligoss">
+<span id="id5"></span><h2>Running OLIGOSS<a class="headerlink" href="#running-oligoss" title="Permalink to this headline">¶</a></h2>
+<p>To run an OLIGOSS sequencing workflow, run the following command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">oligoss</span> <span class="o">-</span><span class="n">i</span> <span class="n">input_params</span><span class="o">.</span><span class="n">json</span> <span class="o">-</span><span class="n">r</span> <span class="n">ripper_folder</span> <span class="o">-</span><span class="n">o</span> <span class="n">output_folder</span>
+</pre></div>
+</div>
+<p><strong>input_params.json = input parameters file</strong></p>
+<blockquote>
+<div><p>This should contain all relevant input parameters for executing an
+OLIGOSS sequencing workflow (see <a class="reference internal" href="input_parameters/index.html#input-parameters"><span class="std std-ref">Input Parameters File</span></a>).</p>
+</div></blockquote>
+<p><strong>ripper_folder = data directory</strong>.</p>
+<blockquote>
+<div><p>This argument can either be passed in via the command line directly (as above) or specified in the input parameters file using the data_folder parameter.
+This folder should contain input MS data in either mzML or ripper JSON format.</p>
+</div></blockquote>
+<p><strong>out_dir = output directory</strong>.</p>
+<blockquote>
+<div><p>This argument can either be passed in via the command line directly (as above) or specified in the input parameters file using the output_folder parameter.
+All output data will be dumped to this folder.</p>
+</div></blockquote>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation and Requirements" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="OLIGOSS Documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, D. Doran, E. Clarke, G. Keenan, E. Carrick, C. Mathis and L. Cronin
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

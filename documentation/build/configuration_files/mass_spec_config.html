@@ -1,0 +1,274 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Instrument Configuration Files &mdash; polymersoup 0.0.3 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="OLIG Files" href="oligomer_config.html" />
+    <link rel="prev" title="Configuration Files" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #99b7d3" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/full_logo_0.0.3.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../getting started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation and Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../input_parameters/index.html">Input Parameters File</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Configuration Files</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Instrument Configuration Files</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mass-spec-configuration">Mass Spec Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="oligomer_config.html">OLIG Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#indices-and-tables">Indices and tables</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">polymersoup</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">Configuration Files</a> &raquo;</li>
+        
+      <li>Instrument Configuration Files</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/configuration_files/mass_spec_config.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="instrument-configuration-files">
+<span id="instrument-config"></span><h1>Instrument Configuration Files<a class="headerlink" href="#instrument-configuration-files" title="Permalink to this headline">¶</a></h1>
+<p>All parameters relevant to extraction and processing of data can be stated explicitly in
+input parameter files (see <cite>input parameters&lt;Input-Parameters&gt;</cite>). However, sensible default
+values for many of these parameters can be determined based on the particular mass spec model
+used. Therefore, OLIGOSS allows users to construct instrument-specific configuration files.</p>
+<div class="section" id="mass-spec-configuration">
+<span id="mass-spec-config"></span><h2>Mass Spec Configuration<a class="headerlink" href="#mass-spec-configuration" title="Permalink to this headline">¶</a></h2>
+<p>To avoid repeatedly defining the same parameters for each new sequencing experiment,
+default values for the following parameters can be saved in mass spec configuration files
+for each instrument:</p>
+<ol class="arabic">
+<li><p><strong>error</strong>:
+* Description: this defines the default error threshold for an instrument when matching peaks.
+* Type: <cite>float</cite>
+* Options: any valid float &gt;= 0. This can correspond to relative error threshold (parts per million, ppm) or absolute error threshold (mass units, u).</p></li>
+<li><p><strong>error_units</strong>:
+* Description: specifies units of default <strong>error</strong>.
+* Type: <cite>str</cite>
+* Options: either “ppm” or “abs” for relative and absolute error thresholding, respectively.</p></li>
+<li><p><strong>rt_units</strong>:
+* Description: specifies the default retention time units in mzML files. This is a vendor-specific property outside the control of OLIGOSS (e.g. mzML files generated from Bruker mass specs have retention time units of seconds, while ThermoScientific mass spec units are in minutes).
+* Type: <cite>str</cite>
+* Options: either “min” or “sec” for minutes and seconds, respectively.
+* <strong>NOTE</strong>:  if you are unsure about the retention time units in your mzML files, this is usually not specified in the raw mzML itself. Spectra in output rippers are sorted by retention time, so it should be straightforward to work out rt_units for your mass spec from the recorded retention times of the first and last spectra (assuming you know total acquisition time).</p></li>
+<li><p><strong>min_ms1_max_intensity</strong>:
+* Description: specifies default minimum peak in intensity for accepting an MS1 EIC as valid.
+* Type: <cite>float</cite>
+* Options: any valid float &gt;= 0.</p></li>
+<li><p><strong>min_ms2_max_intensity</strong>:
+* Description: specifies default minimum peak in intensity for accepting an MS2 EIC as valid.
+* Type: <cite>float</cite>
+* Options: any valid float &gt;= 0.</p></li>
+<li><p><strong>fragmentation</strong>:
+* Descroption: specifies fragmentation methods available at every stage of tandem mass spectrometry for an instrument.
+* Type: <cite>Dict[str, List[str]</cite>]
+* Options: keys must include “ms1”, “ms2” and (optionally) “msn” for defining fragmentation methods at MS1, MS2 and MS3+ levels respectively.
+* Example for an ESI-mass spec with neutral loss fragmentation (i.e. is-CID) at MS1, and “HCD” and “CID” at MS2-n:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s2">&quot;ms1&quot;</span><span class="p">:</span> <span class="s2">&quot;neutral&quot;</span><span class="p">,</span> <span class="s2">&quot;ms2&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;HCD&quot;</span><span class="p">,</span> <span class="s2">&quot;CID&quot;</span><span class="p">,</span> <span class="s2">&quot;neutral&quot;</span><span class="p">],</span> <span class="s2">&quot;msn&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;HCD&quot;</span><span class="p">,</span> <span class="s2">&quot;CID&quot;</span><span class="p">,</span> <span class="s2">&quot;neutral&quot;</span><span class="p">]}</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>pre_screen_filters</strong>:
+* Description: any valid parameter from <cite>pre-screen filters&lt;Pre-Screen-Filters&gt;</cite></p></li>
+<li><p><strong>polymer_classes</strong>:
+* Description: any silico or postprocess parameter for specific oligomer class.</p></li>
+</ol>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="oligomer_config.html" class="btn btn-neutral float-right" title="OLIG Files" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="Configuration Files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, D. Doran, E. Clarke, G. Keenan, E. Carrick, C. Mathis and L. Cronin
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
