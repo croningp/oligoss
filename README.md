@@ -3,7 +3,7 @@
 OLIGOSS is a package for _de novo_ sequencing of linear oligomers from
 tandem mass spectrometry data.
 
-Full documentation can be found at: <DOCUMENTATION LINK>
+Full documentation can be found here: https://croningroup.gitlab.io/origins/oligoss/index.html
 
 __Note__: proper use of this package requires a good working knowledge of both
 the chemistry and analytical methods used to obtain results. It is __not__ a
