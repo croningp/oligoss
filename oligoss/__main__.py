@@ -1,5 +1,5 @@
 """
-OLIGOSS Version 0.0.2
+OLIGOSS Version 0.0.3
 
 This file is used to run all OLIGOSS experiments.
 Artificial Life Team, Cronin Group, 2020
