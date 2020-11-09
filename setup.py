@@ -7,14 +7,14 @@ with open(os.path.join(HERE, "README.md")) as o:
 
 setup(
     name='oligoss',
-    version='0.0.1',
+    version='0.0.2',
     description='de novo sequencer for heterogeneous oligomer mixtures',
     long_description=readme,
     long_description_content_type="text/markdown",
     author='ALife Team, Cronin Group',
     author_email='daviddoran20161@gmail.com',
     packages=find_packages(),
-    install_requires=["bson", "psutil", "mzmlripper"],
+    install_requires=["bson", "psutil", "mzmlripper", "pymongo"],
     entry_points={
         "console_scripts": [
             "oligoss=oligoss.__main__:main"
