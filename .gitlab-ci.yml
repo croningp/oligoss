@@ -34,3 +34,14 @@ test:
 
   script:
     - coverage run -m pytest tests -m unit -rf -x
+
+pages:
+  stage: "deploy"
+  image: "python3.8"
+  script:
+  - pip install -U sphinx
+  - pip install sphinx_rtd_theme
+  - sphinx-build -b html documentation/build public
+  artifacts:
+    paths:
+    - public
