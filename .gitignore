@@ -7,7 +7,8 @@ __pycache__/
 .vscode/
 *.egg-info/
 *.txt
-documentation/build
+/documentation/build
+/documentation/source
 dist/
 *.csv
 *.lnk
