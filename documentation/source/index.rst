@@ -8,7 +8,11 @@ OLIGOSS Documentation
 #####################
 
 Welcome to the documentation for Oligomer-Soup-Sequencing (OLIGOSS), a software tool for *de novo*
-oligomer sequencing from LC-MS/MS data brought to you by `The Cronin Group <http://www.chem.gla.ac.uk/cronin/>`_.
+oligomer sequencing from LC-MS/MS data.
+
+OLIGOSS is the product of research conducted within `The Cronin Group <http://www.chem.gla.ac.uk/cronin/>`_. If you are curious about
+how and why it was developed, there is a pre-print publication available to read on `ChemRxiv <https://chemrxiv.org/articles/preprint/A_Universal_Sequencing_System_for_Unknown_Oligomers/13202969/1>`_
+
 
 **Developers**: David Doran, Emma Clarke and Graham Keenan.
 

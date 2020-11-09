@@ -7,7 +7,7 @@ with open(os.path.join(HERE, "README.md")) as o:
 
 setup(
     name='oligoss',
-    version='0.0.2',
+    version='0.0.3',
     description='de novo sequencer for heterogeneous oligomer mixtures',
     long_description=readme,
     long_description_content_type="text/markdown",
