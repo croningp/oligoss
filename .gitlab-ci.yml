@@ -1,8 +1,9 @@
-image: "python:3.8"
+image: "python:3.7.5"
 
 stages:
   - lint
   - testing
+  - deploy
 
 lint:
   stage: lint
@@ -34,3 +35,15 @@ test:
 
   script:
     - coverage run -m pytest tests -m unit -rf -x
+
+pages:
+  stage: deploy
+  script:
+  - pip install -U sphinx
+  - pip install sphinx_rtd_theme
+  - sphinx-build -b html documentation/source public
+  artifacts:
+    paths:
+    - public
+  only:
+  - master
