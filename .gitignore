@@ -1,14 +1,13 @@
 !oligoss/insilico/Config_files/*.json
 .md
+*.css
 !*read*.md
 __pycache__/
 *.pyc
 .vscode/
 *.egg-info/
 *.txt
-!Documentation/build/html/_sources/*.txt
-build/
-!Documentation/build/
+documentation/build
 dist/
 *.csv
 *.lnk
