@@ -79,7 +79,7 @@ def postprocess_sequence(sequence_info, params):
     )
     if confidence > 0:
         core_confirmed = [
-            frag for frag in sequence_info["confirmed_fragments"]
+            frag for frag in sequence_info["confirmed_fragments"]["core"]
             if frag not in ["signatures", "terminal_modifications"]]
         sig_confirmed = [
             frag for frag in sequence_info["confirmed_fragments"]["signatures"]
