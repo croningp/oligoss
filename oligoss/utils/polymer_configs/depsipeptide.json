@@ -43,7 +43,12 @@
     "g": 
       [76.01606, [["hydroxyA", 1], ["carboxyl", 1]], "glycolic acid"],
     "n": 
-      [91.02594, [["amine", 1], ["carboxyl", 1]], "N-hydroxyglycine"]},
+      [91.02594, [["amine", 1], ["carboxyl", 1]], "N-hydroxyglycine"],
+    "m": 
+      [152.04734, [["hydroxyA", 1], ["carboxyl", 1]], "mandelic acid"],
+    "l":
+      [90.03169, [["hydroxyA", 1], ["carboxyl", 1]], "lactic acid"]
+  },
 
   "SIDE_CHAIN_CROSSLINKS": {
     "C": {
