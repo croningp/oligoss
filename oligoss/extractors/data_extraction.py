@@ -71,7 +71,7 @@ def extract_MS1_EICs(
                 error_units=extractor_parameters.error_units,
                 min_total_intensity=(
                     extractor_parameters.min_ms1_total_intensity),
-                rt_units=extractor_parameters.rt_units)
+                min_max_intensity=extractor_parameters.min_ms1_max_intensity)
 
         if sequence_EIC:
             ms1_EICs[sequence] = sequence_EIC
@@ -169,8 +169,9 @@ def generate_EIC(
     ripper_dict,
     error,
     error_units,
-    rt_units,
-    min_total_intensity=None
+    rt_units=None,
+    min_total_intensity=0,
+    min_max_intensity=0
 ):
     """ Takes a list of ions (m/z values) and generates a combined extracted ion
     chromatogram (EIC) of those ions from mass spectra in mzml ripper format
@@ -194,6 +195,7 @@ def generate_EIC(
     """
     EIC = []
     total_intensity = 0
+    max_intensity = 0
 
     for mass in masses:
 
@@ -211,15 +213,22 @@ def generate_EIC(
 
             if matches:
                 for match in matches:
+                    intensity = spectrum[str(match)]
                     EIC.append(
-                        [spectrum['retention_time'],
-                            spectrum[str(match)]])
-                    total_intensity += spectrum[str(match)]
+                        (
+                            spectrum['retention_time'],
+                            intensity
+                        )
+                    )
+                    total_intensity += intensity
+                    max_intensity = max(max_intensity, intensity)
+
+    if min_max_intensity and max_intensity < min_max_intensity:
+        return []
 
     # check total intensity meets minimum value, if not return empty EIC
-    if min_total_intensity:
-        if (total_intensity <= min_total_intensity):
-            EIC = []
+    if total_intensity and total_intensity <= min_total_intensity:
+        return []
 
     return EIC
 
