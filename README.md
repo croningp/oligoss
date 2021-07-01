@@ -24,3 +24,8 @@ pip install oligoss --user
 ## Source Code
 
 Source code can be viewedon github: https://github.com/croningp/oligoss.git
+
+## Tutorial
+
+A tutorial for installing OLIGOSS and carrying out a basic sequencing run with an example data set can be
+found on Zenodo: https://zenodo.org/record/4252732
