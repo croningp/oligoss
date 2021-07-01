@@ -119,3 +119,9 @@ To run an OLIGOSS sequencing workflow, run the following command::
     This argument can either be passed in via the command line directly (as above) or specified in the input parameters file using the output_folder parameter.
     All output data will be dumped to this folder.
 
+.. _Tutorial:
+
+Tutorial
+========
+
+A basic tutorial for installing OLIGOSS and carrying out sequencing using an example data set can be found on `Zenodo <https://zenodo.org/record/4252732/>`_
