@@ -70,21 +70,25 @@ def postprocess_sequence(sequence_info, params):
 
     #  get subsequence weights for calculating confidence
     ssw = params.postprocess.subsequence_weight
-
     confidence = assign_confidence_sequence_concurrent(
-        confirmed_fragments=sequence_info["confirmed_fragments"]["core"],
+        confirmed_fragments=sequence_info["confirmed_fragments"],
         unconfirmed=sequence_info["unconfirmed"],
         ssw=ssw,
         params=params
     )
     if confidence > 0:
         core_confirmed = [
-            frag for frag in sequence_info["confirmed_fragments"]["core"]
+            frag for frag in sequence_info["confirmed_fragments"]
             if frag not in ["signatures", "terminal_modifications"]]
-        sig_confirmed = [
-            frag for frag in sequence_info["confirmed_fragments"]["signatures"]
-            if frag != "terminal_modifications"
-        ]
+
+        sig_confirmed = []
+        if "signatures" in sequence_info["confirmed_fragments"]:
+            sig_confirmed = [
+                frag for frag in sequence_info[
+                    "confirmed_fragments"]["signatures"]
+                if frag != "terminal_modifications"
+            ]
+
         return [
             sequence_info["sequence"],
             confidence,

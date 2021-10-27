@@ -191,7 +191,7 @@ def screen_rippers_linux(
             sequence_space=len(polymer)
         )
 
-        print(f"filequeuer ouput = {filequeuer.output_dir}")
+        print(f"filequeuer output = {filequeuer.output_dir}")
 
         logging.info(
             f"screening ripper file ({ripper}). This is ripper file\n"

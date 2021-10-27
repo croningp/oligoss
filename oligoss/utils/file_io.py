@@ -183,7 +183,7 @@ class FileQueueManager():
         self,
         output_dir,
         sequence_space,
-        shared_space_limit=2E7,
+        shared_space_limit=1E10,
         headers=[
             "sequence",
             "confidence",
@@ -294,11 +294,10 @@ class FileQueueManager():
         if not destination:
             destination = self.output_csv
 
-        if not os.path.exists(self.output_csv):
-            with open(self.output_csv, "w") as w:
-                writer = csv.writer(w)
-                writer.writerow(self.headers)
-            logging.info(f"output csv written to {self.output_csv}")
+        with open(self.output_csv, "w") as w:
+            writer = csv.writer(w)
+            writer.writerow(self.headers)
+        logging.info(f"output csv written to {self.output_csv}")
 
     def queue_data(self, data):
         if not self.composition_write:

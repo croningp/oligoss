@@ -73,13 +73,14 @@ def generate_screen_ms2(
             if confirmed[0]:
                 if confirmed[0]["core"] or confirmed[0]["signatures"]:
                     confirmed_count += 1
-                    confirmed_fragments = confirmed[0]
+                    confirmed_fragments = confirmed[0]["core"]
                     unconfirmed = list_unconfirmed_fragments(
                         confirmed_fragments=confirmed[0],
                         silico_dict=fragment_dict["MS2"])
                     spectral_matches = confirmed[1]
                     confirmed_fragments.update(
-                        {"unconfirmed": unconfirmed})
+                        {"unconfirmed": unconfirmed,
+                         "signatures": confirmed[0]["signatures"]})
 
                     yield sequence, confirmed_fragments, spectral_matches
     logging.info(

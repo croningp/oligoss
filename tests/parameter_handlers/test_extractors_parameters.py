@@ -44,7 +44,7 @@ def test_extractors_fallbacks():
     assert not parameters.extractors.min_ms2_total_intensity
     assert not parameters.extractors.min_ms2_max_intensity
 
-    assert parameters.extractors.min_ms1_max_intensity == 10000
+    assert parameters.extractors.min_ms1_max_intensity == 1000
 
     for param in EXTRACTOR_FALLBACKS:
         assert param in parameters.extractors.__dict__.keys()
