@@ -228,7 +228,7 @@ def generate_EIC(
 
     if min_total_intensity:
         # check total intensity meets minimum value, if not return empty EIC
-        if total_intensity and total_intensity:
+        if total_intensity and total_intensity < min_total_intensity:
             return []
 
     return EIC

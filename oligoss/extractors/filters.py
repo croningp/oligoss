@@ -100,11 +100,12 @@ def apply_prefilters_ms2(
         min_total_int=min_total_intensity)
 
     # if ms2, filter by precursors
-    filtered_spectra = find_precursors(
-        spectra=filtered_spectra,
-        ms2_precursors=ms2_precursors,
-        error=error,
-        error_units=error_units)
+    if filtered_spectra:
+        filtered_spectra = find_precursors(
+            spectra=filtered_spectra,
+            ms2_precursors=ms2_precursors,
+            error=error,
+            error_units=error_units)
 
     return filtered_spectra
 

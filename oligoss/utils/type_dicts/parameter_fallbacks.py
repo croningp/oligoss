@@ -45,7 +45,7 @@ EXTRACTOR_FALLBACKS = {
     "pre_screen_filters": None,
     "min_ms1_total_intensity": None,
     "min_ms2_total_intensity": None,
-    "min_ms1_max_intensity": 1E4,
+    "min_ms1_max_intensity": 1E3,
     "min_ms2_max_intensity": None
 }
 
